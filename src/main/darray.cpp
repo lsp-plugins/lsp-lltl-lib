@@ -5,15 +5,14 @@
  *      Author: sadko
  */
 
-#include <lsp-plug.in/lltl/cstorage.h>
-
+#include <lsp-plug.in/lltl/darray.h>
 #include <stdlib.h>
 
 namespace lsp
 {
     namespace lltl
     {
-        void raw_cstorage::init(size_t n_sizeof)
+        void raw_darray::init(size_t n_sizeof)
         {
             vItems      = NULL;
             nCapacity   = 0;
@@ -21,12 +20,12 @@ namespace lsp
             nSizeOf     = n_sizeof;
         }
 
-        raw_cstorage::~raw_cstorage()
+        raw_darray::~raw_darray()
         {
             flush();
         }
 
-        bool raw_cstorage::grow(size_t capacity)
+        bool raw_darray::grow(size_t capacity)
         {
             if (capacity < 32)
                 capacity        = 32;
@@ -42,7 +41,7 @@ namespace lsp
             return true;
         }
 
-        bool raw_cstorage::truncate(size_t capacity)
+        bool raw_darray::truncate(size_t capacity)
         {
             if (capacity < 32)
             {
@@ -69,7 +68,7 @@ namespace lsp
             return true;
         }
 
-        uint8_t *raw_cstorage::slice(size_t idx, size_t size)
+        uint8_t *raw_darray::slice(size_t idx, size_t size)
         {
             if (size <= 0)
                 return NULL;
@@ -78,7 +77,7 @@ namespace lsp
             return (tail <= nItems) ? &vItems[idx * nSizeOf] : NULL;
         }
 
-        bool raw_cstorage::xswap(size_t i1, size_t i2)
+        bool raw_darray::xswap(size_t i1, size_t i2)
         {
             if ((i1 >= nItems) || (i2 >= nItems))
                 return false;
@@ -87,7 +86,7 @@ namespace lsp
             return true;
         }
 
-        void raw_cstorage::uswap(size_t i1, size_t i2)
+        void raw_darray::uswap(size_t i1, size_t i2)
         {
             uint8_t buf[0x200];
             uint8_t *a = &vItems[i1 * nSizeOf];
@@ -111,7 +110,7 @@ namespace lsp
             }
         }
 
-        uint8_t *raw_cstorage::append(size_t n)
+        uint8_t *raw_darray::append(size_t n)
         {
             size_t size = nItems + n;
             if (size > nCapacity)
@@ -126,7 +125,7 @@ namespace lsp
             return ptr;
         }
 
-        uint8_t *raw_cstorage::append(size_t n, const void *src)
+        uint8_t *raw_darray::append(size_t n, const void *src)
         {
             size_t size = nItems + n;
             if (size > nCapacity)
@@ -142,7 +141,7 @@ namespace lsp
             return ptr;
         }
 
-        uint8_t *raw_cstorage::set(size_t n, const void *src)
+        uint8_t *raw_darray::set(size_t n, const void *src)
         {
             if (n > nCapacity)
             {
@@ -160,7 +159,7 @@ namespace lsp
             return vItems;
         }
 
-        uint8_t *raw_cstorage::insert(size_t index, size_t n)
+        uint8_t *raw_darray::insert(size_t index, size_t n)
         {
             if ((index < 0) || (index > nItems))
                 return NULL;
@@ -177,7 +176,7 @@ namespace lsp
             return res;
         }
 
-        uint8_t *raw_cstorage::insert(size_t index, size_t n, const void *src)
+        uint8_t *raw_darray::insert(size_t index, size_t n, const void *src)
         {
             if ((index < 0) || (index > nItems))
                 return NULL;
@@ -196,15 +195,15 @@ namespace lsp
             return res;
         }
 
-        void raw_cstorage::swap(raw_cstorage *src)
+        void raw_darray::swap(raw_darray *src)
         {
-            raw_cstorage tmp;
+            raw_darray tmp;
             tmp     = *this;
             *this   = *src;
             *src    = tmp;
         }
 
-        void raw_cstorage::flush()
+        void raw_darray::flush()
         {
             if (vItems != NULL)
             {
@@ -215,27 +214,41 @@ namespace lsp
             nItems      = 0;
         }
 
-        bool raw_cstorage::premove(const void *ptr, size_t n)
+        ssize_t raw_darray::index_of(const void *ptr)
+        {
+            if (ptr == NULL)
+                return -1;
+            uint8_t *src = static_cast<uint8_t *>(const_cast<void *>(ptr));
+            if (src < vItems) // Pointer before array
+                return -2;
+
+            size_t off  = (src - vItems) / nSizeOf;
+            if (off >= nItems)
+                return -3;
+
+            return (&vItems[off * nSizeOf] == src) ? off : -1;
+        }
+
+        bool raw_darray::premove(const void *ptr, size_t n)
         {
             if (ptr == NULL)
                 return false;
             uint8_t *src = static_cast<uint8_t *>(const_cast<void *>(ptr));
-            if (src < vItems) // Pointer before array
+            if (src < vItems) // Pointer before array?
                 return false;
 
-            size_t off  = src - vItems;
-            size_t cap  = nItems * nSizeOf;
-            if ((off >= cap) || (off % nSizeOf))
+            size_t off  = (src - vItems) / nSizeOf;
+            size_t last = off + n;
+            if ((last > nItems) || (src != &vItems[off * nSizeOf]))
                 return false;
 
-            size_t last = off + n * nSizeOf;
-            if (last < cap)
-                ::memmove(&vItems[off], &vItems[last], cap - last);
+            if (last < nItems)
+                ::memmove(src, &vItems[last * nSizeOf], nItems - last);
             nItems     -= n;
             return true;
         }
 
-        uint8_t *raw_cstorage::premove(const void *ptr, size_t n, void *dst)
+        uint8_t *raw_darray::premove(const void *ptr, size_t n, void *dst)
         {
             if (ptr == NULL)
                 return NULL;
@@ -257,31 +270,30 @@ namespace lsp
             return static_cast<uint8_t *>(dst);
         }
 
-        uint8_t *raw_cstorage::premove(const void *ptr, size_t n, raw_cstorage *cs)
+        uint8_t *raw_darray::premove(const void *ptr, size_t n, raw_darray *cs)
         {
             if (ptr == NULL)
                 return NULL;
             uint8_t *src = static_cast<uint8_t *>(const_cast<void *>(ptr));
-            if (src < vItems) // Pointer before array
-                return NULL;
-            size_t off = src - vItems;
-            if ((off >= nItems) || (off % nSizeOf))
+            if (src < vItems) // Pointer before array?
                 return NULL;
 
-            size_t cap  = nItems * nSizeOf;
-            size_t last = off + n * nSizeOf;
+            size_t off  = (src - vItems) / nSizeOf;
+            size_t last = off + n;
+            if ((last > nItems) || (src != &vItems[off * nSizeOf]))
+                return NULL;
 
             uint8_t *res = cs->append(n, src);
             if (res)
             {
-                if (last < cap)
-                    ::memmove(src, &vItems[last], cap - last);
+                if (last < nItems)
+                    ::memmove(src, &vItems[last], nItems - last);
                 nItems     -= n;
             }
             return res;
         }
 
-        bool raw_cstorage::iremove(size_t idx, size_t n)
+        bool raw_darray::iremove(size_t idx, size_t n)
         {
             size_t last = idx + n;
             if (last > nItems)
@@ -292,7 +304,7 @@ namespace lsp
             return true;
         }
 
-        uint8_t    *raw_cstorage::iremove(size_t idx, size_t n, void *dst)
+        uint8_t    *raw_darray::iremove(size_t idx, size_t n, void *dst)
         {
             size_t last = idx + n;
             if (last > nItems)
@@ -306,7 +318,7 @@ namespace lsp
             return static_cast<uint8_t *>(dst);
         }
 
-        uint8_t *raw_cstorage::iremove(size_t idx, size_t n, raw_cstorage *cs)
+        uint8_t *raw_darray::iremove(size_t idx, size_t n, raw_darray *cs)
         {
             size_t last = idx + n;
             if (last > nItems)
@@ -323,7 +335,7 @@ namespace lsp
             return res;
         }
 
-        uint8_t *raw_cstorage::pop(size_t n)
+        uint8_t *raw_darray::pop(size_t n)
         {
             if (nItems < n)
                 return NULL;
@@ -332,7 +344,7 @@ namespace lsp
             return &vItems[nItems * nSizeOf];
         }
 
-        uint8_t *raw_cstorage::pop(size_t n, void *dst)
+        uint8_t *raw_darray::pop(size_t n, void *dst)
         {
             if (nItems < n)
                 return NULL;
@@ -345,7 +357,7 @@ namespace lsp
             return static_cast<uint8_t *>(dst);
         }
 
-        uint8_t *raw_cstorage::pop(size_t n, raw_cstorage *cs)
+        uint8_t *raw_darray::pop(size_t n, raw_darray *cs)
         {
             if (nItems < n)
                 return NULL;

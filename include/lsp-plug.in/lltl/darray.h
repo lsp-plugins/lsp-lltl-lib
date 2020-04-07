@@ -5,18 +5,22 @@
  *      Author: sadko
  */
 
-#ifndef LSP_PLUG_IN_LLTL_CSTORAGE_H_
-#define LSP_PLUG_IN_LLTL_CSTORAGE_H_
+#ifndef LSP_PLUG_IN_LLTL_DARRAY_H_
+#define LSP_PLUG_IN_LLTL_DARRAY_H_
 
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
+#include <sys/types.h>
 
 namespace lsp
 {
     namespace lltl
     {
-        struct raw_cstorage
+        /**
+         * Raw data array implementation with fixed set of routines
+         */
+        struct raw_darray
         {
             public:
                 uint8_t    *vItems;
@@ -25,16 +29,17 @@ namespace lsp
                 size_t      nSizeOf;
 
             public:
-                ~raw_cstorage();
+                ~raw_darray();
 
             public:
                 void        init(size_t n_sizeof);
                 bool        grow(size_t capacity);
                 bool        truncate(size_t capacity);
-                void        swap(raw_cstorage *src);
+                void        swap(raw_darray *src);
                 bool        xswap(size_t i1, size_t i2);
                 void        uswap(size_t i1, size_t i2);
                 void        flush();
+                ssize_t     index_of(const void *ptr);
 
                 uint8_t    *slice(size_t idx, size_t size);
 
@@ -46,31 +51,34 @@ namespace lsp
 
                 uint8_t    *pop(size_t n);
                 uint8_t    *pop(size_t n, void *dst);
-                uint8_t    *pop(size_t n, raw_cstorage *cs);
+                uint8_t    *pop(size_t n, raw_darray *cs);
                 bool        premove(const void *ptr, size_t n);
                 uint8_t    *premove(const void *ptr, size_t n, void *dst);
-                uint8_t    *premove(const void *ptr, size_t n, raw_cstorage *cs);
+                uint8_t    *premove(const void *ptr, size_t n, raw_darray *cs);
                 bool        iremove(size_t idx, size_t n);
                 uint8_t    *iremove(size_t idx, size_t n, void *dst);
-                uint8_t    *iremove(size_t idx, size_t n, raw_cstorage *cs);
+                uint8_t    *iremove(size_t idx, size_t n, raw_darray *cs);
         };
 
+        /**
+         * Data array template
+         */
         template <class T>
-            class cstorage
+            class darray
             {
                 private:
-                    cstorage(const cstorage<T> &src);                               // Disable copying
-                    cstorage<T> & operator = (const cstorage<T> & src);             // Disable copying
+                    darray(const darray<T> &src);                                   // Disable copying
+                    darray<T> & operator = (const darray<T> & src);                 // Disable copying
 
                 private:
-                    mutable raw_cstorage    v;
+                    mutable raw_darray    v;
 
                     inline static T *cast(void *ptr)                                { return static_cast<T *>(ptr);         }
                     inline static const T *ccast(const void *ptr)                   { return static_cast<const T *>(ptr);   }
 
                 public:
-                    explicit inline cstorage()                                      { v.init(sizeof(T));                }
-                    ~cstorage() {};
+                    explicit inline darray()                                        { v.init(sizeof(T));                }
+                    ~darray() {};
 
                 public:
                     // Size and capacity
@@ -84,8 +92,8 @@ namespace lsp
                     inline void truncate()                                          { v.flush();                        }
                     inline void truncate(size_t size)                               { v.truncate(size);                 }
                     inline void reserve(size_t capacity)                            { v.grow(capacity);                 }
-                    inline void swap(cstorage<T> &src)                              { v.swap(&src.v);                   }
-                    inline void swap(cstorage<T> *src)                              { v.swap(&src->v);                  }
+                    inline void swap(darray<T> &src)                                { v.swap(&src.v);                   }
+                    inline void swap(darray<T> *src)                                { v.swap(&src->v);                  }
 
                 public:
                     // Accessing elements (non-const)
@@ -95,6 +103,7 @@ namespace lsp
                     inline T *last()                                                { return (v.nItems > 0) ? cast(&v.vItems[(v.nItems - 1) * v.nSizeOf]) : NULL;   }
                     inline T *array()                                               { return cast(v.vItems); }
                     inline T *slice(size_t idx, size_t size)                        { return cast(v.slice(idx, size));  }
+                    inline ssize_t index_of(const T *p) const                       { return v.index_of(p);             }
 
                 public:
                     // Accessing elements (const)
@@ -180,43 +189,43 @@ namespace lsp
 
                 public:
                     // Collection-based modifications (pointer argument)
-                    inline T *set(const cstorage<T> *x)                             { return cast(v.set(x->v.nItems, x->v.vItems));             }
-                    inline T *append(const cstorage<T> *x)                          { return cast(v.append(x->v.nItems, x->v.vItems));          }
-                    inline T *add(const cstorage<T> *x)                             { return cast(v.append(x->v.nItems, x->v.vItems));          }
-                    inline T *push(const cstorage<T> *x)                            { return cast(v.append(x->v.nItems, x->v.vItems));          }
-                    inline T *unshift(const cstorage<T> *x)                         { return cast(v.insert(0, x->v.nItems, x->v.vItems));       }
-                    inline T *prepend(const cstorage<T> *x)                         { return cast(v.insert(0, x->v.nItems, x->v.vItems));       }
-                    inline T *insert(size_t idx, const cstorage<T> *x)              { return cast(v.insert(idx, x->v.nItems, x->v.vItems));     }
+                    inline T *set(const darray<T> *x)                               { return cast(v.set(x->v.nItems, x->v.vItems));             }
+                    inline T *append(const darray<T> *x)                            { return cast(v.append(x->v.nItems, x->v.vItems));          }
+                    inline T *add(const darray<T> *x)                               { return cast(v.append(x->v.nItems, x->v.vItems));          }
+                    inline T *push(const darray<T> *x)                              { return cast(v.append(x->v.nItems, x->v.vItems));          }
+                    inline T *unshift(const darray<T> *x)                           { return cast(v.insert(0, x->v.nItems, x->v.vItems));       }
+                    inline T *prepend(const darray<T> *x)                           { return cast(v.insert(0, x->v.nItems, x->v.vItems));       }
+                    inline T *insert(size_t idx, const darray<T> *x)                { return cast(v.insert(idx, x->v.nItems, x->v.vItems));     }
 
-                    inline T *pop(cstorage<T> *x)                                   { return cast(v.pop(1, &x->v));                             }
-                    inline T *shift(size_t idx, cstorage<T> *x)                     { return cast(v.iremove(0, 1, &x->v));                      }
-                    inline T *remove(size_t idx, cstorage<T> *x)                    { return cast(v.iremove(idx, 1, &x->v));                    }
-                    inline T *premove(const T *ptr, cstorage<T> *x)                 { return cast(v.premove(ptr, 1, &x->v));                    }
+                    inline T *pop(darray<T> *x)                                     { return cast(v.pop(1, &x->v));                             }
+                    inline T *shift(size_t idx, darray<T> *x)                       { return cast(v.iremove(0, 1, &x->v));                      }
+                    inline T *remove(size_t idx, darray<T> *x)                      { return cast(v.iremove(idx, 1, &x->v));                    }
+                    inline T *premove(const T *ptr, darray<T> *x)                   { return cast(v.premove(ptr, 1, &x->v));                    }
 
-                    inline T *pop_n(size_t n, cstorage<T> *x)                       { return cast(v.pop(n, &x->v));                             }
-                    inline T *shift_n(size_t n, cstorage<T> *x)                     { return cast(v.iremove(0, n, &x->v));                      }
-                    inline T *remove_n(size_t idx, size_t n, cstorage<T> *x)        { return cast(v.iremove(idx, n, &x->v));                    }
-                    inline T *premove(const T *ptr, size_t n, cstorage<T> *x)       { return cast(v.premove(ptr, n, &x->v));                    }
+                    inline T *pop_n(size_t n, darray<T> *x)                         { return cast(v.pop(n, &x->v));                             }
+                    inline T *shift_n(size_t n, darray<T> *x)                       { return cast(v.iremove(0, n, &x->v));                      }
+                    inline T *remove_n(size_t idx, size_t n, darray<T> *x)          { return cast(v.iremove(idx, n, &x->v));                    }
+                    inline T *premove(const T *ptr, size_t n, darray<T> *x)         { return cast(v.premove(ptr, n, &x->v));                    }
 
                 public:
                     // Collection-based modifications (reference argument)
-                    inline T *set(const cstorage<T> &x)                             { return set(&x);                                           }
-                    inline T *append(const cstorage<T> &x)                          { return append(&x);                                        }
-                    inline T *add(const cstorage<T> &x)                             { return add(&x);                                           }
-                    inline T *push(const cstorage<T> &x)                            { return push(&x);                                          }
-                    inline T *unshift(const cstorage<T> &x)                         { return prepend(&x);                                       }
-                    inline T *prepend(const cstorage<T> &x)                         { return prepend(&x);                                       }
-                    inline T *insert(size_t idx, const cstorage<T> &x)              { return insert(&x);                                        }
+                    inline T *set(const darray<T> &x)                               { return set(&x);                                           }
+                    inline T *append(const darray<T> &x)                            { return append(&x);                                        }
+                    inline T *add(const darray<T> &x)                               { return add(&x);                                           }
+                    inline T *push(const darray<T> &x)                              { return push(&x);                                          }
+                    inline T *unshift(const darray<T> &x)                           { return prepend(&x);                                       }
+                    inline T *prepend(const darray<T> &x)                           { return prepend(&x);                                       }
+                    inline T *insert(size_t idx, const darray<T> &x)                { return insert(&x);                                        }
 
-                    inline T *pop(cstorage<T> &x)                                   { return pop(&x);                                           }
-                    inline T *shift(cstorage<T> &x)                                 { return shift(&x);                                         }
-                    inline T *remove(size_t idx, cstorage<T> &x)                    { return remove(idx, &x);                                   }
-                    inline T *premove(const T *ptr, cstorage<T> &x)                 { return premove(ptr, &x);                                  }
+                    inline T *pop(darray<T> &x)                                     { return pop(&x);                                           }
+                    inline T *shift(darray<T> &x)                                   { return shift(&x);                                         }
+                    inline T *remove(size_t idx, darray<T> &x)                      { return remove(idx, &x);                                   }
+                    inline T *premove(const T *ptr, darray<T> &x)                   { return premove(ptr, &x);                                  }
 
-                    inline T *pop_n(size_t n, cstorage<T> &x)                       { return pop(n, &x);                                        }
-                    inline T *shift_n(size_t n, cstorage<T> &x)                     { return shift_n(n, &x);                                    }
-                    inline T *remove_n(size_t idx, size_t n, cstorage<T> &x)        { return remove(idx, n, &x);                                }
-                    inline T *premove(const T *ptr, size_t n, cstorage<T> &x)       { return premove(ptr, n, &x);                               }
+                    inline T *pop_n(size_t n, darray<T> &x)                         { return pop(n, &x);                                        }
+                    inline T *shift_n(size_t n, darray<T> &x)                       { return shift_n(n, &x);                                    }
+                    inline T *remove_n(size_t idx, size_t n, darray<T> &x)          { return remove(idx, n, &x);                                }
+                    inline T *premove(const T *ptr, size_t n, darray<T> &x)         { return premove(ptr, n, &x);                               }
 
                 public:
                     // Operators
@@ -226,4 +235,4 @@ namespace lsp
     }
 }
 
-#endif /* LSP_PLUG_IN_LLTL_CSTORAGE_H_ */
+#endif /* LSP_PLUG_IN_LLTL_DARRAY_H_ */

@@ -5,17 +5,17 @@
  *      Author: sadko
  */
 
+#include <lsp-plug.in/lltl/darray.h>
 #include <lsp-plug.in/test-fw/utest.h>
-#include <lsp-plug.in/lltl/cstorage.h>
 
-UTEST_BEGIN("lltl", cstorage)
+UTEST_BEGIN("lltl", darray)
 
     void test_single()
     {
         static const int numbers[] = { 7, 6, 4, 1, 3, 2, 5 };
-        printf("Testing single operations on cstorage...\n");
+        printf("Testing single operations on darray...\n");
 
-        lltl::cstorage<int> x;
+        lltl::darray<int> x;
         int *pv;
 
         // Check initial state
@@ -89,9 +89,9 @@ UTEST_BEGIN("lltl", cstorage)
     {
         static const int numbers[] = { 16, 15, 14, 13, 6, 7, 0, 1, 2, 3, 4, 5, 8, 9, 11, 12 };
 
-        printf("Testing single operations with data copying on cstorage...\n");
+        printf("Testing single operations with data copying on darray...\n");
 
-        lltl::cstorage<int> x;
+        lltl::darray<int> x;
         int v, *pv;
 
         // Check initial state
@@ -228,10 +228,99 @@ UTEST_BEGIN("lltl", cstorage)
         UTEST_ASSERT(x.slice(0, 0) == NULL);
     }
 
+    void test_multiple()
+    {
+        static const int numbers[] = { 10, 11, 7, 8, 12, 13, 14, 15, 9, 0, 1, 2, 3, 4, 5, 6 };
+        printf("Testing multiple operations on darray...\n");
+
+        lltl::darray<int> x;
+        int *pv;
+
+        // Check initial state
+        UTEST_ASSERT(x.size() == 0);
+        UTEST_ASSERT(x.capacity() == 0);
+        UTEST_ASSERT(x.get(0) == NULL);
+        UTEST_ASSERT(x.first() == NULL);
+        UTEST_ASSERT(x.last() == NULL);
+        UTEST_ASSERT(x.array() == NULL);
+        UTEST_ASSERT(x.slice(0, 0) == NULL);
+
+        // Append items
+        UTEST_ASSERT(pv = x.append_n(2));
+        UTEST_ASSERT(x.index_of(pv) == 0);
+        pv[0] = 0; pv[1] = 1;
+
+        // Add items
+        UTEST_ASSERT(pv = x.add_n(2));
+        UTEST_ASSERT(x.index_of(pv) == 2);
+        pv[0] = 2; pv[1] = 3;
+
+        // Push items
+        UTEST_ASSERT(pv = x.push_n(3));
+        UTEST_ASSERT(x.index_of(pv) == 4);
+        pv[0] = 4; pv[1] = 5; pv[2] = 6;
+
+        // Unshift items
+        UTEST_ASSERT(pv = x.unshift_n(3));
+        UTEST_ASSERT(x.index_of(pv) == 0);
+        pv[0] = 7; pv[1] = 8; pv[2] = 9;
+
+        // Prepend items
+        UTEST_ASSERT(pv = x.prepend_n(2));
+        UTEST_ASSERT(x.index_of(pv) == 0);
+        pv[0] = 10; pv[1] = 11;
+
+        // Insert items
+        UTEST_ASSERT(pv = x.insert_n(4, 4));
+        UTEST_ASSERT(x.index_of(pv) == 4);
+        pv[0] = 12; pv[1] = 13; pv[2] = 14; pv[3] = 15;
+
+        // Check items
+        int n = sizeof(numbers)/sizeof(int);
+        UTEST_ASSERT(x.size() == size_t(n));
+        UTEST_ASSERT(x.capacity() >= size_t(n));
+        for (int i=0; i<n; ++i)
+        {
+            UTEST_ASSERT_MSG(pv = x.get(i), "Failed at index %d", i);
+            UTEST_ASSERT_MSG(*pv == numbers[i], "Failed at index %d: got %d, expected %d", i, *pv, numbers[i]);
+        }
+        UTEST_ASSERT(x.get(n) == NULL);
+
+        // Pop items
+        UTEST_ASSERT(!x.pop_n(17));
+        UTEST_ASSERT(pv = x.pop_n(4));
+        UTEST_ASSERT(pv[0] == 3);
+        UTEST_ASSERT(pv[1] == 4);
+        UTEST_ASSERT(pv[2] == 5);
+        UTEST_ASSERT(pv[3] == 6);
+
+        // Shift items
+        UTEST_ASSERT(!x.shift_n(13));
+        UTEST_ASSERT(x.shift_n(4));
+        UTEST_ASSERT(pv = x.first());
+        UTEST_ASSERT(*pv == 12);
+
+        // Remove items
+        UTEST_ASSERT(!x.remove_n(8, 1));
+        UTEST_ASSERT(!x.remove_n(0, 9));
+        UTEST_ASSERT(x.remove_n(2, 2));
+        UTEST_ASSERT(pv = x.get(2));
+        UTEST_ASSERT(*pv == 9);
+
+        // Remove pointer
+        UTEST_ASSERT(!x.premove_n(x.get(1), 6));
+        UTEST_ASSERT(x.premove_n(x.get(1), 3));
+        UTEST_ASSERT(pv = x.get(1));
+        UTEST_ASSERT(*pv == 1);
+
+        UTEST_ASSERT(x.size() == 3);
+    }
+
     UTEST_MAIN
     {
         test_single();
         test_single_with_copy();
+        test_multiple();
     }
 
 UTEST_END
