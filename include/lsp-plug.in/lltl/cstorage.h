@@ -123,6 +123,34 @@ namespace lsp
                     inline void uswap(size_t i1, size_t i2)                         { v.uswap(i1, i2);                  }
 
                 public:
+                    // Single modifications with data copying (pointer argument)
+                    inline T *append(const T *x)                                    { return cast(v.append(1, x));      }
+                    inline T *add(const T *x)                                       { return cast(v.append(1, x));      }
+                    inline T *push(const T *x)                                      { return cast(v.append(1, x));      }
+                    inline T *unshift(const T *x)                                   { return cast(v.insert(0, 1, x));   }
+                    inline T *prepend(const T *x)                                   { return cast(v.insert(0, 1, x));   }
+                    inline T *insert(size_t idx, const T *x)                        { return cast(v.insert(idx, 1, x)); }
+
+                    inline T *pop(T *x)                                             { return cast(v.pop(1, x));         }
+                    inline T *shift(T *x)                                           { return cast(v.iremove(0, 1, x));  }
+                    inline T *remove(size_t idx, T *x)                              { return cast(v.iremove(idx, 1, x));}
+                    inline T *premove(const T *ptr, T *x)                           { return cast(v.premove(ptr, 1, x));}
+
+                public:
+                    // Single modifications with data copying (reference argument)
+                    inline T *append(const T &x)                                    { return append(&x);                }
+                    inline T *add(const T &x)                                       { return add(&x);                   }
+                    inline T *push(const T &x)                                      { return push(&x);                  }
+                    inline T *unshift(const T &x)                                   { return prepend(&x);               }
+                    inline T *prepend(const T &x)                                   { return prepend(&x);               }
+                    inline T *insert(size_t idx, const T &x)                        { return insert(idx, &x);           }
+
+                    inline T *pop(T &x)                                             { return pop(&x);                   }
+                    inline T *shift(T &x)                                           { return shift(&x);                 }
+                    inline T *remove(size_t idx, T &x)                              { return remove(idx, &x);           }
+                    inline T *premove(const T *ptr, T &x)                           { return premove(ptr, &x);          }
+
+                public:
                     // Multiple modifications
                     inline T *append_n(size_t n)                                    { return cast(v.append(n));         }
                     inline T *add_n(size_t n)                                       { return cast(v.append(n));         }
@@ -135,32 +163,6 @@ namespace lsp
                     inline bool shift_n(size_t n)                                   { return v.iremove(0, n);           }
                     inline bool remove_n(size_t idx, size_t n)                      { return v.iremove(idx, n);         }
                     inline bool premove_n(const T *ptr, size_t n)                   { return v.premove(ptr, n);         }
-
-                public:
-                    // Single modifications with data copying (pointer argument)
-                    inline T *append(const T *x)                                    { return cast(v.append(1, x));      }
-                    inline T *add(const T *x)                                       { return cast(v.append(1, x));      }
-                    inline T *push(const T *x)                                      { return cast(v.append(1, x));      }
-                    inline T *unshift(const T *x)                                   { return cast(v.insert(0, 1, x));   }
-                    inline T *prepend(const T *x)                                   { return cast(v.insert(0, 1, x));   }
-                    inline T *insert(size_t idx, const T *x)                        { return cast(v.insert(idx, 1, x)); }
-
-                    inline T *pop(T *x)                                             { return cast(v.pop(1, x));         }
-                    inline T *shift(T *x)                                           { return cast(v.iremove(0, 1, x));  }
-                    inline T *remove(size_t idx, T *x)                              { return cast(v.iremove(idx, 1, x));}
-                    inline bool premove(const T *ptr, T *x)                         { return v.premove(ptr, 1, x);      }
-
-                public:
-                    // Single modifications with data copying (reference argument)
-                    inline T *append(const T &x)                                    { return append(&x);                }
-                    inline T *add(const T &x)                                       { return add(&x);                   }
-                    inline T *push(const T &x)                                      { return push(&x);                  }
-                    inline T *unshift(const T &x)                                   { return prepend(&x);               }
-                    inline T *prepend(const T &x)                                   { return prepend(&x);               }
-                    inline T *insert(size_t idx, const T &x)                        { return insert(idx, &x);           }
-
-                    inline T *pop(T &x)                                             { return pop(&x);                   }
-                    inline T *remove(T &x)                                          { return cast(v.iremove(0, 1, &x)); }
 
                 public:
                     // Multiple modifications with data copying

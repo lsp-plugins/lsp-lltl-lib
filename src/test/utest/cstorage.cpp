@@ -13,7 +13,7 @@ UTEST_BEGIN("lltl", cstorage)
     void test_single()
     {
         static const int numbers[] = { 7, 6, 4, 1, 3, 2, 5 };
-        printf("Testing single operations on cstorage...");
+        printf("Testing single operations on cstorage...\n");
 
         lltl::cstorage<int> x;
         int *pv;
@@ -87,10 +87,12 @@ UTEST_BEGIN("lltl", cstorage)
 
     void test_single_with_copy()
     {
-        printf("Testing single operations with data copying on cstorage...");
+        static const int numbers[] = { 16, 15, 14, 13, 6, 7, 0, 1, 2, 3, 4, 5, 8, 9, 11, 12 };
+
+        printf("Testing single operations with data copying on cstorage...\n");
 
         lltl::cstorage<int> x;
-        int v;
+        int v, *pv;
 
         // Check initial state
         UTEST_ASSERT(x.size() == 0);
@@ -144,12 +146,92 @@ UTEST_BEGIN("lltl", cstorage)
         UTEST_ASSERT(x.unshift(14));
         UTEST_ASSERT(x.size() == 14);
         UTEST_ASSERT(x.capacity() >= 14);
+
+        // prepend items
+        v = 15;
+        UTEST_ASSERT(x.prepend(&v));
+        UTEST_ASSERT(x.prepend(16));
+        UTEST_ASSERT(x.size() == 16);
+        UTEST_ASSERT(x.capacity() >= 16);
+
+        // Check items
+        int n = sizeof(numbers)/sizeof(int);
+        UTEST_ASSERT(x.size() == size_t(n));
+        UTEST_ASSERT(x.capacity() >= size_t(n));
+        for (int i=0; i<n; ++i)
+        {
+            UTEST_ASSERT_MSG(pv = x.get(i), "Failed at index %d", i);
+            UTEST_ASSERT_MSG(*pv == numbers[i], "Failed at index %d: got %d, expected %d", i, *pv, numbers[i]);
+        }
+        UTEST_ASSERT(x.get(n) == NULL);
+
+        // Pop element
+        pv = NULL;
+        UTEST_ASSERT(pv = x.pop(&v));
+        UTEST_ASSERT(v == 12);
+        UTEST_ASSERT(pv == &v);
+
+        pv = NULL;
+        UTEST_ASSERT(pv = x.pop(v));
+        UTEST_ASSERT(v == 11);
+        UTEST_ASSERT(pv == &v);
+
+        // Shift element
+        pv = NULL;
+        UTEST_ASSERT(pv = x.shift(&v));
+        UTEST_ASSERT(v == 16);
+        UTEST_ASSERT(pv == &v);
+
+        pv = NULL;
+        UTEST_ASSERT(pv = x.shift(v));
+        UTEST_ASSERT(v == 15);
+        UTEST_ASSERT(pv == &v);
+
+        // Remove element
+        pv = NULL;
+        UTEST_ASSERT(pv = x.remove(6, &v));
+        UTEST_ASSERT(v == 2);
+        UTEST_ASSERT(pv == &v);
+
+        pv = NULL;
+        UTEST_ASSERT(pv = x.remove(1, v));
+        UTEST_ASSERT(v == 13);
+        UTEST_ASSERT(pv == &v);
+
+        // Remove pointer
+        pv = NULL;
+        UTEST_ASSERT(pv = x.premove(x.get(5), &v));
+        UTEST_ASSERT(v == 3);
+        UTEST_ASSERT(pv == &v);
+
+        pv = NULL;
+        UTEST_ASSERT(pv = x.premove(x.get(2), v));
+        UTEST_ASSERT(v == 7);
+        UTEST_ASSERT(pv == &v);
+
+        // Check size
+        UTEST_ASSERT(x.size() == 8);
+        UTEST_ASSERT(x.capacity() >= 8);
+        UTEST_ASSERT(pv = x.first());
+        UTEST_ASSERT(*pv == 14);
+        UTEST_ASSERT(pv = x.last());
+        UTEST_ASSERT(*pv == 9);
+
+        // Flush
+        x.flush();
+        UTEST_ASSERT(x.size() == 0);
+        UTEST_ASSERT(x.capacity() == 0);
+        UTEST_ASSERT(x.get(0) == NULL);
+        UTEST_ASSERT(x.first() == NULL);
+        UTEST_ASSERT(x.last() == NULL);
+        UTEST_ASSERT(x.array() == NULL);
+        UTEST_ASSERT(x.slice(0, 0) == NULL);
     }
 
     UTEST_MAIN
     {
         test_single();
-
+        test_single_with_copy();
     }
 
 UTEST_END

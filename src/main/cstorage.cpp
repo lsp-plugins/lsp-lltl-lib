@@ -340,7 +340,7 @@ namespace lsp
             nItems         -= n;
             size_t size     = nItems * nSizeOf;
             uint8_t *src    = &vItems[size];
-            ::memcpy(dst, src, size);
+            ::memcpy(dst, src, n * nSizeOf);
 
             return static_cast<uint8_t *>(dst);
         }
