@@ -71,6 +71,9 @@ namespace lsp
 
         uint8_t *raw_cstorage::slice(size_t idx, size_t size)
         {
+            if (size <= 0)
+                return NULL;
+
             size_t tail = idx + size;
             return (tail <= nItems) ? &vItems[idx * nSizeOf] : NULL;
         }
@@ -214,48 +217,68 @@ namespace lsp
 
         bool raw_cstorage::premove(const void *ptr, size_t n)
         {
-            ssize_t off = reinterpret_cast<const uint8_t *>(ptr) - vItems;
-            if ((off < 0) || ((off % nSizeOf) != 0))
+            if (ptr == NULL)
                 return false;
+            uint8_t *src = static_cast<uint8_t *>(const_cast<void *>(ptr));
+            if (src < vItems) // Pointer before array
+                return false;
+
+            size_t off  = src - vItems;
             size_t cap  = nItems * nSizeOf;
+            if ((off >= cap) || (off % nSizeOf))
+                return false;
+
             size_t last = off + n * nSizeOf;
             if (last < cap)
                 ::memmove(&vItems[off], &vItems[last], cap - last);
+            nItems     -= n;
             return true;
         }
 
-        bool raw_cstorage::premove(const void *ptr, size_t n, void *dst)
+        uint8_t *raw_cstorage::premove(const void *ptr, size_t n, void *dst)
         {
-            ssize_t off = reinterpret_cast<const uint8_t *>(ptr) - vItems;
-            if ((off < 0) || ((off % nSizeOf) != 0))
-                return false;
-            size_t cap  = nItems * nSizeOf;
-            size_t last = off + n * nSizeOf;
+            if (ptr == NULL)
+                return NULL;
+            uint8_t *src = static_cast<uint8_t *>(const_cast<void *>(ptr));
+            if (src < vItems) // Pointer before array
+                return NULL;
 
-            uint8_t *src = &vItems[off];
+            size_t off = src - vItems;
+            size_t cap  = nItems * nSizeOf;
+
+            if ((off >= cap) || (off % nSizeOf))
+                return NULL;
+
+            size_t last = off + n * nSizeOf;
             ::memmove(dst, src, n * nSizeOf);
             if (last < cap)
                 ::memmove(src, &vItems[last], cap - last);
             nItems     -= n;
-            return true;
+            return static_cast<uint8_t *>(dst);
         }
 
-        bool raw_cstorage::premove(const void *ptr, size_t n, raw_cstorage *cs)
+        uint8_t *raw_cstorage::premove(const void *ptr, size_t n, raw_cstorage *cs)
         {
-            ssize_t off = reinterpret_cast<const uint8_t *>(ptr) - vItems;
-            if ((off < 0) || ((off % nSizeOf) != 0))
-                return false;
+            if (ptr == NULL)
+                return NULL;
+            uint8_t *src = static_cast<uint8_t *>(const_cast<void *>(ptr));
+            if (src < vItems) // Pointer before array
+                return NULL;
+            size_t off = src - vItems;
+            if ((off >= nItems) || (off % nSizeOf))
+                return NULL;
+
             size_t cap  = nItems * nSizeOf;
             size_t last = off + n * nSizeOf;
 
-            uint8_t *src = &vItems[off];
-            if (!cs->append(n, src))
-                return false;
-
-            if (last < cap)
-                ::memmove(src, &vItems[last], cap - last);
-            nItems     -= n;
-            return true;
+            uint8_t *res = cs->append(n, src);
+            if (res)
+            {
+                if (last < cap)
+                    ::memmove(src, &vItems[last], cap - last);
+                nItems     -= n;
+            }
+            return res;
         }
 
         bool raw_cstorage::iremove(size_t idx, size_t n)
@@ -269,34 +292,35 @@ namespace lsp
             return true;
         }
 
-        bool raw_cstorage::iremove(size_t idx, size_t n, void *dst)
+        uint8_t    *raw_cstorage::iremove(size_t idx, size_t n, void *dst)
         {
             size_t last = idx + n;
             if (last > nItems)
-                return false;
+                return NULL;
 
             uint8_t *src = &vItems[idx * nSizeOf];
             ::memmove(dst, src, n * nSizeOf);
             if (last < nItems)
                 ::memmove(src, &vItems[last * nSizeOf], (nItems - last) * nSizeOf);
             nItems     -= n;
-            return true;
+            return static_cast<uint8_t *>(dst);
         }
 
-        bool raw_cstorage::iremove(size_t idx, size_t n, raw_cstorage *cs)
+        uint8_t *raw_cstorage::iremove(size_t idx, size_t n, raw_cstorage *cs)
         {
             size_t last = idx + n;
             if (last > nItems)
-                return false;
+                return NULL;
 
             uint8_t *src    = &vItems[idx * nSizeOf];
-            if (!cs->append(n, src))
-                return false;
-
-            if (last < nItems)
-                ::memmove(src, &vItems[last * nSizeOf], (nItems - last) * nSizeOf);
-            nItems     -= n;
-            return true;
+            uint8_t *res    = cs->append(n, src);
+            if (res)
+            {
+                if (last < nItems)
+                    ::memmove(src, &vItems[last * nSizeOf], (nItems - last) * nSizeOf);
+                nItems     -= n;
+            }
+            return res;
         }
 
         uint8_t *raw_cstorage::pop(size_t n)
@@ -318,7 +342,7 @@ namespace lsp
             uint8_t *src    = &vItems[size];
             ::memcpy(dst, src, size);
 
-            return src;
+            return static_cast<uint8_t *>(dst);
         }
 
         uint8_t *raw_cstorage::pop(size_t n, raw_cstorage *cs)
