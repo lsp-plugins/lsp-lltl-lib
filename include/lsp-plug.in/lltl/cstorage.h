@@ -65,8 +65,8 @@ namespace lsp
                 private:
                     mutable raw_cstorage    v;
 
-                    inline T *cast(void *ptr)                                       { return reinterpret_cast<T *>(ptr); }
-                    inline const T *ccast(const void *ptr)                          { return reinterpret_cast<const T *>(ptr); }
+                    inline T *cast(void *ptr)                                       { return static_cast<T *>(ptr);         }
+                    inline const T *ccast(const void *ptr)                          { return static_cast<const T *>(ptr);   }
 
                 public:
                     explicit inline cstorage()                                      { v.init(sizeof(T));                }
@@ -78,7 +78,7 @@ namespace lsp
                     size_t capacity() const                                         { return v.nCapacity;               }
 
                 public:
-                    // Whole manipulations
+                    // Whole collection manipulations
                     inline void clear()                                             { v.nItems  = 0;                    }
                     inline void flush()                                             { v.flush();                        }
                     inline void truncate()                                          { v.flush();                        }
@@ -96,6 +96,8 @@ namespace lsp
                     inline T *array()                                               { return cast(v.vItems); }
                     inline T *slice(size_t idx, size_t size)                        { return cast(v.slice(idx, size));  }
 
+                public:
+                    // Accessing elements (const)
                     inline const T *get(size_t idx) const                           { return (idx < v.nItems) ? ccast(&v.vItems[idx * v.nSizeOf]) : NULL; }
                     inline const T *at(size_t idx) const                            { return ccast(&v.vItems[idx * v.nSizeOf]); }
                     inline const T *first() const                                   { return (v.nItems > 0) ? ccast(v.vItems) : NULL; }
@@ -131,7 +133,7 @@ namespace lsp
                     inline bool premove_n(const T *ptr, size_t n)                   { return v.premove(ptr, n);         }
 
                 public:
-                    // Single modifications with data copying (pointer source)
+                    // Single modifications with data copying (pointer argument)
                     inline T *append(const T *x)                                    { return cast(v.append(1, x));      }
                     inline T *add(const T *x)                                       { return cast(v.append(1, x));      }
                     inline T *push(const T *x)                                      { return cast(v.append(1, x));      }
@@ -143,7 +145,7 @@ namespace lsp
                     inline bool premove(const T *ptr, T *x)                         { return v.premove(ptr, 1, x);      }
 
                 public:
-                    // Single modifications with data copying (reference source)
+                    // Single modifications with data copying (reference argument)
                     inline T *append(const T &v)                                    { return append(&v);                }
                     inline T *add(const T &v)                                       { return add(&v);                   }
                     inline T *push(const T &v)                                      { return push(&v);                  }
@@ -165,7 +167,7 @@ namespace lsp
                     inline bool premove_n(const T *ptr, size_t n, T *x)             { return v.premove(ptr, n, x);      }
 
                 public:
-                    // Collection-based modifications (pointer-based)
+                    // Collection-based modifications (pointer argument)
                     inline T *set(const cstorage<T> *x)                             { return cast(v.set(x->v.nItems, x->v.vItems));             }
                     inline T *append(const cstorage<T> *x)                          { return cast(v.append(x->v.nItems, x->v.vItems));          }
                     inline T *add(const cstorage<T> *x)                             { return cast(v.append(x->v.nItems, x->v.vItems));          }
@@ -180,6 +182,23 @@ namespace lsp
                     inline T *pop_n(size_t n, cstorage<T> *x)                       { return cast(v.pop(n, &x->v));                             }
                     inline bool remove_n(size_t idx, size_t n, cstorage<T> *x)      { return v.iremove(idx, n, &x->v);                          }
                     inline bool premove(const T *ptr, size_t n, cstorage<T> *x)     { return v.premove(ptr, n, &x->v);                          }
+
+                public:
+                    // Collection-based modifications (reference argument)
+                    inline T *set(const cstorage<T> &x)                             { return set(&x);                                           }
+                    inline T *append(const cstorage<T> &x)                          { return append(&x);                                        }
+                    inline T *add(const cstorage<T> &x)                             { return add(&x);                                           }
+                    inline T *push(const cstorage<T> &x)                            { return push(&x);                                          }
+                    inline T *prepend(const cstorage<T> &x)                         { return prepend(&x);                                       }
+                    inline T *insert(size_t idx, const cstorage<T> &x)              { return insert(&x);                                        }
+
+                    inline T *pop(cstorage<T> &x)                                   { return pop(&x);                                           }
+                    inline bool remove(size_t idx, cstorage<T> &x)                  { return remove(idx, &x);                                   }
+                    inline bool premove(const T *ptr, cstorage<T> &x)               { return premove(ptr, &x);                                  }
+
+                    inline T *pop_n(size_t n, cstorage<T> &x)                       { return pop(n, &x);                                        }
+                    inline bool remove_n(size_t idx, size_t n, cstorage<T> &x)      { return remove(idx, n, &x);                                }
+                    inline bool premove(const T *ptr, size_t n, cstorage<T> &x)     { return premove(ptr, n, &x);                               }
 
                 public:
                     // Operators
