@@ -10,361 +10,183 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
 namespace lsp
 {
-    struct base_cstorage
+    namespace lltl
     {
-        protected:
-            uint8_t    *vItems;
-            size_t      nCapacity;
-            size_t      nItems;
-            size_t      nSizeOf;
-
-        protected:
-            bool realloc_capacity(size_t capacity)
-            {
-                if (capacity < 32)
-                    capacity        = 32;
-
-                // Do aligned (re)allocation
-                uint8_t *ptr    = lsp_trealloc(uint8_t, vItems, nSizeOf * capacity);
-                if (ptr == NULL)
-                    return false;
-
-                // Update pointer and capacity
-                vItems          = ptr;
-                nCapacity       = capacity;
-                return true;
-            }
-
-            uint8_t *alloc_items(size_t n)
-            {
-                if ((nItems + n) > nCapacity)
-                {
-                    size_t dn = nCapacity + n;
-                    if (!realloc_capacity(dn + (dn >> 1)))
-                        return NULL;
-                }
-
-                uint8_t    *ptr = &vItems[nItems * nSizeOf];
-                nItems         += n;
-                return ptr;
-            }
-
-            uint8_t *alloc_item()
-            {
-                if (nItems >= nCapacity)
-                {
-                    if (!realloc_capacity(nCapacity + (nCapacity >> 1)))
-                        return NULL;
-                }
-
-                return &vItems[(nItems++)*nSizeOf];
-            }
-
-            uint8_t *insert_items(size_t index, size_t n)
-            {
-                if ((index < 0) || (index > nItems))
-                    return NULL;
-                if ((nItems + n) > nCapacity)
-                {
-                    size_t dn = nCapacity + n;
-                    if (!realloc_capacity(dn + (dn >> 1)))
-                        return NULL;
-                }
-                uint8_t *res = &vItems[index * nSizeOf];
-                if (index < nItems)
-                    ::memmove(&res[n*nSizeOf], res, (nItems - index)*nSizeOf);
-                nItems += n;
-                return res;
-            }
-
-            uint8_t *at(size_t index)
-            {
-                return &vItems[index * nSizeOf];
-            }
-
-            uint8_t *c_at(size_t index)
-            {
-                return &vItems[(index % nItems) * nSizeOf];
-            }
-
-            uint8_t *get_item(size_t index)
-            {
-                return (index < nItems) ? &vItems[index * nSizeOf] : NULL;
-            }
-
-            uint8_t *c_get_item(size_t index)
-            {
-                if (nItems == 0)
-                    return NULL;
-
-                return &vItems[(index % nItems) * nSizeOf];
-            }
-
-            uint8_t *first()
-            {
-                return (nItems > 0) ? vItems : NULL;
-            }
-
-            uint8_t *last()
-            {
-                return (nItems > 0) ? &vItems[(nItems-1)*nSizeOf] : NULL;
-            }
-
-            uint8_t *pop_last()
-            {
-                return (nItems > 0) ? &vItems[(--nItems)*nSizeOf] : NULL;
-            }
-
-            inline void do_swap_data(basic_storage *src)
-            {
-                uint8_t *_vItems    = src->vItems;
-                size_t  _nCapacity  = src->nCapacity;
-                size_t  _nItems     = src->nItems;
-                size_t  _nSizeOf    = src->nSizeOf;
-
-                src->vItems     = vItems;
-                src->nCapacity  = nCapacity;
-                src->nItems     = nItems;
-                src->nSizeOf    = nSizeOf;
-
-                vItems          = _vItems;
-                nCapacity       = _nCapacity;
-                nItems          = _nItems;
-                nSizeOf         = _nSizeOf;
-            }
-
-        public:
-            inline basic_storage(size_t sz)
-            {
-                vItems      = NULL;
-                nCapacity   = 0;
-                nItems      = 0;
-                nSizeOf     = sz;
-            }
-
-            inline ~basic_storage()
-            {
-                flush();
-            }
-
-            void flush()
-            {
-                if (vItems != NULL)
-                {
-                    lsp_free(vItems);
-                    vItems      = NULL;
-                }
-                nCapacity   = 0;
-                nItems      = 0;
-            }
-
-            inline bool remove(size_t idx)
-            {
-                if (idx >= nItems)
-                    return false;
-                if (idx != (--nItems))
-                    ::memmove(&vItems[idx * nSizeOf], &vItems[(idx+1)*nSizeOf], (nItems-idx) * nSizeOf);
-                return true;
-            }
-
-            inline bool remove(const void *ptr)
-            {
-                ssize_t off = reinterpret_cast<const uint8_t *>(ptr) - vItems;
-                if ((off < 0) || ((off % nSizeOf) != 0))
-                    return false;
-                return remove(off / nSizeOf);
-            }
-
-            inline bool remove_n(size_t idx, size_t n)
-            {
-                size_t last = idx + n;
-                if ((last + n) > nItems)
-                    return false;
-                if ((last + n) != nItems)
-                    ::memmove(&vItems[idx * nSizeOf], &vItems[last * nSizeOf], (nItems - last) * nSizeOf);
-                nItems     -= n;
-                return true;
-            }
-
-            inline size_t size() const  { return nItems; }
-
-            inline size_t capacity() const { return nCapacity; }
-
-            inline void clear() { nItems = 0; }
-
-    };
-
-    template <class T>
-        class cstorage: public basic_storage
+        struct raw_cstorage
         {
-            private:
-                cstorage(const cstorage<T> &src);                               // Disable copying
-                cstorage<T> & operator = (const cstorage<T> & src);             // Disable copying
+            public:
+                uint8_t    *vItems;
+                size_t      nCapacity;
+                size_t      nItems;
+                size_t      nSizeOf;
 
             public:
-                explicit cstorage() : basic_storage(sizeof(T)) {};
-                ~cstorage() {};
+                ~raw_cstorage();
 
             public:
-                inline T *append() { return reinterpret_cast<T *>(basic_storage::alloc_item()); }
-                inline T *add() { return reinterpret_cast<T *>(basic_storage::alloc_item()); }
+                void        init(size_t n_sizeof);
+                bool        grow(size_t capacity);
+                bool        truncate(size_t capacity);
+                void        swap(raw_cstorage *src);
+                bool        xswap(size_t i1, size_t i2);
+                void        uswap(size_t i1, size_t i2);
+                void        flush();
 
-                inline T *append(const T *v)
-                {
-                    T *dst = reinterpret_cast<T *>(basic_storage::alloc_item());
-                    if (dst != NULL)
-                        *dst = *v;
-                    return dst;
-                }
+                uint8_t    *slice(size_t idx, size_t size);
 
-                inline T *push(const T *v)
-                {
-                    T *dst = reinterpret_cast<T *>(basic_storage::alloc_item());
-                    if (dst != NULL)
-                        *dst = *v;
-                    return dst;
-                }
+                uint8_t    *set(size_t n, const void *src);
+                uint8_t    *append(size_t n);
+                uint8_t    *append(size_t n, const void *src);
+                uint8_t    *insert(size_t index, size_t n);
+                uint8_t    *insert(size_t index, size_t n, const void *src);
 
-                inline T *push() { return reinterpret_cast<T *>(basic_storage::alloc_item()); }
-
-                inline T *append(const T *v, size_t n)
-                {
-                    T *dst = reinterpret_cast<T *>(basic_storage::alloc_items(n));
-                    if (dst != NULL)
-                        ::memcpy(dst, v, n*sizeof(T));
-                    return dst;
-                }
-
-                inline T *append(T v)
-                {
-                    T *dst = reinterpret_cast<T *>(basic_storage::alloc_item());
-                    if (dst != NULL)
-                        *dst = v;
-                    return dst;
-                }
-
-                inline T *add(const T *v)
-                {
-                    T *dst = reinterpret_cast<T *>(basic_storage::alloc_item());
-                    if (dst != NULL)
-                        *dst = *v;
-                    return dst;
-                }
-
-                inline T *add(T v)
-                {
-                    T *dst = reinterpret_cast<T *>(basic_storage::alloc_item());
-                    if (dst != NULL)
-                        *dst = v;
-                    return dst;
-                }
-
-                inline T *get(size_t idx) { return reinterpret_cast<T *>(basic_storage::get_item(idx)); }
-
-                inline T *c_get(size_t idx) { return reinterpret_cast<T *>(basic_storage::c_get_item(idx)); }
-
-                inline T *operator[](size_t index) { return reinterpret_cast<T *>(basic_storage::get_item(index)); }
-
-                inline T *append_n(size_t n) { return (n == 0) ? NULL : reinterpret_cast<T *>(basic_storage::alloc_items(n)); }
-
-                inline T *at(size_t index) { return reinterpret_cast<T *>(basic_storage::at(index)); }
-
-                inline T *c_at(size_t index) { return reinterpret_cast<T *>(basic_storage::c_at(index)); }
-
-                inline T *first() { return reinterpret_cast<T *>(basic_storage::first()); }
-
-                inline T *get_array() { return reinterpret_cast<T *>(basic_storage::first()); }
-
-                inline const T *get_array() const { return const_cast< cstorage<T> *>(this)->first(); }
-
-                inline T *last() { return reinterpret_cast<T *>(basic_storage::last()); }
-
-                inline T *insert(size_t idx) { return reinterpret_cast<T *>(basic_storage::insert_items(idx, 1)); }
-
-                inline T *insert(size_t idx, const T *v)
-                {
-                    T *dst = reinterpret_cast<T *>(basic_storage::insert_items(idx, 1));
-                    if (dst != NULL)
-                        *dst = *v;
-                    return dst;
-                }
-
-                inline T *insert_n(size_t idx, size_t n) { return reinterpret_cast<T *>(basic_storage::insert_items(idx, n)); }
-
-                inline T *insert_n(size_t idx, const T *v, size_t n)
-                {
-                    T *dst = reinterpret_cast<T *>(basic_storage::insert_items(idx, n));
-                    if (dst != NULL)
-                        ::memcpy(dst, v, n*sizeof(T));
-                    return dst;
-                }
-
-                inline bool remove(size_t idx) { return basic_storage::remove(idx); }
-
-                inline bool remove(const T *ptr) { return basic_storage::remove(ptr); }
-
-                inline bool remove(size_t idx, T *dst)
-                {
-                    void *p = basic_storage::get_item(idx);
-                    if (p == NULL)
-                        return false;
-                    *dst = *(reinterpret_cast<T *>(p));
-                    return basic_storage::remove(idx);
-                }
-
-                inline bool remove_n(size_t idx, size_t n) { return basic_storage::remove_n(idx, n); }
-
-                inline bool pop(T *dst)
-                {
-                    T *src = reinterpret_cast<T *>(basic_storage::pop_last());
-                    if (src == NULL)
-                        return false;
-                    *dst = *src;
-                    return true;
-                }
-
-                inline bool remove_last()
-                {
-                    void *ptr = basic_storage::pop_last();
-                    return ptr != NULL;
-                }
-
-                inline bool pop()
-                {
-                    void *ptr = basic_storage::pop_last();
-                    return ptr != NULL;
-                }
-
-                inline ssize_t indexof(const T *ptr)
-                {
-                    T *p        = reinterpret_cast<T *>(vItems);
-                    if (p == NULL)
-                        return -1;
-                    ssize_t idx = ptr - p;
-                    return ((idx < 0) || (idx >= ssize_t(nItems))) ? -1 : idx;
-                }
-
-                inline void swap(cstorage<T> *src) { do_swap_data(src); }
-
-                inline bool add_all(const T *src, size_t count) {
-                    if (count <= 0)
-                        return true;
-                    T *ptr = append_n(count);
-                    ::memcpy(ptr, src, count * nSizeOf);
-                    return true;
-                }
-
-                inline bool add_all(const cstorage<T> *src) {
-                    if (src->nItems <= 0)
-                        return true;
-                    T *ptr = append_n(src->nItems);
-                    ::memcpy(ptr, src->vItems, src->nItems * nSizeOf);
-                    return true;
-                }
+                uint8_t    *pop(size_t n);
+                uint8_t    *pop(size_t n, void *dst);
+                uint8_t    *pop(size_t n, raw_cstorage *cs);
+                bool        premove(const void *ptr, size_t n);
+                bool        premove(const void *ptr, size_t n, void *dst);
+                bool        premove(const void *ptr, size_t n, raw_cstorage *cs);
+                bool        iremove(size_t idx, size_t n);
+                bool        iremove(size_t idx, size_t n, void *dst);
+                bool        iremove(size_t idx, size_t n, raw_cstorage *cs);
         };
+
+        template <class T>
+            class cstorage
+            {
+                private:
+                    cstorage(const cstorage<T> &src);                               // Disable copying
+                    cstorage<T> & operator = (const cstorage<T> & src);             // Disable copying
+
+                private:
+                    mutable raw_cstorage    v;
+
+                    inline T *cast(void *ptr)                                       { return reinterpret_cast<T *>(ptr); }
+                    inline const T *ccast(const void *ptr)                          { return reinterpret_cast<const T *>(ptr); }
+
+                public:
+                    explicit inline cstorage()                                      { v.init(sizeof(T));                }
+                    ~cstorage() {};
+
+                public:
+                    // Size and capacity
+                    size_t size() const                                             { return v.nItems;                  }
+                    size_t capacity() const                                         { return v.nCapacity;               }
+
+                public:
+                    // Whole manipulations
+                    inline void clear()                                             { v.nItems  = 0;                    }
+                    inline void flush()                                             { v.flush();                        }
+                    inline void truncate()                                          { v.flush();                        }
+                    inline void truncate(size_t size)                               { v.truncate(size);                 }
+                    inline void reserve(size_t capacity)                            { v.grow(capacity);                 }
+                    inline void swap(cstorage<T> &src)                              { v.swap(&src.v);                   }
+                    inline void swap(cstorage<T> *src)                              { v.swap(&src->v);                  }
+
+                public:
+                    // Accessing elements (non-const)
+                    inline T *get(size_t idx)                                       { return (idx < v.nItems) ? cast(&v.vItems[idx * v.nSizeOf]) : NULL; }
+                    inline T *uget(size_t idx)                                      { return cast(&v.vItems[idx * v.nSizeOf]);  }
+                    inline T *first()                                               { return (v.nItems > 0) ? cast(v.vItems) : NULL; }
+                    inline T *last()                                                { return (v.nItems > 0) ? cast(&v.vItems[(v.nItems - 1) * v.nSizeOf]) : NULL;   }
+                    inline T *array()                                               { return cast(v.vItems); }
+                    inline T *slice(size_t idx, size_t size)                        { return cast(v.slice(idx, size));  }
+
+                    inline const T *get(size_t idx) const                           { return (idx < v.nItems) ? ccast(&v.vItems[idx * v.nSizeOf]) : NULL; }
+                    inline const T *at(size_t idx) const                            { return ccast(&v.vItems[idx * v.nSizeOf]); }
+                    inline const T *first() const                                   { return (v.nItems > 0) ? ccast(v.vItems) : NULL; }
+                    inline const T *last() const                                    { return (v.nItems > 0) ? ccast(&v.vItems[(v.nItems - 1) * v.nSizeOf]) : NULL;  }
+                    inline const T *array() const                                   { return ccast(v.vItems); }
+                    inline const T *slice(size_t idx, size_t size) const            { return cast(v.slice(idx, size));  }
+
+                public:
+                    // Single modifications
+                    inline T *append()                                              { return cast(v.append(1));         }
+                    inline T *add()                                                 { return cast(v.append(1));         }
+                    inline T *push()                                                { return cast(v.append(1));         }
+                    inline T *prepend()                                             { return cast(v.insert(0, 1));      }
+                    inline T *insert(size_t idx)                                    { return cast(v.insert(idx, 1));    }
+
+                    inline T *pop()                                                 { return cast(v.pop(1));            }
+                    inline bool remove(size_t idx)                                  { return v.iremove(idx, 1);         }
+                    inline bool premove(const T *ptr)                               { return v.premove(ptr, 1);         }
+
+                    inline bool xswap(size_t i1, size_t i2)                         { return v.xswap(i1, i2);           }
+                    inline void uswap(size_t i1, size_t i2)                         { v.uswap(i1, i2);                  }
+
+                public:
+                    // Multiple modifications
+                    inline T *append_n(size_t n)                                    { return cast(v.append(n));         }
+                    inline T *add_n(size_t n)                                       { return cast(v.append(n));         }
+                    inline T *push_n(size_t n)                                      { return cast(v.append(n));         }
+                    inline T *prepend_n(size_t n)                                   { return cast(v.insert(0, n));      }
+                    inline T *insert_n(size_t idx, size_t n)                        { return cast(v.insert(idx, n));    }
+
+                    inline T *pop_n(size_t n)                                       { return cast(v.pop(n));            }
+                    inline bool remove_n(size_t idx, size_t n)                      { return v.iremove(idx, n);         }
+                    inline bool premove_n(const T *ptr, size_t n)                   { return v.premove(ptr, n);         }
+
+                public:
+                    // Single modifications with data copying (pointer source)
+                    inline T *append(const T *x)                                    { return cast(v.append(1, x));      }
+                    inline T *add(const T *x)                                       { return cast(v.append(1, x));      }
+                    inline T *push(const T *x)                                      { return cast(v.append(1, x));      }
+                    inline T *prepend(const T *x)                                   { return cast(v.insert(0, 1, x));   }
+                    inline T *insert(size_t idx, const T *x)                        { return cast(v.insert(idx, 1, x)); }
+
+                    inline T *pop(T *x)                                             { return cast(v.pop(1, x));         }
+                    inline bool remove(size_t idx, T *x)                            { return v.iremove(idx, 1, x);      }
+                    inline bool premove(const T *ptr, T *x)                         { return v.premove(ptr, 1, x);      }
+
+                public:
+                    // Single modifications with data copying (reference source)
+                    inline T *append(const T &v)                                    { return append(&v);                }
+                    inline T *add(const T &v)                                       { return add(&v);                   }
+                    inline T *push(const T &v)                                      { return push(&v);                  }
+                    inline T *prepend(const T &v)                                   { return prepend(&v);               }
+                    inline T *insert(size_t idx, const T &v)                        { return insert(idx, &v);           }
+
+                    inline T *pop(T &v)                                             { return pop(&v);                   }
+
+                public:
+                    // Multiple modifications with data copying
+                    inline T *append_n(size_t n, const T *x)                        { return cast(v.append(n, x));      }
+                    inline T *add_n(size_t n, const T *x)                           { return cast(v.append(n, x));      }
+                    inline T *push_n(size_t n, const T *x)                          { return cast(v.append(n, x));      }
+                    inline T *prepend_n(size_t n, const T *x)                       { return cast(v.insert(0, n, x));   }
+                    inline T *insert_n(size_t idx, size_t n, const T *x)            { return cast(v.insert(idx, n, x)); }
+
+                    inline T *pop_n(size_t n, T *x)                                 { return cast(v.pop(n, x));         }
+                    inline bool remove_n(size_t idx, size_t n, T *x)                { return v.iremove(idx, n, x);      }
+                    inline bool premove_n(const T *ptr, size_t n, T *x)             { return v.premove(ptr, n, x);      }
+
+                public:
+                    // Collection-based modifications (pointer-based)
+                    inline T *set(const cstorage<T> *x)                             { return cast(v.set(x->v.nItems, x->v.vItems));             }
+                    inline T *append(const cstorage<T> *x)                          { return cast(v.append(x->v.nItems, x->v.vItems));          }
+                    inline T *add(const cstorage<T> *x)                             { return cast(v.append(x->v.nItems, x->v.vItems));          }
+                    inline T *push(const cstorage<T> *x)                            { return cast(v.append(x->v.nItems, x->v.vItems));          }
+                    inline T *prepend(const cstorage<T> *x)                         { return cast(v.insert(0, x->v.nItems, x->v.vItems));       }
+                    inline T *insert(size_t idx, const cstorage<T> *x)              { return cast(v.insert(idx, x->v.nItems, x->v.vItems));     }
+
+                    inline T *pop(cstorage<T> *x)                                   { return cast(v.pop(1, &x->v));                             }
+                    inline bool remove(size_t idx, cstorage<T> *x)                  { return v.iremove(idx, 1, &x->v);                          }
+                    inline bool premove(const T *ptr, cstorage<T> *x)               { return v.premove(ptr, 1, &x->v);                          }
+
+                    inline T *pop_n(size_t n, cstorage<T> *x)                       { return cast(v.pop(n, &x->v));                             }
+                    inline bool remove_n(size_t idx, size_t n, cstorage<T> *x)      { return v.iremove(idx, n, &x->v);                          }
+                    inline bool premove(const T *ptr, size_t n, cstorage<T> *x)     { return v.premove(ptr, n, &x->v);                          }
+
+                public:
+                    // Operators
+                    inline T *operator[](size_t idx)                                { return get(idx);                  }
+                    inline const T *operator[](size_t idx) const                    { return get(idx);                  }
+            };
+    }
 }
 
 #endif /* LSP_PLUG_IN_LLTL_CSTORAGE_H_ */
