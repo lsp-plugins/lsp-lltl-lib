@@ -65,6 +65,8 @@ namespace lsp
                 bool        iremove(size_t idx, size_t n);
                 void      **iremove(size_t idx, size_t n, void **dst);
                 void      **iremove(size_t idx, size_t n, raw_parray *cs);
+
+                void       *qremove(size_t idx);
         };
 
         /**
@@ -146,6 +148,7 @@ namespace lsp
                     inline T *pop()                                                 { return cast(v.pop());                 }
                     inline T *shift()                                               { return cast(v.iremove(0));            }
                     inline T *remove(size_t idx)                                    { return cast(v.iremove(idx));          }
+                    inline T *qremove(size_t idx)                                   { return cast(v.qremove(idx));          }
                     inline T *premove(const T *ptr)                                 { return cast(v.premove(ptr));          }
 
                     inline bool xswap(size_t i1, size_t i2)                         { return v.xswap(i1, i2);               }

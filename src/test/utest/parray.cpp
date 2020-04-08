@@ -76,48 +76,57 @@ UTEST_BEGIN("lltl", parray)
         UTEST_ASSERT(pv = x.prepend());
         *pv = s++;
         dump(x);
+        UTEST_ASSERT(pv = x.unshift());
+        *pv = s++;
+        dump(x);
 
         // Check items
-        static const int numbers[]  = { 6, 5, 3, 0, 2, 1, 4 };
+        static const int numbers[]  = { 7, 6, 5, 3, 0, 2, 1, 4 };
         check_parray(x, numbers, sizeof(numbers)/sizeof(int));
 
         // Remove items
+        UTEST_ASSERT(v = x.qremove(0));
+        dump(x);
+        UTEST_ASSERT(*v == 7);
+        UTEST_ASSERT(v = x.get(0));
+        UTEST_ASSERT(*v == 4);
+
         UTEST_ASSERT(v = x.pop());
         dump(x);
-        UTEST_ASSERT(*v == 4);
+        UTEST_ASSERT(*v == 1);
 
         UTEST_ASSERT(v = x.last());
         dump(x);
-        UTEST_ASSERT(*v == 1);
+        UTEST_ASSERT(*v == 2);
 
         UTEST_ASSERT(x.shift());
         dump(x);
         UTEST_ASSERT(v = x.first());
-        UTEST_ASSERT(*v == 5);
+        UTEST_ASSERT(*v == 6);
 
         UTEST_ASSERT(!x.remove(5));
         UTEST_ASSERT(v = x.get(2));
-        UTEST_ASSERT(*v == 0);
+        UTEST_ASSERT(*v == 3);
 
         UTEST_ASSERT(x.remove(2));
         dump(x);
         UTEST_ASSERT(v = x.get(2));
-        UTEST_ASSERT(*v == 2);
+        UTEST_ASSERT(*v == 0);
 
         UTEST_ASSERT(!x.premove(NULL));
         UTEST_ASSERT(x.get(x.size()) == NULL);
         UTEST_ASSERT(x.premove(v));
         dump(x);
         UTEST_ASSERT(v = x.get(2));
-        UTEST_ASSERT(*v == 1);
+        UTEST_ASSERT(*v == 2);
 
         // Check size
         UTEST_ASSERT(x.size() == 3);
         UTEST_ASSERT(x.capacity() >= 3);
         UTEST_ASSERT(v = x.first());
-        UTEST_ASSERT(*v == 5);
+        UTEST_ASSERT(*v == 6);
         UTEST_ASSERT(v = x.last());
-        UTEST_ASSERT(*v == 1);
+        UTEST_ASSERT(*v == 2);
     }
 
     void test_single_with_copy()
