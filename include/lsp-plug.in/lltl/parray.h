@@ -114,7 +114,7 @@ namespace lsp
                     // Accessing elements (non-const)
                     inline bool test(size_t idx) const                              { return idx < v.nItems;                }
                     inline T *get(size_t idx)                                       { return (idx < v.nItems) ? cast(v.vItems[idx]) : NULL;         }
-                    inline T **get_n(size_t idx, size_t n, T **x)                   { return pcast(v.get_n(idx, n, x));     }
+                    inline T **get_n(size_t idx, size_t n, T **x)                   { return pcast(v.get_n(idx, n, vcast(x)));     }
                     inline T **pget(size_t idx)                                     { return (idx < v.nItems) ? pcast(&v.vItems[idx]) : NULL;       }
                     inline T *uget(size_t idx)                                      { return cast(v.vItems[idx]);           }
                     inline T *upget(size_t idx)                                     { return pcast(&v.vItems[idx]);         }
@@ -186,18 +186,18 @@ namespace lsp
 
                 public:
                     // Multiple modifications with data copying
-                    inline T **set_n(size_t n, T **x)                               { return pcast(v.set(n, x));            }
-                    inline T **append_n(size_t n, T **x)                            { return pcast(v.append(n, x));         }
-                    inline T **add_n(size_t n, T **x)                               { return pcast(v.append(n, x));         }
-                    inline T **push_n(size_t n, T **x)                              { return pcast(v.append(n, x));         }
-                    inline T **unshift_n(size_t n, T **x)                           { return pcast(v.insert(0, n, x));      }
-                    inline T **prepend_n(size_t n, T **x)                           { return pcast(v.insert(0, n, x));      }
-                    inline T **insert_n(size_t idx, size_t n, T **x)                { return pcast(v.insert(idx, n, x));    }
+                    inline T **set_n(size_t n, T **x)                               { return pcast(v.set(n, vcast(x)));            }
+                    inline T **append_n(size_t n, T **x)                            { return pcast(v.append(n, vcast(x)));         }
+                    inline T **add_n(size_t n, T **x)                               { return pcast(v.append(n, vcast(x)));         }
+                    inline T **push_n(size_t n, T **x)                              { return pcast(v.append(n, vcast(x)));         }
+                    inline T **unshift_n(size_t n, T **x)                           { return pcast(v.insert(0, n, vcast(x)));      }
+                    inline T **prepend_n(size_t n, T **x)                           { return pcast(v.insert(0, n, vcast(x)));      }
+                    inline T **insert_n(size_t idx, size_t n, T **x)                { return pcast(v.insert(idx, n, vcast(x)));    }
 
-                    inline T **pop_n(size_t n, T **x)                               { return pcast(v.pop(n, x));            }
-                    inline T **shift_n(size_t n, T **x)                             { return pcast(v.iremove(0, n, x));     }
-                    inline T **remove_n(size_t idx, size_t n, T **x)                { return pcast(v.iremove(idx, n, x));   }
-                    inline T **premove_n(const T *ptr, size_t n, T **x)             { return pcast(v.premove(ptr, n, x));   }
+                    inline T **pop_n(size_t n, T **x)                               { return pcast(v.pop(n, vcast(x)));            }
+                    inline T **shift_n(size_t n, T **x)                             { return pcast(v.iremove(0, n, vcast(x)));     }
+                    inline T **remove_n(size_t idx, size_t n, T **x)                { return pcast(v.iremove(idx, n, vcast(x)));   }
+                    inline T **premove_n(const T *ptr, size_t n, T **x)             { return pcast(v.premove(ptr, n, vcast(x)));   }
 
                 public:
                     // Collection-based modifications (pointer argument)

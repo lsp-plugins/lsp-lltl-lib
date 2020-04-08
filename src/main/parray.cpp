@@ -110,6 +110,16 @@ namespace lsp
             return (tail <= nItems) ? &vItems[idx] : NULL;
         }
 
+        void **raw_parray::get_n(size_t idx, size_t size, void **dst)
+        {
+            size_t tail = idx + size;
+            if (tail > nItems)
+                return NULL;
+
+            ::memcpy(dst, &vItems[idx], size * sizeof(void *));
+            return dst;
+        }
+
         void **raw_parray::set(size_t n, void **src)
         {
             if (n > nCapacity)
@@ -161,10 +171,10 @@ namespace lsp
 
         void **raw_parray::append(size_t n, void **src)
         {
-            size_t size = nItems + 1;
+            size_t size = nItems + n;
             if (size > nCapacity)
             {
-                size_t dn = nCapacity + 1;
+                size_t dn = nCapacity + n;
                 if (!grow(dn + (dn >> 1)))
                     return NULL;
             }
@@ -227,7 +237,7 @@ namespace lsp
             if (index < nItems)
                 ::memmove(&res[n], res, (nItems - index) * sizeof(void *));
 
-            nItems  ++;
+            nItems  += n;
             ::memcpy(res, src, n * sizeof(void *));
             return res;
         }
