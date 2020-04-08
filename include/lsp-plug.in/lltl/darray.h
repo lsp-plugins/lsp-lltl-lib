@@ -23,22 +23,20 @@ namespace lsp
         struct raw_darray
         {
             public:
+                size_t      nItems;
                 uint8_t    *vItems;
                 size_t      nCapacity;
-                size_t      nItems;
                 size_t      nSizeOf;
-
-            public:
-                ~raw_darray();
 
             public:
                 void        init(size_t n_sizeof);
                 bool        grow(size_t capacity);
                 bool        truncate(size_t capacity);
+                void        flush();
+
                 void        swap(raw_darray *src);
                 bool        xswap(size_t i1, size_t i2);
                 void        uswap(size_t i1, size_t i2);
-                void        flush();
                 ssize_t     index_of(const void *ptr);
 
                 uint8_t    *slice(size_t idx, size_t size);
@@ -78,21 +76,29 @@ namespace lsp
                     inline static const T *ccast(const void *ptr)                   { return static_cast<const T *>(ptr);   }
 
                 public:
-                    explicit inline darray()                                        { v.init(sizeof(T));                }
-                    ~darray() {};
+                    explicit inline darray()
+                    {
+                        v.nItems        = 0;
+                        v.vItems        = NULL;
+                        v.nCapacity     = 0;
+                        v.nSizeOf       = sizeof(T);
+                    }
+
+                    ~darray() { v.flush(); };
 
                 public:
                     // Size and capacity
-                    size_t size() const                                             { return v.nItems;                  }
-                    size_t capacity() const                                         { return v.nCapacity;               }
+                    inline size_t size() const                                      { return v.nItems;                  }
+                    inline size_t capacity() const                                  { return v.nCapacity;               }
+                    inline bool is_empty() const                                    { return v.nItems <= 0;             }
 
                 public:
                     // Whole collection manipulations
                     inline void clear()                                             { v.nItems  = 0;                    }
                     inline void flush()                                             { v.flush();                        }
                     inline void truncate()                                          { v.flush();                        }
-                    inline void truncate(size_t size)                               { v.truncate(size);                 }
-                    inline void reserve(size_t capacity)                            { v.grow(capacity);                 }
+                    inline bool truncate(size_t size)                               { return v.truncate(size);          }
+                    inline bool reserve(size_t capacity)                            { return v.grow(capacity);          }
                     inline void swap(darray<T> &src)                                { v.swap(&src.v);                   }
                     inline void swap(darray<T> *src)                                { v.swap(&src->v);                  }
 
@@ -101,7 +107,7 @@ namespace lsp
                     inline T *get(size_t idx)                                       { return (idx < v.nItems) ? cast(&v.vItems[idx * v.nSizeOf]) : NULL; }
                     inline T *get_n(size_t idx, size_t n, T *x)                     { return cast(v.get_n(idx, n, x));  }
                     inline T *uget(size_t idx)                                      { return cast(&v.vItems[idx * v.nSizeOf]);  }
-                    inline T *first()                                               { return cast(v.vItems); }
+                    inline T *first()                                               { return (v.nItems > 0) ? cast(v.vItems) : NULL; }
                     inline T *last()                                                { return (v.nItems > 0) ? cast(&v.vItems[(v.nItems - 1) * v.nSizeOf]) : NULL;   }
                     inline T *array()                                               { return cast(v.vItems); }
                     inline T *slice(size_t idx, size_t size)                        { return cast(v.slice(idx, size));  }

@@ -14,15 +14,10 @@ namespace lsp
     {
         void raw_darray::init(size_t n_sizeof)
         {
+            nItems      = 0;
             vItems      = NULL;
             nCapacity   = 0;
-            nItems      = 0;
             nSizeOf     = n_sizeof;
-        }
-
-        raw_darray::~raw_darray()
-        {
-            flush();
         }
 
         bool raw_darray::grow(size_t capacity)
