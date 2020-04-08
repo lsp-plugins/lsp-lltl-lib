@@ -201,23 +201,23 @@ namespace lsp
 
                 public:
                     // Collection-based modifications (pointer argument)
-                    inline T **set(const parray<T> *x)                              { return ccast(v.set(x->v.nItems, x->v.vItems));             }
-                    inline T **append(const parray<T> *x)                           { return ccast(v.append(x->v.nItems, x->v.vItems));          }
-                    inline T **add(const parray<T> *x)                              { return ccast(v.append(x->v.nItems, x->v.vItems));          }
-                    inline T **push(const parray<T> *x)                             { return ccast(v.append(x->v.nItems, x->v.vItems));          }
-                    inline T **unshift(const parray<T> *x)                          { return ccast(v.insert(0, x->v.nItems, x->v.vItems));       }
-                    inline T **prepend(const parray<T> *x)                          { return ccast(v.insert(0, x->v.nItems, x->v.vItems));       }
-                    inline T **insert(size_t idx, const parray<T> *x)               { return ccast(v.insert(idx, x->v.nItems, x->v.vItems));     }
+                    inline T **set(const parray<T> *x)                              { return pcast(v.set(x->v.nItems, x->v.vItems));             }
+                    inline T **append(const parray<T> *x)                           { return pcast(v.append(x->v.nItems, x->v.vItems));          }
+                    inline T **add(const parray<T> *x)                              { return pcast(v.append(x->v.nItems, x->v.vItems));          }
+                    inline T **push(const parray<T> *x)                             { return pcast(v.append(x->v.nItems, x->v.vItems));          }
+                    inline T **unshift(const parray<T> *x)                          { return pcast(v.insert(0, x->v.nItems, x->v.vItems));       }
+                    inline T **prepend(const parray<T> *x)                          { return pcast(v.insert(0, x->v.nItems, x->v.vItems));       }
+                    inline T **insert(size_t idx, const parray<T> *x)               { return pcast(v.insert(idx, x->v.nItems, x->v.vItems));     }
 
-                    inline T **pop(parray<T> *x)                                    { return ccast(v.pop(1, &x->v));                             }
-                    inline T **shift(parray<T> *x)                                  { return ccast(v.iremove(0, 1, &x->v));                      }
-                    inline T **remove(size_t idx, parray<T> *x)                     { return ccast(v.iremove(idx, 1, &x->v));                    }
-                    inline T **premove(const T *ptr, parray<T> *x)                  { return ccast(v.premove(ptr, 1, &x->v));                    }
+                    inline T **pop(parray<T> *x)                                    { return pcast(v.pop(1, &x->v));                             }
+                    inline T **shift(parray<T> *x)                                  { return pcast(v.iremove(0, 1, &x->v));                      }
+                    inline T **remove(size_t idx, parray<T> *x)                     { return pcast(v.iremove(idx, 1, &x->v));                    }
+                    inline T **premove(const T *ptr, parray<T> *x)                  { return pcast(v.premove(ptr, 1, &x->v));                    }
 
-                    inline T **pop_n(size_t n, parray<T> *x)                        { return ccast(v.pop(n, &x->v));                             }
-                    inline T **shift_n(size_t n, parray<T> *x)                      { return ccast(v.iremove(0, n, &x->v));                      }
-                    inline T **remove_n(size_t idx, size_t n, parray<T> *x)         { return ccast(v.iremove(idx, n, &x->v));                    }
-                    inline T **premove_n(const T *ptr, size_t n, parray<T> *x)      { return ccast(v.premove(ptr, n, &x->v));                    }
+                    inline T **pop_n(size_t n, parray<T> *x)                        { return pcast(v.pop(n, &x->v));                             }
+                    inline T **shift_n(size_t n, parray<T> *x)                      { return pcast(v.iremove(0, n, &x->v));                      }
+                    inline T **remove_n(size_t idx, size_t n, parray<T> *x)         { return pcast(v.iremove(idx, n, &x->v));                    }
+                    inline T **premove_n(const T *ptr, size_t n, parray<T> *x)      { return pcast(v.premove(ptr, n, &x->v));                    }
 
                 public:
                     // Collection-based modifications (reference argument)

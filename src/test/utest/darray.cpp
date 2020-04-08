@@ -687,12 +687,14 @@ UTEST_BEGIN("lltl", darray)
         {
             UTEST_ASSERT(x.add(i));
         }
+        dump(x);
 
         // Reverse order
         for (int i=0, j=x.size()-1; i<j; ++i, --j)
         {
             UTEST_ASSERT(x.xswap(i, j));
         }
+        dump(x);
 
         for (int i=0; i<32; ++i)
         {

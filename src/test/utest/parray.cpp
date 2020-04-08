@@ -476,15 +476,236 @@ UTEST_BEGIN("lltl", parray)
         UTEST_ASSERT(x.size() == 9);
     }
 
+    void test_multiple_parray()
+    {
+        printf("Testing multiple operations on parray with another parray...\n");
+        int array[0x40];
+        for (int i=0, n=sizeof(array)/sizeof(int); i<n; ++i)
+            array[i] = i;
+        int *s = array;
+
+        lltl::parray<int> x, y;
+        int **pv, *vv[4];
+
+        // Append
+        vv[0] = s++; vv[1] = s++; vv[2] = s++; vv[3] = s++;
+        UTEST_ASSERT(y.set_n(4, vv));
+        UTEST_ASSERT(pv = x.append(y));
+        dump(x);
+        UTEST_ASSERT(x.index_of(*pv) == 0);
+
+        vv[0] = s++; vv[1] = s++; vv[2] = s++; vv[3] = s++;
+        UTEST_ASSERT(y.set_n(4, vv));
+        UTEST_ASSERT(pv = x.append(&y));
+        dump(x);
+        UTEST_ASSERT(x.index_of(*pv) == 4);
+
+        // Add
+        vv[0] = s++; vv[1] = s++;
+        UTEST_ASSERT(y.set_n(2, vv));
+        UTEST_ASSERT(pv = x.add(y));
+        dump(x);
+        UTEST_ASSERT(x.index_of(*pv) == 8);
+
+        vv[0] = s++; vv[1] = s++;
+        UTEST_ASSERT(y.set_n(2, vv));
+        UTEST_ASSERT(pv = x.add(&y));
+        dump(x);
+        UTEST_ASSERT(x.index_of(*pv) == 10);
+
+        // Push
+        vv[0] = s++; vv[1] = s++;
+        UTEST_ASSERT(y.set_n(2, vv));
+        UTEST_ASSERT(pv = x.push(y));
+        dump(x);
+        UTEST_ASSERT(x.index_of(*pv) == 12);
+
+        vv[0] = s++; vv[1] = s++;
+        UTEST_ASSERT(y.set_n(2, vv));
+        UTEST_ASSERT(pv = x.push(&y));
+        dump(x);
+        UTEST_ASSERT(x.index_of(*pv) == 14);
+
+        // Unshift
+        vv[0] = s++; vv[1] = s++; vv[2] = s++; vv[3] = s++;
+        UTEST_ASSERT(y.set_n(4, vv));
+        UTEST_ASSERT(pv = x.unshift(y));
+        dump(x);
+        UTEST_ASSERT(x.index_of(*pv) == 0);
+
+        vv[0] = s++; vv[1] = s++; vv[2] = s++; vv[3] = s++;
+        UTEST_ASSERT(y.set_n(4, vv));
+        UTEST_ASSERT(pv = x.unshift(&y));
+        dump(x);
+        UTEST_ASSERT(x.index_of(*pv) == 0);
+
+        // Prepend
+        vv[0] = s++; vv[1] = s++; vv[2] = s++; vv[3] = s++;
+        UTEST_ASSERT(y.set_n(4, vv));
+        UTEST_ASSERT(pv = x.prepend(y));
+        dump(x);
+        UTEST_ASSERT(x.index_of(*pv) == 0);
+
+        vv[0] = s++; vv[1] = s++; vv[2] = s++; vv[3] = s++;
+        UTEST_ASSERT(y.set_n(4, vv));
+        UTEST_ASSERT(pv = x.prepend(&y));
+        dump(x);
+        UTEST_ASSERT(x.index_of(*pv) == 0);
+
+        // Insert
+        vv[0] = s++; vv[1] = s++; vv[2] = s++; vv[3] = s++;
+        UTEST_ASSERT(y.set_n(4, vv));
+        UTEST_ASSERT(pv = x.insert(4, y));
+        dump(x);
+        UTEST_ASSERT(x.index_of(*pv) == 4);
+
+        vv[0] = s++; vv[1] = s++; vv[2] = s++; vv[3] = s++;
+        UTEST_ASSERT(y.set_n(4, vv));
+        UTEST_ASSERT(pv = x.insert(24, &y));
+        dump(x);
+        UTEST_ASSERT(x.index_of(*pv) == 24);
+
+        // Check items
+        static const int numbers[] = {
+            28, 29, 30, 31, 32, 33, 34, 35,
+            24, 25, 26, 27, 20, 21, 22, 23,
+            16, 17, 18, 19, 0, 1, 2, 3,
+            36, 37, 38, 39, 4, 5, 6, 7,
+            8, 9, 10, 11, 12, 13, 14, 15
+        };
+        printf("Check 1...\n");
+        check_parray(x, numbers, sizeof(numbers)/sizeof(int));
+
+        y.flush();
+        dump(x);
+
+        // Perform pop
+        UTEST_ASSERT(pv = x.pop(y));
+        UTEST_ASSERT(y.index_of(*pv) == 0);
+        dump(x);
+
+        UTEST_ASSERT(pv = x.pop(&y));
+        UTEST_ASSERT(y.index_of(*pv) == 1);
+        dump(x);
+
+        // Perform shift
+        UTEST_ASSERT(pv = x.shift(y));
+        UTEST_ASSERT(y.index_of(*pv) == 2);
+        dump(x);
+
+        UTEST_ASSERT(pv = x.shift(&y));
+        UTEST_ASSERT(y.index_of(*pv) == 3);
+        dump(x);
+
+        // Perform removal
+        UTEST_ASSERT(pv = x.remove(12, y));
+        UTEST_ASSERT(y.index_of(*pv) == 4);
+        dump(x);
+
+        UTEST_ASSERT(pv = x.remove(20, &y));
+        UTEST_ASSERT(y.index_of(*pv) == 5);
+        dump(x);
+
+        // Perform pointer removal
+        UTEST_ASSERT(pv = x.premove(x.get(16), y));
+        UTEST_ASSERT(y.index_of(*pv) == 6);
+        dump(x);
+
+        UTEST_ASSERT(pv = x.premove(x.get(28), &y));
+        UTEST_ASSERT(y.index_of(*pv) == 7);
+        dump(x);
+
+        // Perform multiple pop
+        UTEST_ASSERT(pv = x.pop_n(2, y));
+        UTEST_ASSERT(y.index_of(*pv) == 8);
+        dump(x);
+
+        UTEST_ASSERT(pv = x.pop_n(2, &y));
+        UTEST_ASSERT(y.index_of(*pv) == 10);
+        dump(x);
+
+        // Perform multiple shift
+        UTEST_ASSERT(pv = x.shift_n(2, y));
+        UTEST_ASSERT(y.index_of(*pv) == 12);
+        dump(x);
+
+        UTEST_ASSERT(pv = x.shift_n(2, &y));
+        UTEST_ASSERT(y.index_of(*pv) == 14);
+        dump(x);
+
+        // Perform multiple remove
+        UTEST_ASSERT(pv = x.remove_n(10, 2, y));
+        UTEST_ASSERT(y.index_of(*pv) == 16);
+        dump(x);
+
+        UTEST_ASSERT(pv = x.remove_n(12, 2, &y));
+        UTEST_ASSERT(y.index_of(*pv) == 18);
+        dump(x);
+
+        // Perform multiple remove
+        UTEST_ASSERT(pv = x.premove_n(x.get(1), 2, y));
+        UTEST_ASSERT(y.index_of(*pv) == 20);
+        dump(x);
+
+        UTEST_ASSERT(pv = x.premove_n(x.get(8), 2, &y));
+        UTEST_ASSERT(y.index_of(*pv) == 22);
+        dump(x);
+
+        // Perform multiple pointer-based remove
+
+        // Check items
+        static const int numbers2[] = {
+            15, 14, 28, 29,
+            22, 3, 19, 9,
+            12, 13, 10, 11,
+            30, 31, 32, 33,
+            17, 18, 2, 36,
+            35, 24, 0, 1
+        };
+        printf("Check 2...\n");
+        check_parray(y, numbers2, sizeof(numbers2)/sizeof(int));
+    }
+
+    void test_xswap()
+    {
+        printf("Testing xswap...\n");
+
+        int array[0x40];
+        for (int i=0, n=sizeof(array)/sizeof(int); i<n; ++i)
+            array[i] = i;
+        int *s = array;
+
+        lltl::parray<int> x;
+
+        // Initialize
+        for (int i=0; i<0x40; ++i)
+        {
+            UTEST_ASSERT(x.add(s++));
+        }
+        dump(x);
+
+        // Reverse order
+        for (int i=0, j=x.size()-1; i<j; ++i, --j)
+        {
+            UTEST_ASSERT(x.xswap(i, j));
+        }
+        dump(x);
+
+        for (int i=0; i<0x40; ++i)
+        {
+            int *pv = x.get(i);
+            UTEST_ASSERT(*pv == (0x3f-i));
+        }
+    }
+
     UTEST_MAIN
     {
         test_single();
         test_single_with_copy();
         test_multiple();
         test_multiple_with_copy();
-//        test_multiple_darray();
-//        test_xswap();
-//        test_long_xswap();
+        test_multiple_parray();
+        test_xswap();
     }
 
 UTEST_END
