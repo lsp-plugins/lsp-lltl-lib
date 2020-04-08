@@ -42,6 +42,7 @@ namespace lsp
                 ssize_t     index_of(const void *ptr);
 
                 uint8_t    *slice(size_t idx, size_t size);
+                uint8_t    *get_n(size_t idx, size_t size, void *dst);
 
                 uint8_t    *set(size_t n, const void *src);
                 uint8_t    *append(size_t n);
@@ -98,8 +99,9 @@ namespace lsp
                 public:
                     // Accessing elements (non-const)
                     inline T *get(size_t idx)                                       { return (idx < v.nItems) ? cast(&v.vItems[idx * v.nSizeOf]) : NULL; }
+                    inline T *get_n(size_t idx, size_t n, T *x)                     { return cast(v.get_n(idx, n, x));  }
                     inline T *uget(size_t idx)                                      { return cast(&v.vItems[idx * v.nSizeOf]);  }
-                    inline T *first()                                               { return (v.nItems > 0) ? cast(v.vItems) : NULL; }
+                    inline T *first()                                               { return cast(v.vItems); }
                     inline T *last()                                                { return (v.nItems > 0) ? cast(&v.vItems[(v.nItems - 1) * v.nSizeOf]) : NULL;   }
                     inline T *array()                                               { return cast(v.vItems); }
                     inline T *slice(size_t idx, size_t size)                        { return cast(v.slice(idx, size));  }
@@ -108,8 +110,9 @@ namespace lsp
                 public:
                     // Accessing elements (const)
                     inline const T *get(size_t idx) const                           { return (idx < v.nItems) ? ccast(&v.vItems[idx * v.nSizeOf]) : NULL; }
-                    inline const T *at(size_t idx) const                            { return ccast(&v.vItems[idx * v.nSizeOf]); }
-                    inline const T *first() const                                   { return (v.nItems > 0) ? ccast(v.vItems) : NULL; }
+                    inline T *get_n(size_t idx, size_t n, T *x) const               { return cast(v.get_n(idx, n, x));  }
+                    inline const T *uget(size_t idx) const                          { return ccast(&v.vItems[idx * v.nSizeOf]); }
+                    inline const T *first() const                                   { return ccast(v.vItems); }
                     inline const T *last() const                                    { return (v.nItems > 0) ? ccast(&v.vItems[(v.nItems - 1) * v.nSizeOf]) : NULL;  }
                     inline const T *array() const                                   { return ccast(v.vItems); }
                     inline const T *slice(size_t idx, size_t size) const            { return ccast(v.slice(idx, size));  }
@@ -175,6 +178,7 @@ namespace lsp
 
                 public:
                     // Multiple modifications with data copying
+                    inline T *set_n(size_t n, const T *x)                           { return cast(v.set(n, x));         }
                     inline T *append_n(size_t n, const T *x)                        { return cast(v.append(n, x));      }
                     inline T *add_n(size_t n, const T *x)                           { return cast(v.append(n, x));      }
                     inline T *push_n(size_t n, const T *x)                          { return cast(v.append(n, x));      }
@@ -198,14 +202,14 @@ namespace lsp
                     inline T *insert(size_t idx, const darray<T> *x)                { return cast(v.insert(idx, x->v.nItems, x->v.vItems));     }
 
                     inline T *pop(darray<T> *x)                                     { return cast(v.pop(1, &x->v));                             }
-                    inline T *shift(size_t idx, darray<T> *x)                       { return cast(v.iremove(0, 1, &x->v));                      }
+                    inline T *shift(darray<T> *x)                                   { return cast(v.iremove(0, 1, &x->v));                      }
                     inline T *remove(size_t idx, darray<T> *x)                      { return cast(v.iremove(idx, 1, &x->v));                    }
                     inline T *premove(const T *ptr, darray<T> *x)                   { return cast(v.premove(ptr, 1, &x->v));                    }
 
                     inline T *pop_n(size_t n, darray<T> *x)                         { return cast(v.pop(n, &x->v));                             }
                     inline T *shift_n(size_t n, darray<T> *x)                       { return cast(v.iremove(0, n, &x->v));                      }
                     inline T *remove_n(size_t idx, size_t n, darray<T> *x)          { return cast(v.iremove(idx, n, &x->v));                    }
-                    inline T *premove(const T *ptr, size_t n, darray<T> *x)         { return cast(v.premove(ptr, n, &x->v));                    }
+                    inline T *premove_n(const T *ptr, size_t n, darray<T> *x)       { return cast(v.premove(ptr, n, &x->v));                    }
 
                 public:
                     // Collection-based modifications (reference argument)
@@ -215,17 +219,17 @@ namespace lsp
                     inline T *push(const darray<T> &x)                              { return push(&x);                                          }
                     inline T *unshift(const darray<T> &x)                           { return prepend(&x);                                       }
                     inline T *prepend(const darray<T> &x)                           { return prepend(&x);                                       }
-                    inline T *insert(size_t idx, const darray<T> &x)                { return insert(&x);                                        }
+                    inline T *insert(size_t idx, const darray<T> &x)                { return insert(idx, &x);                                   }
 
                     inline T *pop(darray<T> &x)                                     { return pop(&x);                                           }
                     inline T *shift(darray<T> &x)                                   { return shift(&x);                                         }
                     inline T *remove(size_t idx, darray<T> &x)                      { return remove(idx, &x);                                   }
                     inline T *premove(const T *ptr, darray<T> &x)                   { return premove(ptr, &x);                                  }
 
-                    inline T *pop_n(size_t n, darray<T> &x)                         { return pop(n, &x);                                        }
+                    inline T *pop_n(size_t n, darray<T> &x)                         { return pop_n(n, &x);                                      }
                     inline T *shift_n(size_t n, darray<T> &x)                       { return shift_n(n, &x);                                    }
-                    inline T *remove_n(size_t idx, size_t n, darray<T> &x)          { return remove(idx, n, &x);                                }
-                    inline T *premove(const T *ptr, size_t n, darray<T> &x)         { return premove(ptr, n, &x);                               }
+                    inline T *remove_n(size_t idx, size_t n, darray<T> &x)          { return remove_n(idx, n, &x);                              }
+                    inline T *premove_n(const T *ptr, size_t n, darray<T> &x)       { return premove_n(ptr, n, &x);                             }
 
                 public:
                     // Operators

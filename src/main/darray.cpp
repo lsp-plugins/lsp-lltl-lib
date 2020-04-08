@@ -77,6 +77,20 @@ namespace lsp
             return (tail <= nItems) ? &vItems[idx * nSizeOf] : NULL;
         }
 
+        uint8_t *raw_darray::get_n(size_t idx, size_t size, void *dst)
+        {
+            uint8_t *res = static_cast<uint8_t *>(dst);
+            if (size <= 0)
+                return res;
+
+            size_t tail = idx + size;
+            if (tail > nItems)
+                return NULL;
+
+            ::memmove(res, &vItems[idx * nSizeOf], size * nSizeOf);
+            return res;
+        }
+
         bool raw_darray::xswap(size_t i1, size_t i2)
         {
             if ((i1 >= nItems) || (i2 >= nItems))
@@ -171,7 +185,7 @@ namespace lsp
             }
             uint8_t *res = &vItems[index * nSizeOf];
             if (index < nItems)
-                ::memmove(&res[n*nSizeOf], res, (nItems - index)*nSizeOf);
+                ::memmove(&res[n*nSizeOf], res, (nItems - index) * nSizeOf);
             nItems += n;
             return res;
         }
@@ -188,7 +202,7 @@ namespace lsp
             }
             uint8_t *res = &vItems[index * nSizeOf];
             if (index < nItems)
-                ::memmove(&res[n*nSizeOf], res, (nItems - index)*nSizeOf);
+                ::memmove(&res[n*nSizeOf], res, (nItems - index) * nSizeOf);
             ::memcpy(res, src, n * nSizeOf);
 
             nItems += n;
@@ -243,7 +257,7 @@ namespace lsp
                 return false;
 
             if (last < nItems)
-                ::memmove(src, &vItems[last * nSizeOf], nItems - last);
+                ::memmove(src, &vItems[last * nSizeOf], (nItems - last) * nSizeOf);
             nItems     -= n;
             return true;
         }
@@ -256,7 +270,7 @@ namespace lsp
             if (src < vItems) // Pointer before array
                 return NULL;
 
-            size_t off = src - vItems;
+            size_t off  = src - vItems;
             size_t cap  = nItems * nSizeOf;
 
             if ((off >= cap) || (off % nSizeOf))
@@ -287,7 +301,7 @@ namespace lsp
             if (res)
             {
                 if (last < nItems)
-                    ::memmove(src, &vItems[last], nItems - last);
+                    ::memmove(src, &vItems[last * nSizeOf], (nItems - last) * nSizeOf);
                 nItems     -= n;
             }
             return res;
@@ -363,7 +377,7 @@ namespace lsp
                 return NULL;
 
             size_t size     = nItems - n;
-            uint8_t *res    = cs->append(n, &vItems[size]);
+            uint8_t *res    = cs->append(n, &vItems[size * nSizeOf]);
             if (res)
                 nItems          = size;
 
