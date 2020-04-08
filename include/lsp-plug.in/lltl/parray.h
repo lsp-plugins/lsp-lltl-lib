@@ -51,6 +51,7 @@ namespace lsp
                 void      **insert(size_t index, size_t n, void **src);
 
                 void       *pop();
+                void      **pop(void **dst);
                 void      **pop(size_t n);
                 void      **pop(size_t n, void **dst);
                 void      **pop(size_t n, raw_parray *cs);
@@ -79,9 +80,10 @@ namespace lsp
                 private:
                     mutable raw_parray    v;
 
-                    inline static T *cast(void *ptr)                                { return static_cast<T *>(ptr);         }
-                    inline static T **pcast(void **ptr)                             { return reinterpret_cast<T **>(ptr);   }
-                    inline static const T *ccast(void *ptr)                         { return static_cast<const T *>(ptr);   }
+                    inline static T *cast(void *ptr)                                { return static_cast<T *>(ptr);             }
+                    inline static T **pcast(void **ptr)                             { return reinterpret_cast<T **>(ptr);       }
+                    inline static void **vcast(T **ptr)                             { return reinterpret_cast<void **>(ptr);    }
+                    inline static const T *ccast(void *ptr)                         { return static_cast<const T *>(ptr);       }
 
                 public:
                     explicit inline parray()
@@ -156,31 +158,17 @@ namespace lsp
 
                 public:
                     // Single modifications with data copying (pointer argument)
-                    inline T **append(const T *x)                                   { return pcast(v.append(x));            }
-                    inline T **add(const T *x)                                      { return pcast(v.append(x));            }
-                    inline T **push(const T *x)                                     { return pcast(v.append(x));            }
-                    inline T **unshift(const T *x)                                  { return pcast(v.insert(0, x));         }
-                    inline T **prepend(const T *x)                                  { return pcast(v.insert(0, x));         }
-                    inline T **insert(size_t idx, const T *x)                       { return pcast(v.insert(idx, x));       }
+                    inline T **append(T *x)                                         { return pcast(v.append(x));            }
+                    inline T **add(T *x)                                            { return pcast(v.append(x));            }
+                    inline T **push(T *x)                                           { return pcast(v.append(x));            }
+                    inline T **unshift(T *x)                                        { return pcast(v.insert(0, x));         }
+                    inline T **prepend(T *x)                                        { return pcast(v.insert(0, x));         }
+                    inline T **insert(size_t idx, T *x)                             { return pcast(v.insert(idx, x));       }
 
-                    inline T **pop(T *x)                                            { return pcast(v.pop(x));               }
-                    inline T **shift(T *x)                                          { return pcast(v.iremove(0, x));        }
-                    inline T **remove(size_t idx, T *x)                             { return pcast(v.iremove(idx, x));      }
-                    inline T **premove(const T *ptr, T *x)                          { return pcast(v.premove(ptr, x));      }
-
-                public:
-                    // Single modifications with data copying (reference argument)
-                    inline T **append(const T &x)                                   { return append(&x);                    }
-                    inline T **add(const T &x)                                      { return add(&x);                       }
-                    inline T **push(const T &x)                                     { return push(&x);                      }
-                    inline T **unshift(const T &x)                                  { return prepend(&x);                   }
-                    inline T **prepend(const T &x)                                  { return prepend(&x);                   }
-                    inline T **insert(size_t idx, const T &x)                       { return insert(idx, &x);               }
-
-                    inline T **pop(T &x)                                            { return pop(&x);                       }
-                    inline T **shift(T &x)                                          { return shift(&x);                     }
-                    inline T **remove(size_t idx, T &x)                             { return remove(idx, &x);               }
-                    inline T **premove(const T *ptr, T &x)                          { return premove(ptr, &x);              }
+                    inline T **pop(T **x)                                           { return pcast(v.pop(vcast(x)));               }
+                    inline T **shift(T **x)                                         { return pcast(v.iremove(0, 1, vcast(x)));     }
+                    inline T **remove(size_t idx, T **x)                            { return pcast(v.iremove(idx, 1, vcast(x)));   }
+                    inline T **premove(const T *ptr, T **x)                         { return pcast(v.premove(ptr, 1, vcast(x)));   }
 
                 public:
                     // Multiple modifications

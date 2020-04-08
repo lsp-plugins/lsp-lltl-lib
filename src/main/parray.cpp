@@ -237,6 +237,14 @@ namespace lsp
             return (nItems > 0) ? vItems[--nItems] : NULL;
         }
 
+        void **raw_parray::pop(void **dst)
+        {
+            if (nItems <= 0)
+                return NULL;
+            *dst = vItems[--nItems];
+            return dst;
+        }
+
         void **raw_parray::pop(size_t n)
         {
             return (nItems >= n) ? &vItems[nItems -= n] : NULL;
@@ -265,7 +273,7 @@ namespace lsp
 
         void *raw_parray::premove(const void *ptr)
         {
-            size_t idx = index_of(ptr);
+            ssize_t idx = index_of(ptr);
             if (idx < 0)
                 return NULL;
             size_t tail = idx + 1;
@@ -277,7 +285,7 @@ namespace lsp
 
         bool raw_parray::premove(const void *ptr, size_t n)
         {
-            size_t idx = index_of(ptr);
+            ssize_t idx = index_of(ptr);
             if (idx < 0)
                 return false;
             size_t tail = idx + n;
@@ -292,7 +300,7 @@ namespace lsp
 
         void **raw_parray::premove(const void *ptr, size_t n, void **dst)
         {
-            size_t idx = index_of(ptr);
+            ssize_t idx = index_of(ptr);
             if (idx < 0)
                 return NULL;
             size_t tail = idx + n;
@@ -308,7 +316,7 @@ namespace lsp
 
         void **raw_parray::premove(const void *ptr, size_t n, raw_parray *cs)
         {
-            size_t idx = index_of(ptr);
+            ssize_t idx = index_of(ptr);
             if (idx < 0)
                 return NULL;
             size_t tail = idx + n;
