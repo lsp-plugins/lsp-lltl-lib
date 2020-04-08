@@ -13,6 +13,8 @@
 #include <string.h>
 #include <sys/types.h>
 
+#include <lsp-plug.in/lltl/version.h>
+
 namespace lsp
 {
     namespace lltl
