@@ -592,6 +592,64 @@ UTEST_BEGIN("lltl", darray)
         check_darray(y, numbers2, sizeof(numbers2)/sizeof(int));
     }
 
+    void test_xswap()
+    {
+        lltl::darray<int> x;
+        printf("Testing xswap...\n");
+
+        // Initialize
+        for (int i=0; i<32; ++i)
+        {
+            UTEST_ASSERT(x.add(i));
+        }
+
+        // Reverse order
+        for (int i=0, j=x.size()-1; i<j; ++i, --j)
+        {
+            UTEST_ASSERT(x.xswap(i, j));
+        }
+
+        for (int i=0; i<32; ++i)
+        {
+            int *pv = x.get(i);
+            UTEST_ASSERT(*pv == (31-i));
+        }
+    }
+
+    void test_long_xswap()
+    {
+        printf("Testing long xswap...\n");
+
+        typedef struct large_struct_t
+        {
+            int data[0x1234];
+        } large_struct_t;
+
+        large_struct_t *a = new large_struct_t;
+        large_struct_t *b = new large_struct_t;
+
+        lltl::darray<large_struct_t> x;
+
+        // Initialize
+        for (size_t i=0; i<sizeof(large_struct_t::data)/sizeof(int); ++i)
+        {
+            a->data[i] = 0x55aa0000 | i;
+            b->data[i] = (i << 16) | 0xcc33;
+        }
+
+        UTEST_ASSERT(x.add(a));
+        UTEST_ASSERT(x.add(b));
+
+        UTEST_ASSERT(!::memcmp(x.get(0), a, sizeof(large_struct_t)));
+        UTEST_ASSERT(!::memcmp(x.get(1), b, sizeof(large_struct_t)));
+
+        // Swap elements
+        UTEST_ASSERT(x.xswap(0, 1));
+
+        UTEST_ASSERT(!::memcmp(x.get(0), b, sizeof(large_struct_t)));
+        UTEST_ASSERT(!::memcmp(x.get(1), a, sizeof(large_struct_t)));
+    }
+
     UTEST_MAIN
     {
         test_single();
@@ -599,6 +657,8 @@ UTEST_BEGIN("lltl", darray)
         test_multiple();
         test_multiple_with_copy();
         test_multiple_darray();
+        test_xswap();
+        test_long_xswap();
     }
 
 UTEST_END
