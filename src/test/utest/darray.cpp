@@ -10,6 +10,18 @@
 
 UTEST_BEGIN("lltl", darray)
 
+    typedef struct large_struct_t
+    {
+        int data[0x1234];
+    } large_struct_t;
+
+    void dump(lltl::darray<int> &x)
+    {
+        for (int i=0, n=x.size(); i<n; ++i)
+            printf("%d ", *x.get(i));
+        printf("\n");
+    }
+
     void check_darray(lltl::darray<int> &x, const int *numbers, int n)
     {
         int *pv;
@@ -18,7 +30,7 @@ UTEST_BEGIN("lltl", darray)
         UTEST_ASSERT(x.capacity() >= size_t(n));
         for (int i=0; i<n; ++i)
         {
-            UTEST_ASSERT_MSG(pv = x.get(i), "Failed at index %d", i);
+            UTEST_ASSERT_MSG(pv = x.get(i), "Failed get at index %d", i);
             UTEST_ASSERT_MSG(*pv == numbers[i], "Failed at index %d: got %d, expected %d", i, *pv, numbers[i]);
         }
         UTEST_ASSERT(x.get(n) == NULL);
@@ -43,19 +55,32 @@ UTEST_BEGIN("lltl", darray)
         // Add items
         UTEST_ASSERT(pv = x.add());
         *pv = 1;
+        dump(x);
+
         UTEST_ASSERT(pv = x.append());
         *pv = 2;
+        dump(x);
+
         UTEST_ASSERT(!(pv = x.insert(10)));
         UTEST_ASSERT(pv = x.insert(1));
         *pv = 3;
+        dump(x);
+
         UTEST_ASSERT(pv = x.insert(0));
         *pv = 4;
+        dump(x);
+
         UTEST_ASSERT(pv = x.push());
         *pv = 5;
+        dump(x);
+
         UTEST_ASSERT(pv = x.unshift());
         *pv = 6;
+        dump(x);
+
         UTEST_ASSERT(pv = x.prepend());
         *pv = 7;
+        dump(x);
 
         // Check items
         static const int numbers[] = { 7, 6, 4, 1, 3, 2, 5 };
@@ -64,23 +89,34 @@ UTEST_BEGIN("lltl", darray)
         // Remove items
         UTEST_ASSERT(pv = x.pop());
         UTEST_ASSERT(*pv == 5);
+        dump(x);
+
         UTEST_ASSERT(pv = x.last());
         UTEST_ASSERT(*pv == 2);
+        dump(x);
+
         UTEST_ASSERT(x.shift());
         UTEST_ASSERT(pv = x.first());
         UTEST_ASSERT(*pv == 6);
+        dump(x);
+
         UTEST_ASSERT(!x.remove(5));
         UTEST_ASSERT(pv = x.get(2));
         UTEST_ASSERT(*pv == 1);
+        dump(x);
+
         UTEST_ASSERT(x.remove(2));
         UTEST_ASSERT(pv = x.get(2));
         UTEST_ASSERT(*pv == 3);
+        dump(x);
+
         UTEST_ASSERT(!x.premove(NULL));
         UTEST_ASSERT(x.get(x.size()) == NULL);
         UTEST_ASSERT(!x.premove(x.uget(x.size())));
         UTEST_ASSERT(x.premove(pv));
         UTEST_ASSERT(pv = x.get(2));
         UTEST_ASSERT(*pv == 2);
+        dump(x);
 
         // Check size
         UTEST_ASSERT(x.size() == 3);
@@ -110,9 +146,13 @@ UTEST_BEGIN("lltl", darray)
         // Add items
         v = 0;
         UTEST_ASSERT(x.add(&v));
+        dump(x);
         UTEST_ASSERT(x.add(1));
+        dump(x);
         UTEST_ASSERT(x.add(2));
+        dump(x);
         UTEST_ASSERT(x.add(3));
+        dump(x);
         UTEST_ASSERT(x.size() == 4);
         UTEST_ASSERT(x.capacity() >= 4);
 
@@ -123,10 +163,14 @@ UTEST_BEGIN("lltl", darray)
         UTEST_ASSERT(x.capacity() >= 4);
         v = 4;
         UTEST_ASSERT(x.insert(4, &v));
+        dump(x);
         UTEST_ASSERT(x.insert(5, 5));
+        dump(x);
         v = 6;
         UTEST_ASSERT(x.insert(0, &v));
+        dump(x);
         UTEST_ASSERT(x.insert(1, 7));
+        dump(x);
         UTEST_ASSERT(x.size() == 8);
         UTEST_ASSERT(x.capacity() >= 8);
 
@@ -140,21 +184,27 @@ UTEST_BEGIN("lltl", darray)
         // Push items
         v = 11;
         UTEST_ASSERT(x.push(&v));
+        dump(x);
         UTEST_ASSERT(x.push(12));
+        dump(x);
         UTEST_ASSERT(x.size() == 12);
         UTEST_ASSERT(x.capacity() >= 12);
 
         // Unshift items
         v = 13;
         UTEST_ASSERT(x.unshift(&v));
+        dump(x);
         UTEST_ASSERT(x.unshift(14));
+        dump(x);
         UTEST_ASSERT(x.size() == 14);
         UTEST_ASSERT(x.capacity() >= 14);
 
         // prepend items
         v = 15;
         UTEST_ASSERT(x.prepend(&v));
+        dump(x);
         UTEST_ASSERT(x.prepend(16));
+        dump(x);
         UTEST_ASSERT(x.size() == 16);
         UTEST_ASSERT(x.capacity() >= 16);
 
@@ -165,44 +215,52 @@ UTEST_BEGIN("lltl", darray)
         // Pop element
         pv = NULL;
         UTEST_ASSERT(pv = x.pop(&v));
+        dump(x);
         UTEST_ASSERT(v == 12);
         UTEST_ASSERT(pv == &v);
 
         pv = NULL;
         UTEST_ASSERT(pv = x.pop(v));
+        dump(x);
         UTEST_ASSERT(v == 11);
         UTEST_ASSERT(pv == &v);
 
         // Shift element
         pv = NULL;
         UTEST_ASSERT(pv = x.shift(&v));
+        dump(x);
         UTEST_ASSERT(v == 16);
         UTEST_ASSERT(pv == &v);
 
         pv = NULL;
         UTEST_ASSERT(pv = x.shift(v));
+        dump(x);
         UTEST_ASSERT(v == 15);
         UTEST_ASSERT(pv == &v);
 
         // Remove element
         pv = NULL;
         UTEST_ASSERT(pv = x.remove(6, &v));
+        dump(x);
         UTEST_ASSERT(v == 2);
         UTEST_ASSERT(pv == &v);
 
         pv = NULL;
         UTEST_ASSERT(pv = x.remove(1, v));
+        dump(x);
         UTEST_ASSERT(v == 13);
         UTEST_ASSERT(pv == &v);
 
         // Remove pointer
         pv = NULL;
         UTEST_ASSERT(pv = x.premove(x.get(5), &v));
+        dump(x);
         UTEST_ASSERT(v == 3);
         UTEST_ASSERT(pv == &v);
 
         pv = NULL;
         UTEST_ASSERT(pv = x.premove(x.get(2), v));
+        dump(x);
         UTEST_ASSERT(v == 7);
         UTEST_ASSERT(pv == &v);
 
@@ -245,31 +303,37 @@ UTEST_BEGIN("lltl", darray)
         UTEST_ASSERT(pv = x.append_n(2));
         UTEST_ASSERT(x.index_of(pv) == 0);
         pv[0] = 0; pv[1] = 1;
+        dump(x);
 
         // Add items
         UTEST_ASSERT(pv = x.add_n(2));
         UTEST_ASSERT(x.index_of(pv) == 2);
         pv[0] = 2; pv[1] = 3;
+        dump(x);
 
         // Push items
         UTEST_ASSERT(pv = x.push_n(3));
         UTEST_ASSERT(x.index_of(pv) == 4);
         pv[0] = 4; pv[1] = 5; pv[2] = 6;
+        dump(x);
 
         // Unshift items
         UTEST_ASSERT(pv = x.unshift_n(3));
         UTEST_ASSERT(x.index_of(pv) == 0);
         pv[0] = 7; pv[1] = 8; pv[2] = 9;
+        dump(x);
 
         // Prepend items
         UTEST_ASSERT(pv = x.prepend_n(2));
         UTEST_ASSERT(x.index_of(pv) == 0);
         pv[0] = 10; pv[1] = 11;
+        dump(x);
 
         // Insert items
         UTEST_ASSERT(pv = x.insert_n(4, 4));
         UTEST_ASSERT(x.index_of(pv) == 4);
         pv[0] = 12; pv[1] = 13; pv[2] = 14; pv[3] = 15;
+        dump(x);
 
         // Check items
         static const int numbers[] = { 10, 11, 7, 8, 12, 13, 14, 15, 9, 0, 1, 2, 3, 4, 5, 6 };
@@ -278,6 +342,7 @@ UTEST_BEGIN("lltl", darray)
         // Pop items
         UTEST_ASSERT(!x.pop_n(17));
         UTEST_ASSERT(pv = x.pop_n(4));
+        dump(x);
         UTEST_ASSERT(pv[0] == 3);
         UTEST_ASSERT(pv[1] == 4);
         UTEST_ASSERT(pv[2] == 5);
@@ -286,6 +351,7 @@ UTEST_BEGIN("lltl", darray)
         // Shift items
         UTEST_ASSERT(!x.shift_n(13));
         UTEST_ASSERT(x.shift_n(4));
+        dump(x);
         UTEST_ASSERT(pv = x.first());
         UTEST_ASSERT(*pv == 12);
 
@@ -293,12 +359,14 @@ UTEST_BEGIN("lltl", darray)
         UTEST_ASSERT(!x.remove_n(8, 1));
         UTEST_ASSERT(!x.remove_n(0, 9));
         UTEST_ASSERT(x.remove_n(2, 2));
+        dump(x);
         UTEST_ASSERT(pv = x.get(2));
         UTEST_ASSERT(*pv == 9);
 
         // Remove pointer
         UTEST_ASSERT(!x.premove_n(x.get(1), 6));
         UTEST_ASSERT(x.premove_n(x.get(1), 3));
+        dump(x);
         UTEST_ASSERT(pv = x.get(1));
         UTEST_ASSERT(*pv == 1);
 
@@ -327,36 +395,43 @@ UTEST_BEGIN("lltl", darray)
         // Set values
         vv[0] = 0; vv[1] = 1; vv[2] = 2; vv[3] = 3;
         UTEST_ASSERT(pv = x.set_n(4,  vv));
+        dump(x);
         UTEST_ASSERT(x.index_of(pv) == 0);
 
         // Append values
         vv[0] = 4; vv[1] = 5;
         UTEST_ASSERT(pv = x.append_n(2,  vv));
+        dump(x);
         UTEST_ASSERT(x.index_of(pv) == 4);
 
         // Add values
         vv[0] = 6; vv[1] = 7; vv[2] = 8;
         UTEST_ASSERT(pv = x.append_n(3,  vv));
+        dump(x);
         UTEST_ASSERT(x.index_of(pv) == 6);
 
         // Push values
         vv[0] = 9; vv[1] = 10; vv[2] = 11;
         UTEST_ASSERT(pv = x.push_n(3,  vv));
+        dump(x);
         UTEST_ASSERT(x.index_of(pv) == 9);
 
         // Unshift values
         vv[0] = 12; vv[1] = 13;
         UTEST_ASSERT(pv = x.unshift_n(2,  vv));
+        dump(x);
         UTEST_ASSERT(x.index_of(pv) == 0);
 
         // Prepend values
         vv[0] = 14; vv[1] = 15;
         UTEST_ASSERT(pv = x.prepend_n(2,  vv));
+        dump(x);
         UTEST_ASSERT(x.index_of(pv) == 0);
 
         // Insert values
         vv[0] = 16; vv[1] = 17; vv[2] = 18; vv[3] = 19;
         UTEST_ASSERT(pv = x.insert_n(12,  4, vv));
+        dump(x);
         UTEST_ASSERT(x.index_of(pv) == 12);
 
         // Check items
@@ -365,6 +440,7 @@ UTEST_BEGIN("lltl", darray)
 
         // Pop items
         UTEST_ASSERT(pv = x.pop_n(4,  vv));
+        dump(x);
         UTEST_ASSERT(x.index_of(pv) < 0);
         UTEST_ASSERT(pv == vv);
         UTEST_ASSERT(vv[0] == 8)
@@ -375,6 +451,7 @@ UTEST_BEGIN("lltl", darray)
 
         // Get items
         UTEST_ASSERT(pv = x.get_n(10, 2, vv));
+        dump(x);
         UTEST_ASSERT(x.index_of(pv) < 0);
         UTEST_ASSERT(pv == vv);
         UTEST_ASSERT(vv[0] == 6)
@@ -383,6 +460,7 @@ UTEST_BEGIN("lltl", darray)
 
         // Shift items
         UTEST_ASSERT(pv = x.shift_n(3,  vv));
+        dump(x);
         UTEST_ASSERT(x.index_of(pv) < 0);
         UTEST_ASSERT(pv == vv);
         UTEST_ASSERT(vv[0] == 14)
@@ -392,6 +470,7 @@ UTEST_BEGIN("lltl", darray)
 
         // Remove items
         UTEST_ASSERT(pv = x.remove_n(8, 2, vv));
+        dump(x);
         UTEST_ASSERT(x.index_of(pv) < 0);
         UTEST_ASSERT(pv == vv);
         UTEST_ASSERT(vv[0] == 7)
@@ -400,6 +479,7 @@ UTEST_BEGIN("lltl", darray)
 
         // Remove pointer
         UTEST_ASSERT(pv = x.premove_n(x.get(2), 2, vv));
+        dump(x);
         UTEST_ASSERT(x.index_of(pv) < 0);
         UTEST_ASSERT(pv == vv);
         UTEST_ASSERT(vv[0] == 1)
@@ -408,13 +488,6 @@ UTEST_BEGIN("lltl", darray)
 
         // Check final size
         UTEST_ASSERT(x.size() == 9);
-    }
-
-    void dump(lltl::darray<int> &x)
-    {
-        for (int i=0, n=x.size(); i<n; ++i)
-            printf("%d ", *x.get(i));
-        printf("\n");
     }
 
     void test_multiple_darray()
@@ -429,66 +502,78 @@ UTEST_BEGIN("lltl", darray)
         vv[0] = 0; vv[1] = 1; vv[2] = 2; vv[3] = 3;
         UTEST_ASSERT(y.set_n(4, vv));
         UTEST_ASSERT(pv = x.append(y));
+        dump(x);
         UTEST_ASSERT(x.index_of(pv) == 0);
 
         vv[0] = 4; vv[1] = 5; vv[2] = 6; vv[3] = 7;
         UTEST_ASSERT(y.set_n(4, vv));
         UTEST_ASSERT(pv = x.append(&y));
+        dump(x);
         UTEST_ASSERT(x.index_of(pv) == 4);
 
         // Add
         vv[0] = 8; vv[1] = 9;
         UTEST_ASSERT(y.set_n(2, vv));
         UTEST_ASSERT(pv = x.add(y));
+        dump(x);
         UTEST_ASSERT(x.index_of(pv) == 8);
 
         vv[0] = 10; vv[1] = 11;
         UTEST_ASSERT(y.set_n(2, vv));
         UTEST_ASSERT(pv = x.add(&y));
+        dump(x);
         UTEST_ASSERT(x.index_of(pv) == 10);
 
         // Push
         vv[0] = 12; vv[1] = 13;
         UTEST_ASSERT(y.set_n(2, vv));
         UTEST_ASSERT(pv = x.push(y));
+        dump(x);
         UTEST_ASSERT(x.index_of(pv) == 12);
 
         vv[0] = 14; vv[1] = 15;
         UTEST_ASSERT(y.set_n(2, vv));
         UTEST_ASSERT(pv = x.push(&y));
+        dump(x);
         UTEST_ASSERT(x.index_of(pv) == 14);
 
         // Unshift
         vv[0] = 16; vv[1] = 17; vv[2] = 18; vv[3] = 19;
         UTEST_ASSERT(y.set_n(4, vv));
         UTEST_ASSERT(pv = x.unshift(y));
+        dump(x);
         UTEST_ASSERT(x.index_of(pv) == 0);
 
         vv[0] = 20; vv[1] = 21; vv[2] = 22; vv[3] = 23;
         UTEST_ASSERT(y.set_n(4, vv));
         UTEST_ASSERT(pv = x.unshift(&y));
+        dump(x);
         UTEST_ASSERT(x.index_of(pv) == 0);
 
         // Prepend
         vv[0] = 24; vv[1] = 25; vv[2] = 26; vv[3] = 27;
         UTEST_ASSERT(y.set_n(4, vv));
         UTEST_ASSERT(pv = x.prepend(y));
+        dump(x);
         UTEST_ASSERT(x.index_of(pv) == 0);
 
         vv[0] = 28; vv[1] = 29; vv[2] = 30; vv[3] = 31;
         UTEST_ASSERT(y.set_n(4, vv));
         UTEST_ASSERT(pv = x.prepend(&y));
+        dump(x);
         UTEST_ASSERT(x.index_of(pv) == 0);
 
         // Insert
         vv[0] = 32; vv[1] = 33; vv[2] = 34; vv[3] = 35;
         UTEST_ASSERT(y.set_n(4, vv));
         UTEST_ASSERT(pv = x.insert(4, y));
+        dump(x);
         UTEST_ASSERT(x.index_of(pv) == 4);
 
         vv[0] = 36; vv[1] = 37; vv[2] = 38; vv[3] = 39;
         UTEST_ASSERT(y.set_n(4, vv));
         UTEST_ASSERT(pv = x.insert(24, &y));
+        dump(x);
         UTEST_ASSERT(x.index_of(pv) == 24);
 
         // Check items
@@ -619,11 +704,6 @@ UTEST_BEGIN("lltl", darray)
     void test_long_xswap()
     {
         printf("Testing long xswap...\n");
-
-        typedef struct large_struct_t
-        {
-            int data[0x1234];
-        } large_struct_t;
 
         large_struct_t *a = new large_struct_t;
         large_struct_t *b = new large_struct_t;

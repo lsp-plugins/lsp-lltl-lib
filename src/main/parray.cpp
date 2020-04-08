@@ -263,16 +263,16 @@ namespace lsp
             return res;
         }
 
-        bool raw_parray::premove(const void *ptr)
+        void *raw_parray::premove(const void *ptr)
         {
             size_t idx = index_of(ptr);
             if (idx < 0)
-                return false;
+                return NULL;
             size_t tail = idx + 1;
             if (tail < nItems)
                 ::memmove(&vItems[idx], &vItems[tail], (nItems - tail) * sizeof(void *));
             nItems     -= 1;
-            return true;
+            return const_cast<void *>(ptr);
         }
 
         bool raw_parray::premove(const void *ptr, size_t n)

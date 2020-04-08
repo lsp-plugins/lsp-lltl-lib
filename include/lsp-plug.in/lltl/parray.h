@@ -55,7 +55,7 @@ namespace lsp
                 void      **pop(size_t n, void **dst);
                 void      **pop(size_t n, raw_parray *cs);
 
-                bool        premove(const void *ptr);
+                void       *premove(const void *ptr);
                 bool        premove(const void *ptr, size_t n);
                 void      **premove(const void *ptr, size_t n, void **dst);
                 void      **premove(const void *ptr, size_t n, raw_parray *cs);
@@ -80,7 +80,7 @@ namespace lsp
                     mutable raw_parray    v;
 
                     inline static T *cast(void *ptr)                                { return static_cast<T *>(ptr);         }
-                    inline static T **pcast(void **ptr)                             { return static_cast<T **>(ptr);        }
+                    inline static T **pcast(void **ptr)                             { return reinterpret_cast<T **>(ptr);   }
                     inline static const T *ccast(void *ptr)                         { return static_cast<const T *>(ptr);   }
 
                 public:
@@ -111,11 +111,13 @@ namespace lsp
                 public:
                     // Accessing elements (non-const)
                     inline bool test(size_t idx) const                              { return idx < v.nItems;                }
-                    inline T *get(size_t idx)                                       { return (idx < v.nItems) ? cast(v.vItems[idx]) : NULL; }
+                    inline T *get(size_t idx)                                       { return (idx < v.nItems) ? cast(v.vItems[idx]) : NULL;         }
                     inline T **get_n(size_t idx, size_t n, T **x)                   { return pcast(v.get_n(idx, n, x));     }
+                    inline T **pget(size_t idx)                                     { return (idx < v.nItems) ? pcast(&v.vItems[idx]) : NULL;       }
                     inline T *uget(size_t idx)                                      { return cast(v.vItems[idx]);           }
+                    inline T *upget(size_t idx)                                     { return pcast(&v.vItems[idx]);         }
                     inline T *first()                                               { return (v.nItems > 0) ? cast(v.vItems[0]) : NULL; }
-                    inline T *last()                                                { return (v.nItems > 0) ? cast(v.vItems[v.nItems - 1]) : NULL;   }
+                    inline T *last()                                                { return (v.nItems > 0) ? cast(v.vItems[v.nItems - 1]) : NULL;  }
                     inline T **array()                                              { return pcast(v.vItems);               }
                     inline T **slice(size_t idx, size_t size)                       { return pcast(v.slice(idx, size));     }
                     inline ssize_t index_of(const T *p) const                       { return v.index_of(p);                 }
@@ -126,7 +128,7 @@ namespace lsp
                     inline T **get_n(size_t idx, size_t n, T **x) const             { return pcast(v.get_n(idx, n, x));  }
                     inline const T *uget(size_t idx) const                          { return cast(v.vItems[idx]);       }
                     inline const T *first() const                                   { return (v.nItems > 0) ? cast(v.vItems[0]) : NULL; }
-                    inline const T *last() const                                    { return (v.nItems > 0) ? cast(v.vItems[v.nItems - 1]) : NULL;   }
+                    inline const T *last() const                                    { return (v.nItems > 0) ? cast(v.vItems[v.nItems - 1]) : NULL;  }
                     inline const T *array() const                                   { return ccast(v.vItems); }
                     inline const T **slice(size_t idx, size_t size) const           { return pcast(v.slice(idx, size)); }
 
@@ -141,8 +143,8 @@ namespace lsp
 
                     inline T *pop()                                                 { return cast(v.pop());                 }
                     inline T *shift()                                               { return cast(v.iremove(0));            }
-                    inline bool remove(size_t idx)                                  { return v.iremove(idx, 1);             }
-                    inline bool premove(const T *ptr)                               { return v.premove(ptr, 1);             }
+                    inline T *remove(size_t idx)                                    { return cast(v.iremove(idx));          }
+                    inline T *premove(const T *ptr)                                 { return cast(v.premove(ptr));          }
 
                     inline bool xswap(size_t i1, size_t i2)                         { return v.xswap(i1, i2);               }
                     inline void uswap(size_t i1, size_t i2)
