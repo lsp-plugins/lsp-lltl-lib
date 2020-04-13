@@ -103,6 +103,15 @@ namespace lsp
                     inline bool reserve(size_t capacity)                            { return v.grow(capacity);          }
                     inline void swap(darray<T> &src)                                { v.swap(&src.v);                   }
                     inline void swap(darray<T> *src)                                { v.swap(&src->v);                  }
+                    inline T   *release()
+                    {
+                        T *ptr          = cast(v.vItems);
+                        v.nItems        = 0;
+                        v.vItems        = NULL;
+                        v.nCapacity     = 0;
+                        v.nSizeOf       = sizeof(T);
+                        return ptr;
+                    }
 
                 public:
                     // Accessing elements (non-const)

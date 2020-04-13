@@ -111,6 +111,14 @@ namespace lsp
                     inline bool reserve(size_t capacity)                            { return v.grow(capacity);              }
                     inline void swap(parray<T> &src)                                { v.swap(&src.v);                       }
                     inline void swap(parray<T> *src)                                { v.swap(&src->v);                      }
+                    inline T **release()
+                    {
+                        T **ptr         = pcast(v.vItems);
+                        v.nItems        = 0;
+                        v.vItems        = NULL;
+                        v.nCapacity     = 0;
+                        return ptr;
+                    }
 
                 public:
                     // Accessing elements (non-const)
