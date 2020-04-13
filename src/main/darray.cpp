@@ -123,8 +123,8 @@ namespace lsp
 
         uint8_t *raw_darray::append(size_t n)
         {
-			size_t count= nonzero(nItems, n);
-            size_t size = nItems + count;
+			size_t count    = nonzero(nItems, n);
+            size_t size     = nItems + count;
             if (size > nCapacity)
             {
                 size_t dn = nCapacity + count;
@@ -133,14 +133,14 @@ namespace lsp
             }
 
             uint8_t *ptr    = &vItems[nItems * nSizeOf];
-            nItems          = size;
+            nItems         += n;
             return ptr;
         }
 
         uint8_t *raw_darray::append(size_t n, const void *src)
         {
-            size_t count= nonzero(nItems, n);
-            size_t size = nItems + count;
+            size_t count    = nonzero(nItems, n);
+            size_t size     = nItems + count;
             if (size > nCapacity)
             {
                 size_t dn = nCapacity + count;
@@ -150,20 +150,21 @@ namespace lsp
 
             uint8_t *ptr    = &vItems[nItems * nSizeOf];
             ::memcpy(ptr, src, n * nSizeOf);
-            nItems          = size;
+            nItems         += n;
             return ptr;
         }
 
         uint8_t *raw_darray::set(size_t n, const void *src)
         {
-            if (n > nCapacity)
+            size_t count    = (n > 0) ? n : 1;
+            if (count > nCapacity)
             {
-                if (!grow(n))
+                if (!grow(count))
                     return NULL;
             }
-            else if (n < (nCapacity >> 1))
+            else if (count < (nCapacity >> 1))
             {
-                if (!truncate(n))
+                if (!truncate(count))
                     return NULL;
             }
 
@@ -177,18 +178,18 @@ namespace lsp
             if ((index < 0) || (index > nItems))
                 return NULL;
 
-            size_t count= nonzero(nItems, n);
-            size_t size = nItems + count;
+            size_t count    = nonzero(nItems, n);
+            size_t size     = nItems + count;
             if (size > nCapacity)
             {
                 size_t dn = nCapacity + count;
                 if (!grow(dn + (dn >> 1)))
                     return NULL;
             }
-            uint8_t *res = &vItems[index * nSizeOf];
+            uint8_t *res    = &vItems[index * nSizeOf];
             if (index < nItems)
                 ::memmove(&res[n*nSizeOf], res, (nItems - index) * nSizeOf);
-            nItems += n;
+            nItems         += n;
             return res;
         }
 
@@ -197,20 +198,20 @@ namespace lsp
             if ((index < 0) || (index > nItems))
                 return NULL;
 
-            size_t count= nonzero(nItems, n);
-            size_t size = nItems + count;
+            size_t count    = nonzero(nItems, n);
+            size_t size     = nItems + count;
             if (size > nCapacity)
             {
                 size_t dn = nCapacity + count;
                 if (!grow(dn + (dn >> 1)))
                     return NULL;
             }
-            uint8_t *res = &vItems[index * nSizeOf];
+            uint8_t *res    = &vItems[index * nSizeOf];
             if (index < nItems)
                 ::memmove(&res[n*nSizeOf], res, (nItems - index) * nSizeOf);
             ::memcpy(res, src, n * nSizeOf);
 
-            nItems += n;
+            nItems         += n;
             return res;
         }
 
