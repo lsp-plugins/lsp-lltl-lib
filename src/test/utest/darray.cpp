@@ -400,7 +400,7 @@ UTEST_BEGIN("lltl", darray)
 
         // Append values
         vv[0] = 4; vv[1] = 5;
-        UTEST_ASSERT(pv = x.append_n(2,  vv));
+        UTEST_ASSERT(pv = x.append_n(2, vv));
         dump(x);
         UTEST_ASSERT(x.index_of(pv) == 4);
 

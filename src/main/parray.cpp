@@ -12,6 +12,8 @@ namespace lsp
 {
     namespace lltl
     {
+        inline size_t nonzero(size_t count, size_t n) { return ((count + n) > 0) ? n : 1; }
+
         void raw_parray::init()
         {
             nItems      = 0;
@@ -140,10 +142,11 @@ namespace lsp
 
         void **raw_parray::append(size_t n)
         {
-            size_t size = nItems + n;
+            size_t count = nonzero(nItems, n);
+            size_t size  = nItems + count;
             if (size > nCapacity)
             {
-                size_t dn = nCapacity + n;
+                size_t dn = nCapacity + count;
                 if (!grow(dn + (dn >> 1)))
                     return NULL;
             }
@@ -171,10 +174,11 @@ namespace lsp
 
         void **raw_parray::append(size_t n, void **src)
         {
-            size_t size = nItems + n;
+            size_t count = nonzero(nItems, n);
+            size_t size = nItems + count;
             if (size > nCapacity)
             {
-                size_t dn = nCapacity + n;
+                size_t dn = nCapacity + count;
                 if (!grow(dn + (dn >> 1)))
                     return NULL;
             }
@@ -189,9 +193,12 @@ namespace lsp
         {
             if ((index < 0) || (index > nItems))
                 return NULL;
-            if ((nItems + n) > nCapacity)
+
+            size_t count = nonzero(nItems, n);
+            size_t size = nItems + count;
+            if (size > nCapacity)
             {
-                size_t dn = nCapacity + n;
+                size_t dn = nCapacity + count;
                 if (!grow(dn + (dn >> 1)))
                     return NULL;
             }
@@ -226,9 +233,12 @@ namespace lsp
         {
             if ((index < 0) || (index > nItems))
                 return NULL;
-            if ((nItems + n) > nCapacity)
+
+            size_t count = nonzero(nItems, n);
+            size_t size = nItems + count;
+            if (size > nCapacity)
             {
-                size_t dn = nCapacity + n;
+                size_t dn = nCapacity + count;
                 if (!grow(dn + (dn >> 1)))
                     return NULL;
             }
