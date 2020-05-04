@@ -43,6 +43,7 @@ namespace lsp
                 void      **get_n(size_t idx, size_t size, void **dst);
 
                 void      **set(size_t n, void **src);
+                void      **iset(size_t idx, void **src, size_t n);
                 void      **append(size_t n);
                 void      **append(void *ptr);
                 void      **append(size_t n, void **src);
@@ -175,6 +176,7 @@ namespace lsp
                     inline T **unshift(T *x)                                        { return pcast(v.insert(0, x));         }
                     inline T **prepend(T *x)                                        { return pcast(v.insert(0, x));         }
                     inline T **insert(size_t idx, T *x)                             { return pcast(v.insert(idx, x));       }
+                    inline T **set(size_t idx, T *x)                                { return pcast(v.iset(idx, reinterpret_cast<void **>(&x), 1));   }
 
                     inline T **pop(T **x)                                           { return pcast(v.pop(vcast(x)));               }
                     inline T **shift(T **x)                                         { return pcast(v.iremove(0, 1, vcast(x)));     }

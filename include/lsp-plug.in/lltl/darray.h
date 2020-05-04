@@ -45,6 +45,7 @@ namespace lsp
                 uint8_t    *get_n(size_t idx, size_t size, void *dst);
 
                 uint8_t    *set(size_t n, const void *src);
+                uint8_t    *iset(size_t index, const void *src, size_t n);
                 uint8_t    *append(size_t n);
                 uint8_t    *append(size_t n, const void *src);
                 uint8_t    *insert(size_t index, size_t n);
@@ -142,6 +143,8 @@ namespace lsp
                     inline T *unshift()                                             { return cast(v.insert(0, 1));      }
                     inline T *prepend()                                             { return cast(v.insert(0, 1));      }
                     inline T *insert(size_t idx)                                    { return cast(v.insert(idx, 1));    }
+                    inline T *set(size_t idx, const T *x)                           { return cast(v.iset(idx, x, 1));   }
+                    inline T *set(size_t idx, const T &x)                           { return cast(v.iset(idx, &x, 1));  }
 
                     inline T *pop()                                                 { return cast(v.pop(1));            }
                     inline bool shift()                                             { return v.iremove(0, 1);           }

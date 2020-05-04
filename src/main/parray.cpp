@@ -141,6 +141,16 @@ namespace lsp
             return vItems;
         }
 
+        void **raw_parray::iset(size_t idx, void **src, size_t n)
+        {
+            if ((idx + n) > nItems)
+                return NULL;
+
+            void **dst      = &vItems[idx];
+            ::memcpy(dst, src, n * sizeof(void *));
+            return dst;
+        }
+
         void **raw_parray::append(size_t n)
         {
             size_t count    = nonzero(nItems, n);

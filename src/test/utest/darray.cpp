@@ -82,8 +82,12 @@ UTEST_BEGIN("lltl", darray)
         *pv = 7;
         dump(x);
 
+        UTEST_ASSERT(pv = x.set(1, 10));
+        UTEST_ASSERT(*pv == 10);
+        dump(x);
+
         // Check items
-        static const int numbers[] = { 7, 6, 4, 1, 3, 2, 5 };
+        static const int numbers[] = { 7, 10, 4, 1, 3, 2, 5 };
         check_darray(x, numbers, sizeof(numbers)/sizeof(int));
 
         // Remove items
@@ -97,7 +101,7 @@ UTEST_BEGIN("lltl", darray)
 
         UTEST_ASSERT(x.shift());
         UTEST_ASSERT(pv = x.first());
-        UTEST_ASSERT(*pv == 6);
+        UTEST_ASSERT(*pv == 10);
         dump(x);
 
         UTEST_ASSERT(!x.remove(5));
@@ -122,7 +126,7 @@ UTEST_BEGIN("lltl", darray)
         UTEST_ASSERT(x.size() == 3);
         UTEST_ASSERT(x.capacity() >= 3);
         UTEST_ASSERT(pv = x.first());
-        UTEST_ASSERT(*pv == 6);
+        UTEST_ASSERT(*pv == 10);
         UTEST_ASSERT(pv = x.last());
         UTEST_ASSERT(*pv == 2);
     }
