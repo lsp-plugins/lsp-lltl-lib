@@ -173,6 +173,16 @@ namespace lsp
             return vItems;
         }
 
+        uint8_t *raw_darray::iset(size_t idx, const void *src, size_t n)
+        {
+            if ((idx + n) > nItems)
+                return NULL;
+
+            uint8_t *dst = &vItems[idx * nSizeOf];
+            ::memcpy(dst, src, n * nSizeOf);
+            return dst;
+        }
+
         uint8_t *raw_darray::insert(size_t index, size_t n)
         {
             if ((index < 0) || (index > nItems))

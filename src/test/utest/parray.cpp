@@ -79,9 +79,12 @@ UTEST_BEGIN("lltl", parray)
         UTEST_ASSERT(pv = x.unshift());
         *pv = s++;
         dump(x);
+        UTEST_ASSERT(pv = x.set(1, &array[10]));
+        UTEST_ASSERT(**pv == 10);
+        dump(x);
 
         // Check items
-        static const int numbers[]  = { 7, 6, 5, 3, 0, 2, 1, 4 };
+        static const int numbers[]  = { 7, 10, 5, 3, 0, 2, 1, 4 };
         check_parray(x, numbers, sizeof(numbers)/sizeof(int));
 
         // Remove items
@@ -102,7 +105,7 @@ UTEST_BEGIN("lltl", parray)
         UTEST_ASSERT(x.shift());
         dump(x);
         UTEST_ASSERT(v = x.first());
-        UTEST_ASSERT(*v == 6);
+        UTEST_ASSERT(*v == 10);
 
         UTEST_ASSERT(!x.remove(5));
         UTEST_ASSERT(v = x.get(2));
@@ -124,7 +127,7 @@ UTEST_BEGIN("lltl", parray)
         UTEST_ASSERT(x.size() == 3);
         UTEST_ASSERT(x.capacity() >= 3);
         UTEST_ASSERT(v = x.first());
-        UTEST_ASSERT(*v == 6);
+        UTEST_ASSERT(*v == 10);
         UTEST_ASSERT(v = x.last());
         UTEST_ASSERT(*v == 2);
     }
