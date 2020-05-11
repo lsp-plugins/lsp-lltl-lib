@@ -173,6 +173,7 @@ namespace lsp
             {
                 // There is no data in ybin by default
                 ybin->size      = 0;
+                ybin->data      = 0;
 
                 // Migrate items from xbin list to ybin list
                 for (tuple_t **pcurr = &xbin->data; *pcurr != NULL; )

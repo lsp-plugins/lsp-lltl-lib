@@ -148,9 +148,40 @@ UTEST_BEGIN("lltl", pphash)
         }
     }
 
+    void test_large()
+    {
+        char buf[32], *s;
+        lltl::pphash<char, char> h;
+
+        printf("Generating large data...\n");
+        for (size_t i=0; i<100000; ++i)
+        {
+            ::snprintf(buf, sizeof(buf), "%08lx", long(i));
+            UTEST_ASSERT(h.put(buf, ::strdup(buf), NULL));
+            if (!((i+1) % 10000))
+                printf("  generated %d keys\n", int(i+1));
+        }
+        UTEST_ASSERT(h.size() == 100000);
+        UTEST_ASSERT(h.capacity() == 0x20000);
+
+        printf("Validating contents...\n");
+        for (size_t i=0; i<100000; ++i)
+        {
+            ::snprintf(buf, sizeof(buf), "%08lx", long(i));
+            UTEST_ASSERT(s = h.get(buf));
+            UTEST_ASSERT(::strcmp(s, buf) == 0);
+            ::free(s);
+            if (!((i+1) % 10000))
+                printf("  validated %d keys\n", int(i+1));
+        }
+        UTEST_ASSERT(h.size() == 100000);
+        UTEST_ASSERT(h.capacity() == 0x20000);
+    }
+
     UTEST_MAIN
     {
         test_basic();
+        test_large();
     }
 
 UTEST_END

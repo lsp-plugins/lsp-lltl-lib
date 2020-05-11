@@ -43,8 +43,19 @@ namespace lsp
 
         size_t char_hash_func(const void *ptr, size_t size)
         {
-            size_t len = ::strlen(static_cast<const char *>(ptr));
-            return default_hash_func(ptr, len);
+            const uint8_t *s = static_cast<const uint8_t *>(ptr);
+            size_t hash = 0;
+
+            while (true)
+            {
+                size_t  v = *(s++);
+                if (v == 0)
+                    break;
+
+                hash    = ((hash << 7) + (hash << 4) + hash) ^ v;
+            }
+
+            return hash;
         }
 
         ssize_t char_cmp_func(const void *a, const void *b, size_t size)
