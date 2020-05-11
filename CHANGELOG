@@ -3,6 +3,9 @@
 *******************************************************************************
 
 === 0.5.2 ===
+* Added hash interface for objects.
+* Added default hashing function.
+* Implemented lltl::pphash collection which allows to use hash maps
 
 === 0.5.1 ===
 * added set method to lltl::parray which allows to set single 
