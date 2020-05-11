@@ -17,7 +17,7 @@ namespace lsp
             const size_t *p = static_cast<const size_t *>(ptr);
 
             // Main part
-            while (size >= sizeof(size_t))
+            for ( ; size >= sizeof(size_t); size -= sizeof(size_t))
             {
                 v       = *(p++);
 
@@ -39,6 +39,22 @@ namespace lsp
             }
 
             return hash;
+        }
+
+        size_t char_hash_func(const void *ptr, size_t size)
+        {
+            size_t len = ::strlen(static_cast<const char *>(ptr));
+            return default_hash_func(ptr, len);
+        }
+
+        ssize_t char_cmp_func(const void *a, const void *b, size_t size)
+        {
+            return ::strcmp(static_cast<const char *>(a), static_cast<const char *>(b));
+        }
+
+        void *char_copy_func(const void *ptr, size_t size)
+        {
+            return ::strdup(static_cast<const char *>(ptr));
         }
     }
 }

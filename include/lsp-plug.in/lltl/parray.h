@@ -88,8 +88,6 @@ namespace lsp
                     inline static void **vcast(T **ptr)                             { return reinterpret_cast<void **>(ptr);    }
                     inline static const T *ccast(void *ptr)                         { return static_cast<const T *>(ptr);       }
 
-                    friend class pphash;
-
                 public:
                     explicit inline parray()
                     {
@@ -102,6 +100,7 @@ namespace lsp
 
                 public:
                     // Size and capacity
+                    inline raw_parray *raw()                                        { return &v;                            }
                     inline size_t size() const                                      { return v.nItems;                      }
                     inline size_t capacity() const                                  { return v.nCapacity;                   }
 

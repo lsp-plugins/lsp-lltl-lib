@@ -38,32 +38,35 @@ namespace lsp
                 size_t          cap;        // Capacity in bins
                 bin_t          *bins;       // Overall array of bins
                 size_t          ksize;      // Size of key object
-                hash_func_t     hash;       // Hash function
-                compare_func_t  compare;    // Comparison function
+                hash_iface      iface;      // Hash interface
 
             protected:
                 void            destroy_bin(bin_t *bin);
                 bool            grow();
-                tuple_t        *find_tuple(const void *key, size_t hash, bin_t *bin);
-                tuple_t        *remove_tuple(const void *key, size_t hash, bin_t *bin);
-                tuple_t        *create_tuple(void *key, size_t hash);
+                tuple_t        *find_tuple(const void *key, size_t hash);
+                tuple_t        *remove_tuple(const void *key, size_t hash);
+                tuple_t        *create_tuple(const void *key, size_t hash);
 
             public:
                 void            flush();
                 void            clear();
                 void            swap(raw_pphash *src);
                 void           *get(const void *key, void *dfl);
-                void          **wget(const void *key);
-                void          **put(void *key, void *value, void **ok, void **ov);
-                void          **replace(void *key, void *value, void **ok, void **ov);
-                void          **create(void *key, void *value);
-                bool            remove(const void *key, void **ok, void **ov);
+                void          **wbget(const void *key);
+                void          **put(const void *key, void *value, void **ov);
+                void          **replace(const void *key, void *value, void **ov);
+                void          **create(const void *key, void *value);
+                bool            remove(const void *key, void **ov);
                 bool            keys(raw_parray *k);
                 bool            values(raw_parray *v);
                 bool            items(raw_parray *k, raw_parray *v);
         };
 
 
+        /**
+         * Raw pointer implementation of key-value hash map.
+         * Keys are automatically managed by the hash interface.
+         */
         template <class K, class V>
             class pphash
             {
@@ -83,20 +86,20 @@ namespace lsp
                 public:
                     explicit inline pphash()
                     {
-                        hash_iface<K> iface;
+                        hash_impl<K> iface;
 
                         v.size          = 0;
                         v.cap           = 0;
                         v.bins          = NULL;
                         v.ksize         = sizeof(K);
-                        v.hash          = iface.hash;
-                        v.compare       = iface.compare;
+                        v.iface         = iface;
                     }
 
                     ~pphash()                                               { v.flush();                                                    }
 
                 public:
                     inline size_t       size() const                        { return v.size;                                                }
+                    inline size_t       capacity() const                    { return v.cap;                                                 }
 
                 public:
                     void clear()                                            { v.clear();                                                    }
@@ -110,7 +113,7 @@ namespace lsp
                      * @param key key
                      * @return true if value exists
                      */
-                    inline bool exists(const K *key) const                  { return v.wget(key) != NULL;                                   }
+                    inline bool exists(const K *key) const                  { return v.wbget(key) != NULL;                                   }
 
                     /**
                      * Get value by key
@@ -132,27 +135,25 @@ namespace lsp
                      * @param key the key to lookup the value
                      * @return pointer to the associated value that can be overwritten
                      */
-                    inline V **wget(const K *key)                           { return pvcast(v.wget(key));                                   }
+                    inline V **wbget(const K *key)                          { return pvcast(v.wbget(key));                                  }
 
                 public:
                     /**
                      * Put the value to the hash
                      * @param key key to use
                      * @param value value to put
-                     * @param ok key removed from hash
                      * @param ov value removed from hash
                      * @return pointer to write data or NULL if no allocation possible
                      */
-                    inline V **put(K *key, V *value, K **ok, V **ov)        { return pvcast(v.put(key, value, pkcast(ok), pvcast(ov)));     }
+                    inline V **put(const K *key, V *value, V **ov)          { return pvcast(v.put(key, value, pvcast(ov)));     }
 
                     /**
                      * Put the value to the hash
                      * @param key key to use
-                     * @param ok key removed from hash
                      * @param ov value removed from hash
                      * @return pointer to write data or NULL if no allocation possible
                      */
-                    inline V **put(K *key, K **ok, V **ov)                  { return pvcast(v.put(key, NULL, pkcast(ok), pvcast(ov)));      }
+                    inline V **put(const K *key, V **ov)                    { return pvcast(v.put(key, NULL, pvcast(ov)));      }
 
                     /**
                      * Create the entry, do nothing if there is already existing entry with such key
@@ -160,14 +161,14 @@ namespace lsp
                      * @param value value to use
                      * @return pointer to write data or NULL if no allocation possible
                      */
-                    inline V **create(K *key, V *value)                     { return pvcast(v.create(key, value));                          }
+                    inline V **create(const K *key, V *value)               { return pvcast(v.create(key, value));                          }
 
                     /**
                      * Create the entry, do nothing if there is already existing entry with such key
                      * @param key key to use
                      * @return pointer to write data or NULL if no allocation possible
                      */
-                    inline V **create(K *key)                               { return pvcast(v.create(key, NULL));                           }
+                    inline V **create(const K *key)                         { return pvcast(v.create(key, NULL));                           }
 
                     /**
                      * Replace the entry ONLY if it exists
@@ -177,7 +178,7 @@ namespace lsp
                      * @param ov value removed from hash
                      * @return pointer to write data or NULL if no allocation possible
                      */
-                    inline V **replace(K *key, V *value, K **ok, V **ov)    { return pvcast(v.replace(key, value, pkcast(ok), pvcast(ov))); }
+                    inline V **replace(const K *key, V *value, V **ov)      { return pvcast(v.replace(key, value, pvcast(ov))); }
 
                     /**
                      * Replace the entry ONLY if it exists
@@ -186,7 +187,7 @@ namespace lsp
                      * @param ov old value removed from hash
                      * @return pointer to write data or NULL if no allocation possible
                      */
-                    inline V **replace(K *key, K **ok, V **ov)              { return pvcast(v.replace(key, NULL, pkcast(ok), pvcast(ov)));  }
+                    inline V **replace(const K *key, V **ov)                { return pvcast(v.replace(key, NULL, pvcast(ov)));  }
 
                     /**
                      * Remove the associated key
@@ -195,30 +196,30 @@ namespace lsp
                      * @param ov value removed from hash
                      * @return true if the data has been removed
                      */
-                    inline bool remove(const K *key, K **ok, V **ov)        { return pvcast(v.remove(key, pkcast(ok), pvcast(ov)));         }
+                    inline bool remove(const K *key, V **ov)                { return v.remove(key, pvcast(ov));                 }
 
                 public:
                     /**
                      * Store all keys to destination array
-                     * @param k array to store keys
+                     * @param vk array to store keys
                      * @return true if all keys have been successfully stored
                      */
-                    inline bool keys(parray<K> *k)                          { return v.keys(k->v);                                          }
+                    inline bool keys(parray<K> *vk)                          { return v.keys(vk->raw());                        }
 
                     /**
                      * Store all values to destination array
-                     * @param v array to store values
+                     * @param vv array to store values
                      * @return true if all keys have been successfully stored
                      */
-                    inline bool values(parray<V> *v)                        { return v.values(v->v);                                        }
+                    inline bool values(parray<V> *vv)                        { return v.values(vv->raw());                      }
 
                     /**
                      * Store all items to destination array
-                     * @param k array to store keys
-                     * @param v array to store values
+                     * @param vk array to store keys
+                     * @param vv array to store values
                      * @return true if all keys have been successfully stored
                      */
-                    inline bool items(parray<K> *k, parray<V> *v)           { return v.items(k->v, v->v);                                   }
+                    inline bool items(parray<K> *vk, parray<V> *vv)          { return v.items(vk->raw(), vv->raw());            }
             };
     }
 }
