@@ -40,7 +40,7 @@ UTEST_BEGIN("lltl", pphash)
 
         // Create items
         UTEST_ASSERT(h.create("key4", ::strdup("value4")));
-        UTEST_ASSERT(!h.create(::strdup("key1"), xv));
+        UTEST_ASSERT(!h.create("key1", xv));
         UTEST_ASSERT(h.create("key5", NULL));
         UTEST_ASSERT(h.size() == 6);
         UTEST_ASSERT(h.capacity() == 0x10);
