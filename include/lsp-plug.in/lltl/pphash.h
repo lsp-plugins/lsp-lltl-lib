@@ -135,13 +135,13 @@ namespace lsp
                      * Performs internal data exchange with another collection of the same type
                      * @param src collection to perform exchange
                      */
-                    inline void swap(pphash<K, V> &src)                     { v.swap(&src);                                                 }
+                    inline void swap(pphash<K, V> &src)                     { v.swap(&src.v);                                                }
 
                     /**
                      * Performs internal data exchange with another collection of the same type
                      * @param src collection to perform exchange
                      */
-                    inline void swap(pphash<K, V> *src)                     { v.swap(src);                                                  }
+                    inline void swap(pphash<K, V> *src)                     { v.swap(&src->v);                                               }
 
                 public:
                     /**
