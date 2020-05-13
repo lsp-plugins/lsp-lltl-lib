@@ -103,6 +103,7 @@ namespace lsp
                     inline raw_parray *raw()                                        { return &v;                            }
                     inline size_t size() const                                      { return v.nItems;                      }
                     inline size_t capacity() const                                  { return v.nCapacity;                   }
+                    inline bool is_empty() const                                    { return v.nItems <= 0;                 }
 
                 public:
                     // Whole collection manipulations

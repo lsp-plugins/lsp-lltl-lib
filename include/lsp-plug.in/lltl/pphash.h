@@ -77,9 +77,9 @@ namespace lsp
                 private:
                     mutable raw_pphash    v;
 
-                    inline static V *vcast(void *ptr)       { return static_cast<V *>(ptr);         }
-                    inline static V **pvcast(void *ptr)     { return reinterpret_cast<V **>(ptr);   }
-                    inline static K **pkcast(void *ptr)     { return reinterpret_cast<K **>(ptr);   }
+                    inline static V *vcast(void *ptr)       { return static_cast<V *>(ptr);             }
+                    inline static V **pvcast(void *ptr)     { return reinterpret_cast<V **>(ptr);       }
+                    inline static K **pkcast(void *ptr)     { return reinterpret_cast<K **>(ptr);       }
                     inline static void **pvcast(V **ptr)    { return reinterpret_cast<void **>(ptr);    }
                     inline static void **pkcast(K **ptr)    { return reinterpret_cast<void **>(ptr);    }
 
@@ -98,13 +98,49 @@ namespace lsp
                     ~pphash()                                               { v.flush();                                                    }
 
                 public:
+                    /**
+                     * Get number of stored elements in collection
+                     * @return number of stored elements in collection
+                     */
                     inline size_t       size() const                        { return v.size;                                                }
+
+                    /**
+                     * Get number of bins in collection
+                     * @return number of bins in collection
+                     */
                     inline size_t       capacity() const                    { return v.cap;                                                 }
 
+                    /**
+                     * Check whether collection is empty
+                     * @return true if collection does not contain any element
+                     */
+                    inline bool         is_empty() const                    { return v.size <= 0;                                           }
+
                 public:
+                    /**
+                     * Clear all bin data.
+                     * Automatically destroys keys.
+                     * Caller is responsible for destroying values.
+                     */
                     void clear()                                            { v.clear();                                                    }
+
+                    /**
+                     * Clear and destroy all bins.
+                     * Automatically destroys keys.
+                     * Caller is responsible for destroying values.
+                     */
                     inline void flush()                                     { v.flush();                                                    }
+
+                    /**
+                     * Performs internal data exchange with another collection of the same type
+                     * @param src collection to perform exchange
+                     */
                     inline void swap(pphash<K, V> &src)                     { v.swap(&src);                                                 }
+
+                    /**
+                     * Performs internal data exchange with another collection of the same type
+                     * @param src collection to perform exchange
+                     */
                     inline void swap(pphash<K, V> *src)                     { v.swap(src);                                                  }
 
                 public:
