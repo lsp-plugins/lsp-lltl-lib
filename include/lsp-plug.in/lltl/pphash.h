@@ -109,11 +109,18 @@ namespace lsp
 
                 public:
                     /**
-                     * Check that value associated with key exists
+                     * Check that value associated with key exists (same to contains)
                      * @param key key
                      * @return true if value exists
                      */
                     inline bool exists(const K *key) const                  { return v.wbget(key) != NULL;                                   }
+
+                    /**
+                     * Check that value associated with key exists (same to exists)
+                     * @param key key
+                     * @return true if value exists
+                     */
+                    inline bool contains(const K *key) const                { return v.wbget(key) != NULL;                                   }
 
                     /**
                      * Get value by key
