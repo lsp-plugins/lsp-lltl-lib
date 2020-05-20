@@ -7,6 +7,7 @@
 * Added default hashing function.
 * Implemented lltl::pphash collection which allows to use hash maps.
 * Added is_empty() method to lltl::parray class.
+* Fixed upget() method of lltl::parray.
 
 === 0.5.1 ===
 * added set method to lltl::parray which allows to set single 
