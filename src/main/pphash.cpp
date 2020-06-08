@@ -18,7 +18,7 @@ namespace lsp
             {
                 tuple_t *next   = curr->next;
                 if (curr->key != NULL)
-                    iface.free(curr->key);
+                    alloc.free(curr->key);
                 ::free(curr);
                 curr            = next;
             }
@@ -36,7 +36,7 @@ namespace lsp
             {
                 for (tuple_t *curr = bin->data; curr != NULL; curr = curr->next)
                 {
-                    if ((curr->hash == hash) && (iface.compare(key, curr->key, ksize) == 0))
+                    if ((curr->hash == hash) && (cmp.compare(key, curr->key, ksize) == 0))
                         return curr;
                 }
             }
@@ -62,7 +62,7 @@ namespace lsp
                 for (tuple_t **pcurr = &bin->data; *pcurr != NULL; )
                 {
                     tuple_t *curr = *pcurr;
-                    if ((curr->hash == hash) && (iface.compare(key, curr->key, ksize) == 0))
+                    if ((curr->hash == hash) && (cmp.compare(key, curr->key, ksize) == 0))
                     {
                         *pcurr      = curr->next;
                         curr->next  = NULL;
@@ -103,7 +103,7 @@ namespace lsp
             void *kcopy     = NULL;
             if (key != NULL)
             {
-                if ((kcopy = iface.copy(key, ksize)) == NULL)
+                if ((kcopy = alloc.copy(key, ksize)) == NULL)
                 {
                     ::free(tuple);
                     return NULL;
@@ -117,7 +117,7 @@ namespace lsp
                 {
                     ::free(tuple);
                     if (kcopy != NULL)
-                        iface.free(kcopy);
+                        alloc.free(kcopy);
                     return NULL;
                 }
             }
@@ -234,21 +234,21 @@ namespace lsp
 
         void *raw_pphash::get(const void *key, void *dfl)
         {
-            size_t h        = (key != NULL) ? iface.hash(key, ksize) : 0;
+            size_t h        = (key != NULL) ? hash.hash(key, ksize) : 0;
             tuple_t *tuple  = find_tuple(key, h);
             return (tuple != NULL) ? tuple->value : dfl;
         }
 
         void **raw_pphash::wbget(const void *key)
         {
-            size_t h        = (key != NULL) ? iface.hash(key, ksize) : 0;
+            size_t h        = (key != NULL) ? hash.hash(key, ksize) : 0;
             tuple_t *tuple  = find_tuple(key, h);
             return (tuple != NULL) ? &tuple->value : NULL;
         }
 
         void **raw_pphash::put(const void *key, void *value, void **ov)
         {
-            size_t h        = (key != NULL) ? iface.hash(key, ksize) : 0;
+            size_t h        = (key != NULL) ? hash.hash(key, ksize) : 0;
 
             // Find tuple
             tuple_t *tuple  = find_tuple(key, h);
@@ -274,7 +274,7 @@ namespace lsp
 
         void **raw_pphash::create(const void *key, void *value)
         {
-            size_t h        = (key != NULL) ? iface.hash(key, ksize) : 0;
+            size_t h        = (key != NULL) ? hash.hash(key, ksize) : 0;
 
             // Find tuple
             tuple_t *tuple  = find_tuple(key, h);
@@ -293,7 +293,7 @@ namespace lsp
 
         void **raw_pphash::replace(const void *key, void *value, void **ov)
         {
-            size_t h        = (key != NULL) ? iface.hash(key, ksize) : 0;
+            size_t h        = (key != NULL) ? hash.hash(key, ksize) : 0;
 
             // Find tuple
             tuple_t *tuple  = find_tuple(key, h);
@@ -308,7 +308,7 @@ namespace lsp
 
         bool raw_pphash::remove(const void *key, void **ov)
         {
-            size_t h        = (key != NULL) ? iface.hash(key, ksize) : 0;
+            size_t h        = (key != NULL) ? hash.hash(key, ksize) : 0;
 
             // Find tuple
             tuple_t *tuple  = remove_tuple(key, h);
@@ -320,7 +320,7 @@ namespace lsp
 
             // Free tuple data
             if (tuple->key != NULL)
-                iface.free(tuple->key);
+                alloc.free(tuple->key);
             ::free(tuple);
             return true;
         }

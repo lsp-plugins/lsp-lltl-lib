@@ -38,7 +38,9 @@ namespace lsp
                 size_t          cap;        // Capacity in bins
                 bin_t          *bins;       // Overall array of bins
                 size_t          ksize;      // Size of key object
-                hash_iface      iface;      // Hash interface
+                hash_iface      hash;       // Hash interface
+                compare_iface   cmp;        // Copy interface
+                allocator_iface alloc;      // Allocator interface
 
             protected:
                 void            destroy_bin(bin_t *bin);
@@ -86,13 +88,17 @@ namespace lsp
                 public:
                     explicit inline pphash()
                     {
-                        hash_impl<K> iface;
+                        hash_spec<K>        hash;
+                        compare_spec<K>     cmp;
+                        allocator_spec<K>   alloc;
 
                         v.size          = 0;
                         v.cap           = 0;
                         v.bins          = NULL;
                         v.ksize         = sizeof(K);
-                        v.iface         = iface;
+                        v.hash          = hash;
+                        v.cmp           = cmp;
+                        v.alloc         = alloc;
                     }
 
                     ~pphash()                                               { v.flush();                                                    }

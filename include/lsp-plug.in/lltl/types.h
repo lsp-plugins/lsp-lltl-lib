@@ -88,56 +88,33 @@ namespace lsp
         void       *char_copy_func(const void *ptr, size_t size);
 
         /**
-         * Hash interface: set of functions to manage keys and objects
+         * Hash interface: function to perform hashing of the non-NULL object
          */
         struct hash_iface
         {
             hash_func_t         hash;       // Hashing function
+        };
+
+        /**
+         * Compare interface: function to perform comparison of non-NULL objects
+         */
+        struct compare_iface
+        {
             compare_func_t      compare;    // Comparison function
+        };
+
+        /**
+         * Allocator interface: functions to perform copying and destruction of objects
+         */
+        struct allocator_iface
+        {
             copy_func_t         copy;       // Copy function
             free_func_t         free;       // Free function
         };
-
-        // Default specialization for hash interface
-        template <class T>
-            struct hash_impl: public hash_iface
-            {
-                static inline void *operator new(size_t size, void *ptr) { return ptr; }
-
-                static void *copy_func(const void *src, size_t size)
-                {
-                    void *dst = ::malloc(size);
-                    return (dst) ? new(dst) T(static_cast<const T *>(src)) : NULL;
-                }
-
-                static void free_func(void *ptr)
-                {
-                    (static_cast<T *>(ptr))->~T();
-                    ::free(ptr);
-                }
-
-                inline hash_impl()
-                {
-                    hash        = default_hash_func;
-                    compare     = ::memcmp;
-                    copy        = copy_func;
-                    free        = free_func;
-                }
-            };
-
-        // Specialization for char * data (C string)
-        template <>
-            struct hash_impl<char>: public hash_iface
-            {
-                inline hash_impl()
-                {
-                    hash        = char_hash_func;
-                    compare     = char_cmp_func;
-                    copy        = char_copy_func;
-                    free        = ::free;
-                }
-            };
     }
 }
+
+// Include default specialization
+#include <lsp-plug.in/lltl/spec.h>
 
 #endif /* LSP_PLUG_IN_LLTL_TYPES_H_ */
