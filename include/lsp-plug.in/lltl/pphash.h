@@ -1,0 +1,278 @@
+/*
+ * pphash.h
+ *
+ *  Created on: 10 мая 2020 г.
+ *      Author: sadko
+ */
+
+#ifndef LSP_PLUG_IN_LLTL_PPHASH_H_
+#define LSP_PLUG_IN_LLTL_PPHASH_H_
+
+#include <lsp-plug.in/lltl/version.h>
+#include <lsp-plug.in/lltl/types.h>
+#include <lsp-plug.in/lltl/parray.h>
+
+namespace lsp
+{
+    namespace lltl
+    {
+        struct raw_pphash
+        {
+            public:
+                typedef struct tuple_t
+                {
+                    size_t      hash;       // Hash code
+                    void       *key;        // Key
+                    void       *value;      // Value
+                    tuple_t    *next;       // Next tuple
+                } tuple_t;
+
+                typedef struct bin_t
+                {
+                    size_t      size;       // Number of used tuples in storage
+                    tuple_t    *data;       // Tuples
+                } bin_t;
+
+            public:
+                size_t          size;       // Overall size of the hash
+                size_t          cap;        // Capacity in bins
+                bin_t          *bins;       // Overall array of bins
+                size_t          ksize;      // Size of key object
+                hash_iface      hash;       // Hash interface
+                compare_iface   cmp;        // Copy interface
+                allocator_iface alloc;      // Allocator interface
+
+            protected:
+                void            destroy_bin(bin_t *bin);
+                bool            grow();
+                tuple_t        *find_tuple(const void *key, size_t hash);
+                tuple_t        *remove_tuple(const void *key, size_t hash);
+                tuple_t        *create_tuple(const void *key, size_t hash);
+
+            public:
+                void            flush();
+                void            clear();
+                void            swap(raw_pphash *src);
+                void           *get(const void *key, void *dfl);
+                void          **wbget(const void *key);
+                void          **put(const void *key, void *value, void **ov);
+                void          **replace(const void *key, void *value, void **ov);
+                void          **create(const void *key, void *value);
+                bool            remove(const void *key, void **ov);
+                bool            keys(raw_parray *k);
+                bool            values(raw_parray *v);
+                bool            items(raw_parray *k, raw_parray *v);
+        };
+
+
+        /**
+         * Raw pointer implementation of key-value hash map.
+         * Keys are automatically managed by the hash interface.
+         */
+        template <class K, class V>
+            class pphash
+            {
+                private:
+                    pphash(const pphash<K, V> &src);                                // Disable copying
+                    pphash<K, V> & operator = (const pphash<K, V> & src);           // Disable copying
+
+                private:
+                    mutable raw_pphash    v;
+
+                    inline static V *vcast(void *ptr)       { return static_cast<V *>(ptr);             }
+                    inline static V **pvcast(void *ptr)     { return reinterpret_cast<V **>(ptr);       }
+                    inline static K **pkcast(void *ptr)     { return reinterpret_cast<K **>(ptr);       }
+                    inline static void **pvcast(V **ptr)    { return reinterpret_cast<void **>(ptr);    }
+                    inline static void **pkcast(K **ptr)    { return reinterpret_cast<void **>(ptr);    }
+
+                public:
+                    explicit inline pphash()
+                    {
+                        hash_spec<K>        hash;
+                        compare_spec<K>     cmp;
+                        allocator_spec<K>   alloc;
+
+                        v.size          = 0;
+                        v.cap           = 0;
+                        v.bins          = NULL;
+                        v.ksize         = sizeof(K);
+                        v.hash          = hash;
+                        v.cmp           = cmp;
+                        v.alloc         = alloc;
+                    }
+
+                    ~pphash()                                               { v.flush();                                                    }
+
+                public:
+                    /**
+                     * Get number of stored elements in collection
+                     * @return number of stored elements in collection
+                     */
+                    inline size_t       size() const                        { return v.size;                                                }
+
+                    /**
+                     * Get number of bins in collection
+                     * @return number of bins in collection
+                     */
+                    inline size_t       capacity() const                    { return v.cap;                                                 }
+
+                    /**
+                     * Check whether collection is empty
+                     * @return true if collection does not contain any element
+                     */
+                    inline bool         is_empty() const                    { return v.size <= 0;                                           }
+
+                public:
+                    /**
+                     * Clear all bin data.
+                     * Automatically destroys keys.
+                     * Caller is responsible for destroying values.
+                     */
+                    void clear()                                            { v.clear();                                                    }
+
+                    /**
+                     * Clear and destroy all bins.
+                     * Automatically destroys keys.
+                     * Caller is responsible for destroying values.
+                     */
+                    inline void flush()                                     { v.flush();                                                    }
+
+                    /**
+                     * Performs internal data exchange with another collection of the same type
+                     * @param src collection to perform exchange
+                     */
+                    inline void swap(pphash<K, V> &src)                     { v.swap(&src.v);                                                }
+
+                    /**
+                     * Performs internal data exchange with another collection of the same type
+                     * @param src collection to perform exchange
+                     */
+                    inline void swap(pphash<K, V> *src)                     { v.swap(&src->v);                                               }
+
+                public:
+                    /**
+                     * Check that value associated with key exists (same to contains)
+                     * @param key key
+                     * @return true if value exists
+                     */
+                    inline bool exists(const K *key) const                  { return v.wbget(key) != NULL;                                   }
+
+                    /**
+                     * Check that value associated with key exists (same to exists)
+                     * @param key key
+                     * @return true if value exists
+                     */
+                    inline bool contains(const K *key) const                { return v.wbget(key) != NULL;                                   }
+
+                    /**
+                     * Get value by key
+                     * @param key key to use
+                     * @return associated value or NULL if not exists
+                     */
+                    inline V *get(const K *key) const                       { return vcast(v.get(key, NULL));                               }
+
+                    /**
+                     * Get value by key or return default value if the value in hash was not found
+                     * @param key key to use
+                     * @param dfl default value to return if there is no such key in the hash
+                     * @return the associated value
+                     */
+                    inline V *dget(const K *key, void *dfl) const           { return vcast(v.get(key, dfl));                                }
+
+                    /**
+                     * Get value for writing
+                     * @param key the key to lookup the value
+                     * @return pointer to the associated value that can be overwritten
+                     */
+                    inline V **wbget(const K *key)                          { return pvcast(v.wbget(key));                                  }
+
+                public:
+                    /**
+                     * Put the value to the hash
+                     * @param key key to use
+                     * @param value value to put
+                     * @param ov value removed from hash
+                     * @return pointer to write data or NULL if no allocation possible
+                     */
+                    inline V **put(const K *key, V *value, V **ov)          { return pvcast(v.put(key, value, pvcast(ov)));     }
+
+                    /**
+                     * Put the value to the hash
+                     * @param key key to use
+                     * @param ov value removed from hash
+                     * @return pointer to write data or NULL if no allocation possible
+                     */
+                    inline V **put(const K *key, V **ov)                    { return pvcast(v.put(key, NULL, pvcast(ov)));      }
+
+                    /**
+                     * Create the entry, do nothing if there is already existing entry with such key
+                     * @param key key to use
+                     * @param value value to use
+                     * @return pointer to write data or NULL if no allocation possible
+                     */
+                    inline V **create(const K *key, V *value)               { return pvcast(v.create(key, value));                          }
+
+                    /**
+                     * Create the entry, do nothing if there is already existing entry with such key
+                     * @param key key to use
+                     * @return pointer to write data or NULL if no allocation possible
+                     */
+                    inline V **create(const K *key)                         { return pvcast(v.create(key, NULL));                           }
+
+                    /**
+                     * Replace the entry ONLY if it exists
+                     * @param key key to use
+                     * @param value value to use
+                     * @param ok key removed from hash
+                     * @param ov value removed from hash
+                     * @return pointer to write data or NULL if no allocation possible
+                     */
+                    inline V **replace(const K *key, V *value, V **ov)      { return pvcast(v.replace(key, value, pvcast(ov))); }
+
+                    /**
+                     * Replace the entry ONLY if it exists
+                     * @param key key to use
+                     * @param ok old key removed from hash
+                     * @param ov old value removed from hash
+                     * @return pointer to write data or NULL if no allocation possible
+                     */
+                    inline V **replace(const K *key, V **ov)                { return pvcast(v.replace(key, NULL, pvcast(ov)));  }
+
+                    /**
+                     * Remove the associated key
+                     * @param key the key to use for seacrh
+                     * @param ok key removed from hash
+                     * @param ov value removed from hash
+                     * @return true if the data has been removed
+                     */
+                    inline bool remove(const K *key, V **ov)                { return v.remove(key, pvcast(ov));                 }
+
+                public:
+                    /**
+                     * Store all keys to destination array
+                     * @param vk array to store keys
+                     * @return true if all keys have been successfully stored
+                     */
+                    inline bool keys(parray<K> *vk)                          { return v.keys(vk->raw());                        }
+
+                    /**
+                     * Store all values to destination array
+                     * @param vv array to store values
+                     * @return true if all keys have been successfully stored
+                     */
+                    inline bool values(parray<V> *vv)                        { return v.values(vv->raw());                      }
+
+                    /**
+                     * Store all items to destination array
+                     * @param vk array to store keys
+                     * @param vv array to store values
+                     * @return true if all keys have been successfully stored
+                     */
+                    inline bool items(parray<K> *vk, parray<V> *vv)          { return v.items(vk->raw(), vv->raw());            }
+            };
+    }
+}
+
+
+
+#endif /* LSP_PLUG_IN_LLTL_PPHASH_H_ */

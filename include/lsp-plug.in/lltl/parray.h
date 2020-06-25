@@ -100,8 +100,10 @@ namespace lsp
 
                 public:
                     // Size and capacity
-                    size_t size() const                                             { return v.nItems;                      }
-                    size_t capacity() const                                         { return v.nCapacity;                   }
+                    inline raw_parray *raw()                                        { return &v;                            }
+                    inline size_t size() const                                      { return v.nItems;                      }
+                    inline size_t capacity() const                                  { return v.nCapacity;                   }
+                    inline bool is_empty() const                                    { return v.nItems <= 0;                 }
 
                 public:
                     // Whole collection manipulations
@@ -128,7 +130,7 @@ namespace lsp
                     inline T **get_n(size_t idx, size_t n, T **x)                   { return pcast(v.get_n(idx, n, vcast(x)));     }
                     inline T **pget(size_t idx)                                     { return (idx < v.nItems) ? pcast(&v.vItems[idx]) : NULL;       }
                     inline T *uget(size_t idx)                                      { return cast(v.vItems[idx]);           }
-                    inline T *upget(size_t idx)                                     { return pcast(&v.vItems[idx]);         }
+                    inline T **upget(size_t idx)                                    { return pcast(&v.vItems[idx]);         }
                     inline T *first()                                               { return (v.nItems > 0) ? cast(v.vItems[0]) : NULL; }
                     inline T *last()                                                { return (v.nItems > 0) ? cast(v.vItems[v.nItems - 1]) : NULL;  }
                     inline T **array()                                              { return pcast(v.vItems);               }
