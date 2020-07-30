@@ -3,6 +3,7 @@
 *******************************************************************************
 
 === 0.5.3 ===
+* Added lltl::bitset collection with basic methods for storing bit flags.
 
 === 0.5.2 ===
 * Added hash interface for objects.

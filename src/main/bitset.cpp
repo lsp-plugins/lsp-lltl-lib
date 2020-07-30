@@ -52,11 +52,12 @@ namespace lsp
             // Need to realloc data?
             if (cap != nCapacity)
             {
-                umword_t *buf   = static_cast<umword_t *>(::realloc(vData, cap));
+                umword_t *buf   = static_cast<umword_t *>(::realloc(vData, cap * sizeof(umword_t)));
                 if (buf == NULL)
                     return false;
+                if (cap > nCapacity)
+                    ::bzero(&buf[nCapacity], (cap - nCapacity) * sizeof(umword_t));
                 vData           = buf;
-                ::bzero(&vData[nCapacity], (cap - nCapacity) * sizeof(umword_t));
                 nCapacity       = cap;
             }
 
@@ -78,9 +79,9 @@ namespace lsp
             if (index >= nSize)
                 return false;
 
-            size_t cap  = index / UMWORD_BITS;
-            size_t bit  = index % UMWORD_BITS;
-            return vData[cap] & (1 << bit);
+            size_t cap      = index / UMWORD_BITS;
+            umword_t mask   = umword_t(1) << (index % UMWORD_BITS);
+            return vData[cap] & mask;
         }
 
         void bitset::set_all()
@@ -98,10 +99,10 @@ namespace lsp
             if (index >= nSize)
                 return false;
 
-            umword_t *w = &vData[index / UMWORD_BITS];
-            size_t bit  = 1 << (index % UMWORD_BITS);
-            bool prev   = (*w) & bit;
-            *w         |= bit;
+            umword_t *w     = &vData[index / UMWORD_BITS];
+            umword_t mask   = umword_t(1) << (index % UMWORD_BITS);
+            bool prev       = (*w) & mask;
+            *w             |= mask;
             return prev;
         }
 
@@ -110,10 +111,10 @@ namespace lsp
             if (index >= nSize)
                 return false;
 
-            umword_t *w = &vData[index / UMWORD_BITS];
-            size_t bit  = 1 << (index % UMWORD_BITS);
-            bool prev   = (*w) & bit;
-            *w          = (value) ? (*w) | bit : (*w) & (~bit);
+            umword_t *w     = &vData[index / UMWORD_BITS];
+            umword_t mask   = umword_t(1) << (index % UMWORD_BITS);
+            bool prev       = (*w) & mask;
+            *w              = (value) ? (*w) | mask: (*w) & (~mask);
             return prev;
         }
 
@@ -123,6 +124,8 @@ namespace lsp
                 return 0;
             if ((index + count) > nSize)
                 count           = nSize - index;
+            if (count == 0)
+                return 0;
 
             size_t total    = count;
             umword_t *w     = &vData[index / UMWORD_BITS];
@@ -131,16 +134,16 @@ namespace lsp
             size_t off  = index % UMWORD_BITS;
             if (off > 0)
             {
-                size_t bits = off + count;
+                size_t bits = off + count - 1;
                 if (bits < UMWORD_BITS)
                 {
-                    size_t mask     = (UMWORD_MAX >> (UMWORD_BITS - count)) << off;
+                    umword_t mask   = (UMWORD_MAX >> (UMWORD_BITS - count)) << off;
                     *w             |= mask;
                     return total;
                 }
                 else
                 {
-                    size_t mask     = UMWORD_MAX << off;
+                    umword_t mask   = UMWORD_MAX << off;
                     *w             |= mask;
                     count          -= (UMWORD_BITS - off);
                     ++w;
@@ -148,19 +151,19 @@ namespace lsp
             }
 
             // Middle part
-            size_t full = count / UMWORD_BITS;
+            size_t full     = count / UMWORD_BITS;
             if (full > 0)
             {
                 ::memset(w, 0xff, full * sizeof(umword_t));
-                count      -= full * sizeof(umword_t);
-                w          += full;
+                count          -= full * UMWORD_BITS;
+                w              += full;
             }
 
             // Tail part
             if (count > 0)
             {
-                size_t mask = UMWORD_MAX >> (UMWORD_BITS - count);
-                *w         |= mask;
+                umword_t mask   = UMWORD_MAX >> (UMWORD_BITS - count);
+                *w             |= mask;
             }
 
             return total;
@@ -174,15 +177,15 @@ namespace lsp
                 count           = nSize - index;
 
             umword_t *w     = &vData[index / UMWORD_BITS];
-            umword_t mask   = 1 << (index % UMWORD_BITS);
+            umword_t mask   = umword_t(1) << (index % UMWORD_BITS);
 
-            for (size_t i=0; i<count; ++i, ++values)
+            for (size_t i=0; i<count; ++values, ++i)
             {
-                *w              = (*values) ? (*w) | mask : (*w) & (~mask);
+                *w              = (*values) ? *w | mask : *w & (~mask);
                 if (!(mask <<= 1))
                 {
                     ++w;
-                    mask        = 1;
+                    mask            = 1;
                 }
             }
 
@@ -202,10 +205,10 @@ namespace lsp
             if (index >= nSize)
                 return false;
 
-            umword_t *w = &vData[index / UMWORD_BITS];
-            size_t bit  = 1 << (index % UMWORD_BITS);
-            bool prev   = (*w) & bit;
-            *w         &= (~bit);
+            umword_t *w     = &vData[index / UMWORD_BITS];
+            umword_t mask   = umword_t(1) << (index % UMWORD_BITS);
+            bool prev       = (*w) & mask;
+            *w             &= (~mask);
             return prev;
         }
 
@@ -215,6 +218,8 @@ namespace lsp
                 return 0;
             if ((index + count) > nSize)
                 count           = nSize - index;
+            if (count == 0)
+                return 0;
 
             size_t total    = count;
             umword_t *w     = &vData[index / UMWORD_BITS];
@@ -226,13 +231,13 @@ namespace lsp
                 size_t bits = off + count;
                 if (bits < UMWORD_BITS)
                 {
-                    size_t mask     = (UMWORD_MAX >> (UMWORD_BITS - count)) << off;
+                    umword_t mask   = (UMWORD_MAX >> (UMWORD_BITS - count)) << off;
                     *w             &= ~mask;
                     return total;
                 }
                 else
                 {
-                    size_t mask     = UMWORD_MAX << off;
+                    umword_t mask   = UMWORD_MAX << off;
                     *w             &= ~mask;
                     count          -= (UMWORD_BITS - off);
                     ++w;
@@ -244,15 +249,15 @@ namespace lsp
             if (full > 0)
             {
                 ::bzero(w, full * sizeof(umword_t));
-                count      -= full * sizeof(umword_t);
-                w          += full;
+                count          -= full * UMWORD_BITS;
+                w              += full;
             }
 
             // Tail part
             if (count > 0)
             {
-                size_t mask = UMWORD_MAX << count;
-                *w         &= mask;
+                umword_t mask   = UMWORD_MAX << count;
+                *w             &= mask;
             }
 
             return total;
@@ -270,7 +275,7 @@ namespace lsp
 
             if (count > 0)
             {
-                size_t mask     = UMWORD_MAX << (UMWORD_BITS - count);
+                umword_t mask   = UMWORD_MAX >> (UMWORD_BITS - count);
                 *w             ^= mask;
             }
         }
@@ -280,10 +285,10 @@ namespace lsp
             if (index >= nSize)
                 return false;
 
-            umword_t *w = &vData[index / UMWORD_BITS];
-            size_t bit  = 1 << (index % UMWORD_BITS);
-            bool prev   = (*w) & bit;
-            *w         ^= bit;
+            umword_t *w     = &vData[index / UMWORD_BITS];
+            umword_t mask   = umword_t(1) << (index % UMWORD_BITS);
+            bool prev       = (*w) & mask;
+            *w             ^= mask;
             return prev;
         }
 
@@ -293,6 +298,8 @@ namespace lsp
                 return 0;
             if ((index + count) > nSize)
                 count           = nSize - index;
+            if (count == 0)
+                return 0;
 
             size_t total    = count;
             umword_t *w     = &vData[index / UMWORD_BITS];
@@ -304,13 +311,13 @@ namespace lsp
                 size_t bits = off + count;
                 if (bits < UMWORD_BITS)
                 {
-                    size_t mask     = (UMWORD_MAX >> (UMWORD_BITS - count)) << off;
+                    umword_t mask   = (UMWORD_MAX >> (UMWORD_BITS - count)) << off;
                     *w             ^= mask;
                     return total;
                 }
                 else
                 {
-                    size_t mask     = UMWORD_MAX << off;
+                    umword_t mask   = UMWORD_MAX << off;
                     *w             ^= mask;
                     count          -= (UMWORD_BITS - off);
                     ++w;
@@ -324,8 +331,8 @@ namespace lsp
             // Tail part
             if (count > 0)
             {
-                size_t mask = UMWORD_MAX >> (UMWORD_BITS - count);
-                *w         ^= mask;
+                umword_t mask   = UMWORD_MAX >> (UMWORD_BITS - count);
+                *w             ^= mask;
             }
 
             return total;

@@ -29,6 +29,7 @@ namespace lsp
                 ~bitset();
 
             public:
+                inline bool     empty() const               { return nSize == 0;                    }
                 inline size_t   size() const                { return nSize;                         }
                 inline size_t   capacity() const            { return nCapacity * sizeof(umword_t);  }
 
