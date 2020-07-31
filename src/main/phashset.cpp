@@ -273,5 +273,49 @@ namespace lsp
 
             return &tuple->value;
         }
+
+        bool raw_phashset::remove(const void *value, void **ov)
+        {
+            size_t h        = (value != NULL) ? hash.hash(value, vsize) : 0;
+
+            // Find tuple
+            tuple_t *tuple  = remove_tuple(value, h);
+            if (tuple == NULL)
+                return false;
+
+            if (ov != NULL)
+                *ov         = tuple->value;
+
+            // Free tuple data
+            ::free(tuple);
+            return true;
+        }
+
+        bool raw_phashset::values(raw_parray *v)
+        {
+            raw_parray kv;
+
+            // Initialize collection
+            kv.init();
+            if (!kv.grow(size))
+                return false;
+
+            // Make a snapshot
+            for (size_t i=0; i<cap; ++i)
+                for (tuple_t *t = bins[i].data; t != NULL; t = t->next)
+                {
+                    if (!kv.append(t->value))
+                    {
+                        kv.flush();
+                        return false;
+                    }
+                }
+
+            // Return collection data
+            kv.swap(v);
+            kv.flush();
+
+            return true;
+        }
     }
 }

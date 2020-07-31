@@ -24,6 +24,7 @@ UTEST_BEGIN("lltl", pphash)
         // Check initial state
         UTEST_ASSERT(h.size() == 0);
         UTEST_ASSERT(h.capacity() == 0);
+        UTEST_ASSERT(h.is_empty());
         UTEST_ASSERT(xv = ::strdup("test value"));
 
         // Get from empty

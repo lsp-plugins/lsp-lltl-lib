@@ -16,6 +16,24 @@ namespace lsp
     namespace lltl
     {
         //---------------------------------------------------------------------
+        // Interface for pointers
+        struct ptr_hash_iface: public hash_iface
+        {
+            inline ptr_hash_iface()
+            {
+                hash        = ptr_hash_func;
+            }
+        };
+
+        struct ptr_compare_iface: public compare_iface
+        {
+            inline ptr_compare_iface()
+            {
+                compare     = ptr_cmp_func;
+            }
+        };
+
+        //---------------------------------------------------------------------
         // Default specializations
 
         /**

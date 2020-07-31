@@ -177,7 +177,7 @@ namespace lsp
                      * @param ov value removed from hash
                      * @return pointer to write data or NULL if no allocation possible
                      */
-                    inline V  *put(V *value, V **ov = NULL)                 { return pvcast(v.put(value, pvcast(ov)));                      }
+                    inline V **put(V *value, V **ov = NULL)                 { return pvcast(v.put(value, pvcast(ov)));                      }
 
                     /**
                      * Create the value, do nothing if there is already existing value
