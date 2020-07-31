@@ -6,6 +6,7 @@
  */
 
 #include <lsp-plug.in/lltl/types.h>
+#include <lsp-plug.in/common/types.h>
 
 namespace lsp
 {
@@ -60,11 +61,26 @@ namespace lsp
 
         size_t ptr_hash_func(const void *ptr, size_t size)
         {
-            uintptr_t v = uintptr_t(ptr);
+            uintptr_t a     = uintptr_t(ptr);
             // Standard library allocates pointer aligned to 8 or 16 byte boundary
             // we don't need the low part of it
-            v     >>= 4;
-            return (v << 7) + (v << 4) + v; // v *= 137
+            size_t v        = a >> 4;
+
+            // Generate two pseudo-random values
+            size_t h1       = v * 0x4ef1d1e9 + 0x46777db9;
+            size_t h2       = v * 0x4b0faf0d + 0x412318bb;
+
+            // Shuffle data
+            #ifdef ARCH_64BIT
+                h1              = ((h1 & 0xffff0000ffff0000ULL) >> 16) | ((h1 & 0x0000ffff0000ffffULL) << 16);
+                h2              = (h2 >> 13) | (h2 << 51);
+            #else
+                h1              = ((h1 & 0xffff0000UL) >> 16) | ((h1 & 0x0000ffffUL) << 16);
+                h2              = (h2 >> 13) | (h2 << 19);
+            #endif
+
+            // Return the final result as xor'ed expression
+            return h1 ^ h2 ^ a;
         }
 
         ssize_t char_cmp_func(const void *a, const void *b, size_t size)
