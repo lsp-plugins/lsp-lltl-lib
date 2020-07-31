@@ -177,7 +177,7 @@ namespace lsp
                      * @param dfl default value to return if there is no such key in the hash
                      * @return the associated value
                      */
-                    inline V *dget(const K *key, void *dfl) const           { return vcast(v.get(key, dfl));                                }
+                    inline V *dget(const K *key, V *dfl) const              { return vcast(v.get(key, dfl));                                }
 
                     /**
                      * Get value for writing

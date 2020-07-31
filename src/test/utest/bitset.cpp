@@ -16,21 +16,21 @@ UTEST_BEGIN("lltl", bitset)
         lltl::bitset x;
         UTEST_ASSERT(x.size() == 0);
         UTEST_ASSERT(x.capacity() == 0);
-        UTEST_ASSERT(x.empty());
+        UTEST_ASSERT(x.is_empty());
 
         UTEST_ASSERT(x.resize(10));
         UTEST_ASSERT(x.capacity() > 0);
-        UTEST_ASSERT(!x.empty());
+        UTEST_ASSERT(!x.is_empty());
         UTEST_ASSERT(x.size() == 10);
 
         UTEST_ASSERT(x.resize(128));
         UTEST_ASSERT(x.capacity() > 0);
-        UTEST_ASSERT(!x.empty());
+        UTEST_ASSERT(!x.is_empty());
         UTEST_ASSERT(x.size() == 128);
 
         UTEST_ASSERT(x.resize(0));
         UTEST_ASSERT(x.capacity() == 0);
-        UTEST_ASSERT(x.empty());
+        UTEST_ASSERT(x.is_empty());
         UTEST_ASSERT(x.size() == 0);
     }
 

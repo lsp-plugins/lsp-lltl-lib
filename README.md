@@ -2,12 +2,15 @@
 
 Low-level Template Library (LLTL) for basic data collections used in LSP Project
 
-This library does not aim to repeat STL. It aims to replace some imortant
+This library does not aim to repeat STL. It aims to replace some important
 parts of STL with generalized templates (generics). Since STL template 
 instantiation may blow up the code with many additional functions, this library
-tries to economy code space used by collections by generalizing data.
+tries to economy code space used by collections by generalizing data pointers.
 
-Let's look at the paradigm taking for example `std::vector`.
+The Paradigm
+======
+
+Let's look at the paradigm by taking `std::vector` as example.
 
 For STL `std::vector<char>` and `vector<int>` are different
 types, so they will have different instances, so the code:
@@ -42,16 +45,24 @@ lltl::darray<char> a;
 lltl::darray<int> b;
 
 a.push('a'); // Using one of the available instances of lsp::lltl::raw_darray::add()
-b.push(42); // Using the same instance of lsp::lltl::raw_darray::add()
+b.push(42);  // Using the same instance of lsp::lltl::raw_darray::add()
 
 ```
 
 **IMPORTANT!** Data structures do store plain data and do not call any constructors/destructors
-to initialize/free data. This responsibility is delegated to the caller code.
+to initialize/free data. This responsibility is delegated to the caller code (if not said otherwise).
 
-Currently available collections:
+Library Contents
+======
+
+Available collections:
   - darray - dynamic array of plain data structures of the same type.
   - parray - dynamic array of pointers to any data structure of the same base type.
+  - pphash - pointer to pointer hash map, where keys are managed automatically and values
+             are managed by caller.
+  - phashset - hash set of pointers, each pointer is managed by the caller.
+  - bitset - set of bits stored in the optimal for the CPU form for quick data processing 
+             and memory economy. 
 
 Requirements
 ======

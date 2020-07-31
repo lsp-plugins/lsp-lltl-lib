@@ -8,6 +8,8 @@
 #ifndef LSP_PLUG_IN_LLTL_BITSET_H_
 #define LSP_PLUG_IN_LLTL_BITSET_H_
 
+#include <lsp-plug.in/lltl/version.h>
+#include <lsp-plug.in/lltl/types.h>
 #include <lsp-plug.in/common/types.h>
 
 namespace lsp
@@ -29,7 +31,7 @@ namespace lsp
                 ~bitset();
 
             public:
-                inline bool     empty() const               { return nSize == 0;                    }
+                inline bool     is_empty() const            { return nSize == 0;                    }
                 inline size_t   size() const                { return nSize;                         }
                 inline size_t   capacity() const            { return nCapacity * sizeof(umword_t);  }
 
