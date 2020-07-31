@@ -52,17 +52,30 @@ b.push(42);  // Using the same instance of lsp::lltl::raw_darray::add()
 **IMPORTANT!** Data structures do store plain data and do not call any constructors/destructors
 to initialize/free data. This responsibility is delegated to the caller code (if not said otherwise).
 
+Also, for automatic managment of objects and lookup, additional interfaces like `lsp::lltl::hash_spec`,
+`lsp::lltl::compare_spec` and `lsp::lltl::allocator_spec` should be defined.
+
 Library Contents
 ======
 
 Available collections:
-  - darray - dynamic array of plain data structures of the same type.
-  - parray - dynamic array of pointers to any data structure of the same base type.
-  - pphash - pointer to pointer hash map, where keys are managed automatically and values
+  - `lltl::darray` - dynamic array of plain data structures of the same type.
+  - `lltl::parray` - dynamic array of pointers to any data structure of the same base type.
+  - `lltl::pphash` - pointer to pointer hash map, where keys are managed automatically and values
              are managed by caller.
-  - phashset - hash set of pointers, each pointer is managed by the caller.
-  - bitset - set of bits stored in the optimal for the CPU form for quick data processing 
+  - `lltl::phashset` - hash set of pointers, each pointer is managed by the caller.
+  - `lltl::bitset` - set of bits stored in the optimal for the CPU form for quick data processing 
              and memory economy. 
+
+Available specifications:
+  - `lltl::hash_spec` - specification for computing hash value of the object, required by:
+    - `lltl::pphash` for key object,
+    - `lltl::phashset` for value object
+  - `lltl::compare_spec` - specification for comparing two objects, required by:
+    - `lltl::pphash` for key object,
+    - `lltl::phashset` for value object
+  - `lltl::allocator_spec` - specification for allocation and deallocation of the object, required by:
+    - `lltl::pphash` for key object
 
 Requirements
 ======
