@@ -62,19 +62,41 @@ Available collections:
   - `lltl::darray` - dynamic array of plain data structures of the same type.
   - `lltl::parray` - dynamic array of pointers to any data structure of the same base type.
   - `lltl::pphash` - pointer to pointer hash map, where keys are managed automatically and values
-             are managed by caller.
+                       are managed by caller.
   - `lltl::phashset` - hash set of pointers, each pointer is managed by the caller.
   - `lltl::bitset` - set of bits stored in the optimal for the CPU form for quick data processing 
-             and memory economy. 
+                       and memory economy. 
 
-Available specifications:
+Data manipulation interfaces:
+  - `lltl::hash_iface` - inferface for defining hash function for the object.
+  - `lltl::compare_iface` - interface for defining comparison routine for the object.
+  - `lltl::allocator_iface` - interface for defining allocation (creating copy) 
+                                 and deallocation of the object.
+
+Available hashing functions:
+  - `lltl::default_hash_func` - default hashing function used for any object if hashing specification
+                                   for the object is not defined.
+  - `lltl::ptr_hash_func` - hashing function for pointers (considering that it uniquely identifies the
+                               object the pointer points to).
+  - `lltl::char_hash_func` - hashing function for C strings present as `char *` or `const char *` types.
+  
+Available comparison functions:
+  - `lltl::char_cmp_func` - comparison function for C strings present as `char *` or `const char *` types.
+  - `lltl::ptr_cmp_func` - comparisoin function for pointers (considering that it uniquely identifies the
+                               object the pointer points to).
+
+Available allocation functions:
+  - `lltl::char_copy_func` - function for copying C strings
+
+Required specifications:
   - `lltl::hash_spec` - specification for computing hash value of the object, required by:
     - `lltl::pphash` for key object,
     - `lltl::phashset` for value object
   - `lltl::compare_spec` - specification for comparing two objects, required by:
     - `lltl::pphash` for key object,
     - `lltl::phashset` for value object
-  - `lltl::allocator_spec` - specification for allocation and deallocation of the object, required by:
+  - `lltl::allocator_spec` - specification for allocation (creating copy) and deallocation
+                                of the object, required by:
     - `lltl::pphash` for key object
 
 Requirements

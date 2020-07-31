@@ -8,8 +8,8 @@ ARTIFACT_VERSION            = 0.5.3-devel
 # List of dependencies
 TEST_DEPENDENCIES = \
   TEST_STDLIB \
-  LSP_COMMON_LIB \
   LSP_TEST_FW
 
 DEPENDENCIES = \
+  LSP_COMMON_LIB \
   STDLIB

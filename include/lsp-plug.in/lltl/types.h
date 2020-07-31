@@ -63,6 +63,16 @@ namespace lsp
         size_t      default_hash_func(const void *ptr, size_t size);
 
         /**
+         * Default hashing function for raw pointers (considering pointer
+         * being uniquely identifying object)
+         *
+         * @param ptr pointer to the object to compute the hash value
+         * @param size size of the object in bytes (not used)
+         * @return hash value
+         */
+        size_t      ptr_hash_func(const void *ptr, size_t size);
+
+        /**
          * Hash function for computing C string hash
          * @param ptr pointer to the C string
          * @param size size of char type
@@ -78,6 +88,16 @@ namespace lsp
          * @return comparison result
          */
         ssize_t     char_cmp_func(const void *a, const void *b, size_t size);
+
+        /**
+         * Comparison function for raw pointers (considering pointer
+         * being uniquely identifying object)
+         * @param a pointer a
+         * @param b pointer b
+         * @param size size of object, not used
+         * @return comparison result
+         */
+        ssize_t     ptr_cmp_func(const void *a, const void *b, size_t size);
 
         /**
          * Copying character data (C string)

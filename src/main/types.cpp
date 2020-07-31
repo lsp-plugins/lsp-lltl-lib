@@ -58,9 +58,23 @@ namespace lsp
             return hash;
         }
 
+        size_t ptr_hash_func(const void *ptr, size_t size)
+        {
+            uintptr_t v = uintptr_t(ptr);
+            // Standard library allocates pointer aligned to 8 or 16 byte boundary
+            // we don't need the low part of it
+            v     >>= 4;
+            return (v << 7) + (v << 4) + v; // v *= 137
+        }
+
         ssize_t char_cmp_func(const void *a, const void *b, size_t size)
         {
             return ::strcmp(static_cast<const char *>(a), static_cast<const char *>(b));
+        }
+
+        ssize_t ptr_cmp_func(const void *a, const void *b, size_t size)
+        {
+            return (a > b) ? 1 : (a < b) ? -1 : 0;
         }
 
         void *char_copy_func(const void *ptr, size_t size)
