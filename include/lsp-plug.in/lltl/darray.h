@@ -124,6 +124,7 @@ namespace lsp
                     inline T *array()                                               { return cast(v.vItems); }
                     inline T *slice(size_t idx, size_t size)                        { return cast(v.slice(idx, size));  }
                     inline ssize_t index_of(const T *p) const                       { return v.index_of(p);             }
+                    inline bool contains(const T *p) const                          { return v.index_of(p) >= 0;        }
 
                 public:
                     // Accessing elements (const)

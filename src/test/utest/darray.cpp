@@ -306,36 +306,42 @@ UTEST_BEGIN("lltl", darray)
         // Append items
         UTEST_ASSERT(pv = x.append_n(2));
         UTEST_ASSERT(x.index_of(pv) == 0);
+        UTEST_ASSERT(x.contains(pv));
         pv[0] = 0; pv[1] = 1;
         dump(x);
 
         // Add items
         UTEST_ASSERT(pv = x.add_n(2));
         UTEST_ASSERT(x.index_of(pv) == 2);
+        UTEST_ASSERT(x.contains(pv));
         pv[0] = 2; pv[1] = 3;
         dump(x);
 
         // Push items
         UTEST_ASSERT(pv = x.push_n(3));
         UTEST_ASSERT(x.index_of(pv) == 4);
+        UTEST_ASSERT(x.contains(pv));
         pv[0] = 4; pv[1] = 5; pv[2] = 6;
         dump(x);
 
         // Unshift items
         UTEST_ASSERT(pv = x.unshift_n(3));
         UTEST_ASSERT(x.index_of(pv) == 0);
+        UTEST_ASSERT(x.contains(pv));
         pv[0] = 7; pv[1] = 8; pv[2] = 9;
         dump(x);
 
         // Prepend items
         UTEST_ASSERT(pv = x.prepend_n(2));
         UTEST_ASSERT(x.index_of(pv) == 0);
+        UTEST_ASSERT(x.contains(pv));
         pv[0] = 10; pv[1] = 11;
         dump(x);
 
         // Insert items
         UTEST_ASSERT(pv = x.insert_n(4, 4));
         UTEST_ASSERT(x.index_of(pv) == 4);
+        UTEST_ASSERT(x.contains(pv));
         pv[0] = 12; pv[1] = 13; pv[2] = 14; pv[3] = 15;
         dump(x);
 

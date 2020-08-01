@@ -400,42 +400,49 @@ UTEST_BEGIN("lltl", parray)
         UTEST_ASSERT(pv = x.set_n(4, vv));
         dump(x);
         UTEST_ASSERT(x.index_of(*pv) == 0);
+        UTEST_ASSERT(x.contains(*pv));
 
         // Append values
         vv[0] = s++; vv[1] = s++;
         UTEST_ASSERT(pv = x.append_n(2,  vv));
         dump(x);
         UTEST_ASSERT(x.index_of(*pv) == 4);
+        UTEST_ASSERT(x.contains(*pv));
 
         // Add values
         vv[0] = s++; vv[1] = s++; vv[2] = s++;
         UTEST_ASSERT(pv = x.append_n(3,  vv));
         dump(x);
         UTEST_ASSERT(x.index_of(*pv) == 6);
+        UTEST_ASSERT(x.contains(*pv));
 
         // Push values
         vv[0] = s++; vv[1] = s++; vv[2] = s++;
         UTEST_ASSERT(pv = x.push_n(3,  vv));
         dump(x);
         UTEST_ASSERT(x.index_of(*pv) == 9);
+        UTEST_ASSERT(x.contains(*pv));
 
         // Unshift values
         vv[0] = s++; vv[1] = s++;
         UTEST_ASSERT(pv = x.unshift_n(2,  vv));
         dump(x);
         UTEST_ASSERT(x.index_of(*pv) == 0);
+        UTEST_ASSERT(x.contains(*pv));
 
         // Prepend values
         vv[0] = s++; vv[1] = s++;
         UTEST_ASSERT(pv = x.prepend_n(2,  vv));
         dump(x);
         UTEST_ASSERT(x.index_of(*pv) == 0);
+        UTEST_ASSERT(x.contains(*pv));
 
         // Insert values
         vv[0] = s++; vv[1] = s++; vv[2] = s++; vv[3] = s++;
         UTEST_ASSERT(pv = x.insert_n(12,  4, vv));
         dump(x);
         UTEST_ASSERT(x.index_of(*pv) == 12);
+        UTEST_ASSERT(x.contains(*pv));
 
         // Check items
         static const int numbers[] = { 14, 15, 12, 13, 0, 1, 2, 3, 4, 5, 6, 7, 16, 17, 18, 19, 8, 9, 10, 11 };

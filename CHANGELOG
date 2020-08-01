@@ -7,6 +7,7 @@
 * Added lltl::phashset collection for quick managing of hash sets of objects.
 * Added lltl::ptr_hash_func and lltl::ptr_cmp_func functions for managing
   object pointers which are considered to be unique for each object.
+* Added contains() method to lltl::parray and lltl::darray collections.
 
 === 0.5.2 ===
 * Added hash interface for objects.
