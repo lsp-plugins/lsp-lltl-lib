@@ -255,6 +255,30 @@ namespace lsp
             return &tuple->value;
         }
 
+        bool raw_phashset::toggle(void *value)
+        {
+            size_t h        = (value != NULL) ? hash.hash(value, vsize) : 0;
+
+            // Try to remove tuple
+            tuple_t *tuple  = remove_tuple(value, h);
+            if (tuple != NULL)
+            {
+                // Free tuple data
+                ::free(tuple);
+            }
+            else
+            {
+                // Create new tuple
+                tuple           = create_tuple(h);
+                if (tuple == NULL)
+                    return false;
+
+                tuple->value    = value;
+            }
+
+            return true;
+        }
+
         void **raw_phashset::create(void *value)
         {
             size_t h        = (value != NULL) ? hash.hash(value, vsize) : 0;

@@ -68,6 +68,15 @@ UTEST_BEGIN("lltl", phashset)
             UTEST_ASSERT(s.dget(xv[i], NULL) == xv[i]);
         }
 
+        // Check toggle()
+        for (size_t i=0; i<5; ++i)
+        {
+            UTEST_ASSERT(s.toggle(xv[i]));
+            UTEST_ASSERT(s.dget(xv[i], NULL) == NULL);
+            UTEST_ASSERT(s.toggle(xv[i]));
+            UTEST_ASSERT(s.dget(xv[i], NULL) == xv[i]);
+        }
+
         // Check create() of unexisting value
         for (size_t i=0; i<5; ++i, ++id)
         {

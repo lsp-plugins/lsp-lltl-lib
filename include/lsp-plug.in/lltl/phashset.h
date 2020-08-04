@@ -55,6 +55,7 @@ namespace lsp
                 void          **wbget(const void *value);
                 void          **put(void *value, void **ret);
                 void          **create(void *value);
+                bool            toggle(void *value);
                 bool            remove(const void *value, void **ret);
                 bool            values(raw_parray *v);
         };
@@ -169,6 +170,13 @@ namespace lsp
                      * @return the associated value
                      */
                     inline V *dget(const V *key, V *dfl) const              { return vcast(v.get(key, dfl));                                }
+
+                    /**
+                     * Remove the item from set if it is present in the set, add the item if not
+                     * @param value value to toggle
+                     * @return true on success
+                     */
+                    inline bool toggle(V *value) const                      { return v.toggle(value);                                       }
 
                 public:
                     /**
