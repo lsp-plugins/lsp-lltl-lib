@@ -58,6 +58,7 @@ namespace lsp
                 bool            toggle(void *value);
                 bool            remove(const void *value, void **ret);
                 bool            values(raw_parray *v);
+                void           *any();
         };
 
         /**
@@ -177,6 +178,12 @@ namespace lsp
                      * @return true on success
                      */
                     inline bool toggle(V *value) const                      { return v.toggle(value);                                       }
+
+                    /**
+                     * Get any single value present in the collection
+                     * @return any value present in the collection or NULL if none
+                     */
+                    inline V *any() const                                   { return v.any();                                               }
 
                 public:
                     /**

@@ -255,6 +255,21 @@ namespace lsp
             return &tuple->value;
         }
 
+        void *raw_phashset::any()
+        {
+            if (size <= 0)
+                return NULL;
+
+            for (size_t i=0; i<cap; ++i)
+            {
+                bin_t *b = &bins[i];
+                if (b->data != NULL)
+                    return b->data->value;
+            }
+
+            return NULL;
+        }
+
         bool raw_phashset::toggle(void *value)
         {
             size_t h        = (value != NULL) ? hash.hash(value, vsize) : 0;
