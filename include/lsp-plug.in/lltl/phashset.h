@@ -183,7 +183,7 @@ namespace lsp
                      * Get any single value present in the collection
                      * @return any value present in the collection or NULL if none
                      */
-                    inline V *any() const                                   { return v.any();                                               }
+                    inline V *any() const                                   { return vcast(v.any());                                        }
 
                 public:
                     /**
