@@ -67,6 +67,9 @@ Available collections:
   - `lltl::bitset` - set of bits stored in the optimal for the CPU form for quick data processing 
                        and memory economy. 
 
+Collection access:
+  - `lltl::iterator` - iterator class for sequential data access.
+
 Data manipulation interfaces:
   - `lltl::hash_iface` - inferface for defining hash function for the object.
   - `lltl::compare_iface` - interface for defining comparison routine for the object.
