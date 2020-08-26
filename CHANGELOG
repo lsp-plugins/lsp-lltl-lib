@@ -9,6 +9,8 @@
   object pointers which are considered to be unique for each object.
 * Added contains() method to lltl::parray and lltl::darray collections.
 * Added lltl::iterator class for work with iterators.
+* Renamed copy function reference to clone for lltl::allocator_iface.
+* Renamed lltl::char_copy_func to lltl::char_clone_func. 
 
 === 0.5.2 ===
 * Added hash interface for objects.

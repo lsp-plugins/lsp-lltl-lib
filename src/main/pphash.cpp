@@ -103,7 +103,7 @@ namespace lsp
             void *kcopy     = NULL;
             if (key != NULL)
             {
-                if ((kcopy = alloc.copy(key, ksize)) == NULL)
+                if ((kcopy = alloc.clone(key, ksize)) == NULL)
                 {
                     ::free(tuple);
                     return NULL;

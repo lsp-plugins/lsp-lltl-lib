@@ -68,7 +68,7 @@ namespace lsp
             {
                 static inline void *operator new(size_t size, void *ptr) { return ptr; }
 
-                static void *copy_func(const void *src, size_t size)
+                static void *clone_func(const void *src, size_t size)
                 {
                     void *dst = ::malloc(size);
                     return (dst) ? new(dst) T(static_cast<const T *>(src)) : NULL;
@@ -82,7 +82,7 @@ namespace lsp
 
                 inline allocator_spec()
                 {
-                    copy        = copy_func;
+                    clone       = clone_func;
                     free        = free_func;
                 }
             };
@@ -112,7 +112,7 @@ namespace lsp
             {
                 inline allocator_spec()
                 {
-                    copy        = char_copy_func;
+                    clone       = char_clone_func;
                     free        = ::free;
                 }
             };

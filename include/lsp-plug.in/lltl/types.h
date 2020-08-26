@@ -39,12 +39,12 @@ namespace lsp
         typedef     ssize_t (* compare_func_t)(const void *a, const void *b, size_t size);
 
         /**
-         * Copy function
+         * Copy function with dynamic memory allocation
          * @param src source object to copy, never NULL
          * @param size size of the object
          * @return pointer to copied object
          */
-        typedef     void *(* copy_func_t)(const void *src, size_t size);
+        typedef     void *(* clone_func_t)(const void *src, size_t size);
 
         /**
          * Resource destruction and freeing function
@@ -52,6 +52,28 @@ namespace lsp
          * @param ptr pointer to the data, never NULL
          */
         typedef     void (* free_func_t)(void *ptr);
+
+        /**
+         * Initialization function
+         * @param dst destination object to initialize
+         * @param size size of object
+         */
+        typedef     void *(* init_func_t)(void *dst, size_t size);
+
+        /**
+         * Finalization function
+         * @param dst destination object to finalize
+         * @param size size of object
+         */
+        typedef     void  (* fini_func_t)(void *dst, size_t size);
+
+        /**
+         * Copying function with statically allocated memory
+         * @param dst destination object to perform copy
+         * @param src source object
+         * @param size size of object
+         */
+        typedef     void  (* copy_func_t)(void *dst, const void *src, size_t size);
 
         /**
          * Default hashing function
@@ -105,7 +127,7 @@ namespace lsp
          * @param size size of char type
          * @return pointer to allocated C string
          */
-        void       *char_copy_func(const void *ptr, size_t size);
+        void       *char_clone_func(const void *ptr, size_t size);
 
         /**
          * Hash interface: function to perform hashing of the non-NULL object
@@ -124,12 +146,22 @@ namespace lsp
         };
 
         /**
-         * Allocator interface: functions to perform copying and destruction of objects
+         * Allocator interface: functions to perform copying and destruction of dynamic objects
          */
         struct allocator_iface
         {
-            copy_func_t         copy;       // Copy function
+            clone_func_t        clone;      // Copy function
             free_func_t         free;       // Free function
+        };
+
+        /**
+         * Interface for in-place stored objects
+         */
+        struct initializer_iface
+        {
+            init_func_t         init;       // Initialization function
+            fini_func_t         fini;       // Finalization function
+            copy_func_t         copy;       // Copy function
         };
     }
 }

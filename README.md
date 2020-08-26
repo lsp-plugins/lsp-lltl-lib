@@ -73,8 +73,10 @@ Collection access:
 Data manipulation interfaces:
   - `lltl::hash_iface` - inferface for defining hash function for the object.
   - `lltl::compare_iface` - interface for defining comparison routine for the object.
-  - `lltl::allocator_iface` - interface for defining allocation (creating copy) 
+  - `lltl::allocator_iface` - interface for defining allocation (creating cloned copy) 
                                  and deallocation of the object.
+  - `lltl::initializer_iface` - interface for defining initialization, copying and finalization of
+                                 in-place stored objects. 
 
 Available hashing functions:
   - `lltl::default_hash_func` - default hashing function used for any object if hashing specification

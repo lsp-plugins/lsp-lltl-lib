@@ -62,13 +62,11 @@ namespace lsp
         size_t ptr_hash_func(const void *ptr, size_t size)
         {
             uintptr_t a     = uintptr_t(ptr);
-            // Standard library allocates pointer aligned to 8 or 16 byte boundary
-            // we don't need the low part of it
-            size_t v        = a >> 4;
+            uintptr_t v     = (a >> 3) | (a << (sizeof(uintptr_t)*8 - 3));
 
             // Generate two pseudo-random values
-            size_t h1       = v * 0x4ef1d1e9 + 0x46777db9;
-            size_t h2       = v * 0x4b0faf0d + 0x412318bb;
+            uintptr_t h1    = v * 0x4ef1d1e9 + 0x46777db9;
+            uintptr_t h2    = v * 0x4b0faf0d + 0x412318bb;
 
             // Shuffle data
             #ifdef ARCH_64BIT
@@ -93,7 +91,7 @@ namespace lsp
             return (a > b) ? 1 : (a < b) ? -1 : 0;
         }
 
-        void *char_copy_func(const void *ptr, size_t size)
+        void *char_clone_func(const void *ptr, size_t size)
         {
             return ::strdup(static_cast<const char *>(ptr));
         }
