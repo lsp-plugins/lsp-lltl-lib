@@ -11,6 +11,7 @@
 * Added lltl::iterator class for work with iterators.
 * Renamed copy function reference to clone for lltl::allocator_iface.
 * Renamed lltl::char_copy_func to lltl::char_clone_func. 
+* Updated build files to support producing of static library and pkgconfig files.
 
 === 0.5.2 ===
 * Added hash interface for objects.
