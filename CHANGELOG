@@ -12,6 +12,7 @@
 * Renamed copy function reference to clone for lltl::allocator_iface.
 * Renamed lltl::char_copy_func to lltl::char_clone_func. 
 * Updated build files to support producing of static library and pkgconfig files.
+* Updated headers to conform with LGPL3+ license.
 
 === 0.5.2 ===
 * Added hash interface for objects.
