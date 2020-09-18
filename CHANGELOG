@@ -13,6 +13,7 @@
 * Renamed lltl::char_copy_func to lltl::char_clone_func. 
 * Updated build files to support producing of static library and pkgconfig files.
 * Updated headers to conform with LGPL3+ license.
+* Updated build scripts that now use tags without prefixes first.
 
 === 0.5.2 ===
 * Added hash interface for objects.
