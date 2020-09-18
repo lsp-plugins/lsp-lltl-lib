@@ -2,12 +2,15 @@
 
 Low-level Template Library (LLTL) for basic data collections used in LSP Project
 
-This library does not aim to repeat STL. It aims to replace some imortant
+This library does not aim to repeat STL. It aims to replace some important
 parts of STL with generalized templates (generics). Since STL template 
 instantiation may blow up the code with many additional functions, this library
-tries to economy code space used by collections by generalizing data.
+tries to economy code space used by collections by generalizing data pointers.
 
-Let's look at the paradigm taking for example `std::vector`.
+The Paradigm
+======
+
+Let's look at the paradigm by taking `std::vector` as example.
 
 For STL `std::vector<char>` and `vector<int>` are different
 types, so they will have different instances, so the code:
@@ -42,16 +45,64 @@ lltl::darray<char> a;
 lltl::darray<int> b;
 
 a.push('a'); // Using one of the available instances of lsp::lltl::raw_darray::add()
-b.push(42); // Using the same instance of lsp::lltl::raw_darray::add()
+b.push(42);  // Using the same instance of lsp::lltl::raw_darray::add()
 
 ```
 
 **IMPORTANT!** Data structures do store plain data and do not call any constructors/destructors
-to initialize/free data. This responsibility is delegated to the caller code.
+to initialize/free data. This responsibility is delegated to the caller code (if not said otherwise).
 
-Currently available collections:
-  - darray - dynamic array of plain data structures of the same type.
-  - parray - dynamic array of pointers to any data structure of the same base type.
+Also, for automatic managment of objects and lookup, additional interfaces like `lsp::lltl::hash_spec`,
+`lsp::lltl::compare_spec` and `lsp::lltl::allocator_spec` should be defined.
+
+Library Contents
+======
+
+Available collections:
+  - `lltl::darray` - dynamic array of plain data structures of the same type.
+  - `lltl::parray` - dynamic array of pointers to any data structure of the same base type.
+  - `lltl::pphash` - pointer to pointer hash map, where keys are managed automatically and values
+                       are managed by caller.
+  - `lltl::phashset` - hash set of pointers, each pointer is managed by the caller.
+  - `lltl::bitset` - set of bits stored in the optimal for the CPU form for quick data processing 
+                       and memory economy. 
+
+Collection access:
+  - `lltl::iterator` - iterator class for sequential data access.
+
+Data manipulation interfaces:
+  - `lltl::hash_iface` - inferface for defining hash function for the object.
+  - `lltl::compare_iface` - interface for defining comparison routine for the object.
+  - `lltl::allocator_iface` - interface for defining allocation (creating cloned copy) 
+                                 and deallocation of the object.
+  - `lltl::initializer_iface` - interface for defining initialization, copying and finalization of
+                                 in-place stored objects. 
+
+Available hashing functions:
+  - `lltl::default_hash_func` - default hashing function used for any object if hashing specification
+                                   for the object is not defined.
+  - `lltl::ptr_hash_func` - hashing function for pointers (considering that it uniquely identifies the
+                               object the pointer points to).
+  - `lltl::char_hash_func` - hashing function for C strings present as `char *` or `const char *` types.
+  
+Available comparison functions:
+  - `lltl::char_cmp_func` - comparison function for C strings present as `char *` or `const char *` types.
+  - `lltl::ptr_cmp_func` - comparisoin function for pointers (considering that it uniquely identifies the
+                               object the pointer points to).
+
+Available allocation functions:
+  - `lltl::char_copy_func` - function for copying C strings
+
+Required specifications:
+  - `lltl::hash_spec` - specification for computing hash value of the object, required by:
+    - `lltl::pphash` for key object,
+    - `lltl::phashset` for value object
+  - `lltl::compare_spec` - specification for comparing two objects, required by:
+    - `lltl::pphash` for key object,
+    - `lltl::phashset` for value object
+  - `lltl::allocator_spec` - specification for allocation (creating copy) and deallocation
+                                of the object, required by:
+    - `lltl::pphash` for key object
 
 Requirements
 ======

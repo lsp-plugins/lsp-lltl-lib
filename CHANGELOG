@@ -2,6 +2,19 @@
 * RECENT CHANGES
 *******************************************************************************
 
+=== 0.5.3 ===
+* Added lltl::bitset collection with basic methods for storing bit flags.
+* Added lltl::phashset collection for quick managing of hash sets of objects.
+* Added lltl::ptr_hash_func and lltl::ptr_cmp_func functions for managing
+  object pointers which are considered to be unique for each object.
+* Added contains() method to lltl::parray and lltl::darray collections.
+* Added lltl::iterator class for work with iterators.
+* Renamed copy function reference to clone for lltl::allocator_iface.
+* Renamed lltl::char_copy_func to lltl::char_clone_func. 
+* Updated build files to support producing of static library and pkgconfig files.
+* Updated headers to conform with LGPL3+ license.
+* Updated build scripts that now use tags without prefixes first.
+
 === 0.5.2 ===
 * Added hash interface for objects.
 * Added default hashing function.

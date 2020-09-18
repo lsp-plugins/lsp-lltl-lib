@@ -1,8 +1,22 @@
 /*
- * parray.cpp
+ * Copyright (C) 2020 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2020 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
- *  Created on: 8 апр. 2020 г.
- *      Author: sadko
+ * This file is part of lsp-lltl-lib
+ * Created on: 8 апр. 2020 г.
+ *
+ * lsp-lltl-lib is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * lsp-lltl-lib is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with lsp-lltl-lib. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include <lsp-plug.in/lltl/parray.h>
@@ -400,42 +414,49 @@ UTEST_BEGIN("lltl", parray)
         UTEST_ASSERT(pv = x.set_n(4, vv));
         dump(x);
         UTEST_ASSERT(x.index_of(*pv) == 0);
+        UTEST_ASSERT(x.contains(*pv));
 
         // Append values
         vv[0] = s++; vv[1] = s++;
         UTEST_ASSERT(pv = x.append_n(2,  vv));
         dump(x);
         UTEST_ASSERT(x.index_of(*pv) == 4);
+        UTEST_ASSERT(x.contains(*pv));
 
         // Add values
         vv[0] = s++; vv[1] = s++; vv[2] = s++;
         UTEST_ASSERT(pv = x.append_n(3,  vv));
         dump(x);
         UTEST_ASSERT(x.index_of(*pv) == 6);
+        UTEST_ASSERT(x.contains(*pv));
 
         // Push values
         vv[0] = s++; vv[1] = s++; vv[2] = s++;
         UTEST_ASSERT(pv = x.push_n(3,  vv));
         dump(x);
         UTEST_ASSERT(x.index_of(*pv) == 9);
+        UTEST_ASSERT(x.contains(*pv));
 
         // Unshift values
         vv[0] = s++; vv[1] = s++;
         UTEST_ASSERT(pv = x.unshift_n(2,  vv));
         dump(x);
         UTEST_ASSERT(x.index_of(*pv) == 0);
+        UTEST_ASSERT(x.contains(*pv));
 
         // Prepend values
         vv[0] = s++; vv[1] = s++;
         UTEST_ASSERT(pv = x.prepend_n(2,  vv));
         dump(x);
         UTEST_ASSERT(x.index_of(*pv) == 0);
+        UTEST_ASSERT(x.contains(*pv));
 
         // Insert values
         vv[0] = s++; vv[1] = s++; vv[2] = s++; vv[3] = s++;
         UTEST_ASSERT(pv = x.insert_n(12,  4, vv));
         dump(x);
         UTEST_ASSERT(x.index_of(*pv) == 12);
+        UTEST_ASSERT(x.contains(*pv));
 
         // Check items
         static const int numbers[] = { 14, 15, 12, 13, 0, 1, 2, 3, 4, 5, 6, 7, 16, 17, 18, 19, 8, 9, 10, 11 };

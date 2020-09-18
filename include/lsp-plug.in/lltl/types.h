@@ -1,8 +1,22 @@
 /*
- * types.h
+ * Copyright (C) 2020 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2020 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
- *  Created on: 10 мая 2020 г.
- *      Author: sadko
+ * This file is part of lsp-lltl-lib
+ * Created on: 10 мая 2020 г.
+ *
+ * lsp-lltl-lib is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * lsp-lltl-lib is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with lsp-lltl-lib. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef LSP_PLUG_IN_LLTL_TYPES_H_
@@ -39,12 +53,12 @@ namespace lsp
         typedef     ssize_t (* compare_func_t)(const void *a, const void *b, size_t size);
 
         /**
-         * Copy function
+         * Copy function with dynamic memory allocation
          * @param src source object to copy, never NULL
          * @param size size of the object
          * @return pointer to copied object
          */
-        typedef     void *(* copy_func_t)(const void *src, size_t size);
+        typedef     void *(* clone_func_t)(const void *src, size_t size);
 
         /**
          * Resource destruction and freeing function
@@ -54,6 +68,28 @@ namespace lsp
         typedef     void (* free_func_t)(void *ptr);
 
         /**
+         * Initialization function
+         * @param dst destination object to initialize
+         * @param size size of object
+         */
+        typedef     void *(* init_func_t)(void *dst, size_t size);
+
+        /**
+         * Finalization function
+         * @param dst destination object to finalize
+         * @param size size of object
+         */
+        typedef     void  (* fini_func_t)(void *dst, size_t size);
+
+        /**
+         * Copying function with statically allocated memory
+         * @param dst destination object to perform copy
+         * @param src source object
+         * @param size size of object
+         */
+        typedef     void  (* copy_func_t)(void *dst, const void *src, size_t size);
+
+        /**
          * Default hashing function
          *
          * @param ptr pointer to the object to retrieve hash value
@@ -61,6 +97,16 @@ namespace lsp
          * @return hash value
          */
         size_t      default_hash_func(const void *ptr, size_t size);
+
+        /**
+         * Default hashing function for raw pointers (considering pointer
+         * being uniquely identifying object)
+         *
+         * @param ptr pointer to the object to compute the hash value
+         * @param size size of the object in bytes (not used)
+         * @return hash value
+         */
+        size_t      ptr_hash_func(const void *ptr, size_t size);
 
         /**
          * Hash function for computing C string hash
@@ -80,12 +126,22 @@ namespace lsp
         ssize_t     char_cmp_func(const void *a, const void *b, size_t size);
 
         /**
+         * Comparison function for raw pointers (considering pointer
+         * being uniquely identifying object)
+         * @param a pointer a
+         * @param b pointer b
+         * @param size size of object, not used
+         * @return comparison result
+         */
+        ssize_t     ptr_cmp_func(const void *a, const void *b, size_t size);
+
+        /**
          * Copying character data (C string)
          * @param ptr pointer to character string
          * @param size size of char type
          * @return pointer to allocated C string
          */
-        void       *char_copy_func(const void *ptr, size_t size);
+        void       *char_clone_func(const void *ptr, size_t size);
 
         /**
          * Hash interface: function to perform hashing of the non-NULL object
@@ -104,12 +160,22 @@ namespace lsp
         };
 
         /**
-         * Allocator interface: functions to perform copying and destruction of objects
+         * Allocator interface: functions to perform copying and destruction of dynamic objects
          */
         struct allocator_iface
         {
-            copy_func_t         copy;       // Copy function
+            clone_func_t        clone;      // Copy function
             free_func_t         free;       // Free function
+        };
+
+        /**
+         * Interface for in-place stored objects
+         */
+        struct initializer_iface
+        {
+            init_func_t         init;       // Initialization function
+            fini_func_t         fini;       // Finalization function
+            copy_func_t         copy;       // Copy function
         };
     }
 }

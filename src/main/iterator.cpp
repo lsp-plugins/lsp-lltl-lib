@@ -3,7 +3,7 @@
  *           (C) 2020 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-lltl-lib
- * Created on: 8 апр. 2020 г.
+ * Created on: 17 авг. 2020 г.
  *
  * lsp-lltl-lib is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -19,23 +19,39 @@
  * along with lsp-lltl-lib. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef LSP_PLUG_IN_LLTL_VERSION_H_
-#define LSP_PLUG_IN_LLTL_VERSION_H_
+#include <lsp-plug.in/lltl/iterator.h>
 
-#define LSP_LLTL_LIB_MAJOR      0
-#define LSP_LLTL_LIB_MINOR      5
-#define LSP_LLTL_LIB_MICRO      3
+namespace lsp
+{
+    namespace lltl
+    {
+        raw_iterator *raw_iterator::reference(raw_iterator *src)
+        {
+            if (src == NULL)
+                return NULL;
+            ++src->refs;
+            return src;
+        }
 
-#ifdef LSP_LLTL_LIB_BUILTIN
-    #define LSP_LLTL_LIB_EXPORT
-    #define LSP_LLTL_LIB_CEXPORT
-    #define LSP_LLTL_LIB_IMPORT         LSP_SYMBOL_IMPORT
-    #define LSP_LLTL_LIB_CIMPORT        LSP_CSYMBOL_IMPORT
-#else
-    #define LSP_LLTL_LIB_EXPORT         LSP_SYMBOL_EXPORT
-    #define LSP_LLTL_LIB_CEXPORT        LSP_CSYMBOL_EXPORT
-    #define LSP_LLTL_LIB_IMPORT         LSP_SYMBOL_IMPORT
-    #define LSP_LLTL_LIB_CIMPORT        LSP_CSYMBOL_IMPORT
-#endif
+        raw_iterator *raw_iterator::dereference(raw_iterator *src)
+        {
+            if (src != NULL)
+            {
+                if ((--src->refs) <= 0)
+                    ::free(src);
+            }
 
-#endif /* LSP_PLUG_IN_LLTL_VERSION_H_ */
+            return NULL;
+        }
+
+        raw_iterator *raw_iterator::replace(raw_iterator *xold, raw_iterator *xnew)
+        {
+            if (xold == xnew)
+                return xold;
+
+            raw_iterator *ref = reference(xnew);
+            dereference(xold);
+            return ref;
+        }
+    }
+}

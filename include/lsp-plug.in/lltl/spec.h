@@ -1,8 +1,22 @@
 /*
- * spec.h
+ * Copyright (C) 2020 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2020 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
- *  Created on: 9 июн. 2020 г.
- *      Author: sadko
+ * This file is part of lsp-lltl-lib
+ * Created on: 9 июн. 2020 г.
+ *
+ * lsp-lltl-lib is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * lsp-lltl-lib is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with lsp-lltl-lib. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef LSP_PLUG_IN_LLTL_SPEC_H_
@@ -15,6 +29,24 @@ namespace lsp
 {
     namespace lltl
     {
+        //---------------------------------------------------------------------
+        // Interface for pointers
+        struct ptr_hash_iface: public hash_iface
+        {
+            inline ptr_hash_iface()
+            {
+                hash        = ptr_hash_func;
+            }
+        };
+
+        struct ptr_compare_iface: public compare_iface
+        {
+            inline ptr_compare_iface()
+            {
+                compare     = ptr_cmp_func;
+            }
+        };
+
         //---------------------------------------------------------------------
         // Default specializations
 
@@ -50,7 +82,7 @@ namespace lsp
             {
                 static inline void *operator new(size_t size, void *ptr) { return ptr; }
 
-                static void *copy_func(const void *src, size_t size)
+                static void *clone_func(const void *src, size_t size)
                 {
                     void *dst = ::malloc(size);
                     return (dst) ? new(dst) T(static_cast<const T *>(src)) : NULL;
@@ -64,7 +96,7 @@ namespace lsp
 
                 inline allocator_spec()
                 {
-                    copy        = copy_func;
+                    clone       = clone_func;
                     free        = free_func;
                 }
             };
@@ -94,7 +126,7 @@ namespace lsp
             {
                 inline allocator_spec()
                 {
-                    copy        = char_copy_func;
+                    clone       = char_clone_func;
                     free        = ::free;
                 }
             };

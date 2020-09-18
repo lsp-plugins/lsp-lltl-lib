@@ -1,15 +1,41 @@
+#
+# Copyright (C) 2020 Linux Studio Plugins Project <https://lsp-plug.in/>
+#           (C) 2020 Vladimir Sadovnikov <sadko4u@gmail.com>
+#
+# This file is part of lsp-lltl-lib
+#
+# lsp-lltl-lib is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# any later version.
+#
+# lsp-lltl-lib is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with lsp-lltl-lib.  If not, see <https://www.gnu.org/licenses/>.
+#
+
 # Determine tools
 ifeq ($(PLATFORM),OpenBSD)
   X_CC_TOOL          := egcc
   X_CXX_TOOL         := eg++
+  X_AS_TOOL          := gas
+  X_AR_TOOL          := ar
 else
   X_CC_TOOL          := gcc
   X_CXX_TOOL         := g++
+  X_AS_TOOL          := as
+  X_AR_TOOL          := ar
 endif
 
 # Define tool variables
 CC                 := $(X_CC_TOOL)
 CXX                := $(X_CXX_TOOL)
+AS                 := $(X_AS_TOOL)
+AR                 := $(X_AR_TOOL)
 LD                 := ld
 GIT                := git
 INSTALL            := install
@@ -92,7 +118,7 @@ CFLAGS             := \
 CXXFLAGS           := \
   $(CXXFLAGS_EXT) \
   -std=c++98 \
-  -exceptions \
+  -fno-exceptions \
   -fno-rtti \
   -fdata-sections \
   -ffunction-sections \
@@ -106,13 +132,15 @@ EXE_FLAGS          := $(EXE_FLAGS_EXT) $(FLAG_RELRO) -Wl,--gc-sections
 SO_FLAGS           := $(SO_FLAGS_EXT) $(FLAG_RELRO) -Wl,--gc-sections -shared -Llibrary $(FLAG_STDLIB) -fPIC 
 
 TOOL_VARS := \
-  CC CXX LD GIT INSTALL \
+  AS CC CXX LD GIT INSTALL \
   CFLAGS CXXFLAGS LDFLAGS EXE_FLAGS SO_FLAGS \
   INCLUDE
 
 .PHONY: toolvars
 toolvars:
 	@echo "List of tool variables:"
+	@echo "  AR                        Archiver tool"
+	@echo "  AS                        Assembler tool"
 	@echo "  CC                        C compiler execution command line"
 	@echo "  CFLAGS                    C compiler build flags"
 	@echo "  CXX                       C++ compiler execution command line"

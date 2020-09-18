@@ -1,8 +1,22 @@
 /*
- * cstorage.h
+ * Copyright (C) 2020 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2020 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
- *  Created on: 7 апр. 2020 г.
- *      Author: sadko
+ * This file is part of lsp-lltl-lib
+ * Created on: 7 апр. 2020 г.
+ *
+ * lsp-lltl-lib is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * lsp-lltl-lib is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with lsp-lltl-lib. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef LSP_PLUG_IN_LLTL_DARRAY_H_
@@ -124,6 +138,7 @@ namespace lsp
                     inline T *array()                                               { return cast(v.vItems); }
                     inline T *slice(size_t idx, size_t size)                        { return cast(v.slice(idx, size));  }
                     inline ssize_t index_of(const T *p) const                       { return v.index_of(p);             }
+                    inline bool contains(const T *p) const                          { return v.index_of(p) >= 0;        }
 
                 public:
                     // Accessing elements (const)

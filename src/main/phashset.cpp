@@ -3,7 +3,7 @@
  *           (C) 2020 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-lltl-lib
- * Created on: 11 мая 2020 г.
+ * Created on: 31 июл. 2020 г.
  *
  * lsp-lltl-lib is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -19,20 +19,18 @@
  * along with lsp-lltl-lib. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <lsp-plug.in/lltl/pphash.h>
-#include <stdlib.h>
+#include <lsp-plug.in/lltl/phashset.h>
+#include <lsp-plug.in/common/debug.h>
 
 namespace lsp
 {
     namespace lltl
     {
-        void raw_pphash::destroy_bin(bin_t *bin)
+        void raw_phashset::destroy_bin(bin_t *bin)
         {
             for (tuple_t *curr = bin->data; curr != NULL; )
             {
                 tuple_t *next   = curr->next;
-                if (curr->key != NULL)
-                    alloc.free(curr->key);
                 ::free(curr);
                 curr            = next;
             }
@@ -40,17 +38,17 @@ namespace lsp
             bin->data   = NULL;
         }
 
-        raw_pphash::tuple_t *raw_pphash::find_tuple(const void *key, size_t hash)
+        raw_phashset::tuple_t *raw_phashset::find_tuple(const void *value, size_t hash)
         {
             if (bins == NULL)
                 return NULL;
             bin_t *bin = &bins[hash & (cap - 1)];
 
-            if (key != NULL)
+            if (value != NULL)
             {
                 for (tuple_t *curr = bin->data; curr != NULL; curr = curr->next)
                 {
-                    if ((curr->hash == hash) && (cmp.compare(key, curr->key, ksize) == 0))
+                    if ((curr->hash == hash) && (cmp.compare(value, curr->value, vsize) == 0))
                         return curr;
                 }
             }
@@ -58,25 +56,25 @@ namespace lsp
             {
                 for (tuple_t *curr = bin->data; curr != NULL; curr = curr->next)
                 {
-                    if (curr->key == NULL)
+                    if (curr->value == NULL)
                         return curr;
                 }
             }
             return NULL;
         }
 
-        raw_pphash::tuple_t *raw_pphash::remove_tuple(const void *key, size_t hash)
+        raw_phashset::tuple_t *raw_phashset::remove_tuple(const void *value, size_t hash)
         {
             if (bins == NULL)
                 return NULL;
             bin_t *bin = &bins[hash & (cap - 1)];
 
-            if (key != NULL)
+            if (value != NULL)
             {
                 for (tuple_t **pcurr = &bin->data; *pcurr != NULL; )
                 {
                     tuple_t *curr = *pcurr;
-                    if ((curr->hash == hash) && (cmp.compare(key, curr->key, ksize) == 0))
+                    if ((curr->hash == hash) && (cmp.compare(value, curr->value, vsize) == 0))
                     {
                         *pcurr      = curr->next;
                         curr->next  = NULL;
@@ -92,7 +90,7 @@ namespace lsp
                 for (tuple_t **pcurr = &bin->data; *pcurr != NULL; )
                 {
                     tuple_t *curr = *pcurr;
-                    if (curr->key == NULL)
+                    if (curr->value == NULL)
                     {
                         *pcurr      = curr->next;
                         curr->next  = NULL;
@@ -106,23 +104,12 @@ namespace lsp
             return NULL;
         }
 
-        raw_pphash::tuple_t *raw_pphash::create_tuple(const void *key, size_t hash)
+        raw_phashset::tuple_t *raw_phashset::create_tuple(size_t hash)
         {
             // Allocate tuple
-            tuple_t *tuple  = reinterpret_cast<tuple_t *>(::malloc(sizeof(tuple_t)));
+            tuple_t *tuple  = static_cast<tuple_t *>(::malloc(sizeof(tuple_t)));
             if (tuple == NULL)
                 return NULL;
-
-            // Create copy of the key
-            void *kcopy     = NULL;
-            if (key != NULL)
-            {
-                if ((kcopy = alloc.clone(key, ksize)) == NULL)
-                {
-                    ::free(tuple);
-                    return NULL;
-                }
-            }
 
             // Need to grow?
             if (size >= cap)
@@ -130,8 +117,6 @@ namespace lsp
                 if (!grow())
                 {
                     ::free(tuple);
-                    if (kcopy != NULL)
-                        alloc.free(kcopy);
                     return NULL;
                 }
             }
@@ -142,14 +127,13 @@ namespace lsp
             ++size;
 
             tuple->hash     = hash;
-            tuple->key      = kcopy;
             tuple->next     = bin->data;
             bin->data       = tuple;
 
             return tuple;
         }
 
-        bool raw_pphash::grow()
+        bool raw_phashset::grow()
         {
             bin_t *xbin, *ybin;
             size_t ncap, mask;
@@ -157,7 +141,7 @@ namespace lsp
             // No previous allocations?
             if (cap == 0)
             {
-                xbin            = reinterpret_cast<bin_t *>(::malloc(0x10 * sizeof(bin_t)));
+                xbin            = static_cast<bin_t *>(::malloc(0x10 * sizeof(bin_t)));
                 if (xbin == NULL)
                     return false; // Very bad things?
 
@@ -174,7 +158,7 @@ namespace lsp
 
             // Twice increase the capacity of hash
             ncap            = cap << 1;
-            xbin            = reinterpret_cast<bin_t *>(::realloc(bins, ncap * sizeof(bin_t)));
+            xbin            = static_cast<bin_t *>(::realloc(bins, ncap * sizeof(bin_t)));
             if (xbin == NULL)
                 return false; // Very bad things?
 
@@ -212,7 +196,7 @@ namespace lsp
             return true;
         }
 
-        void raw_pphash::flush()
+        void raw_phashset::flush()
         {
             // Drop all bins
             if (bins != NULL)
@@ -227,7 +211,7 @@ namespace lsp
             cap     = 0;
         }
 
-        void raw_pphash::clear()
+        void raw_phashset::clear()
         {
             // Just reset the size value for each bin
             if (bins != NULL)
@@ -239,64 +223,103 @@ namespace lsp
             size    = 0;
         }
 
-        void raw_pphash::swap(raw_pphash *src)
+        void raw_phashset::swap(raw_phashset *src)
         {
-            raw_pphash tmp  = *this;
-            *this           = *src;
-            *src            = tmp;
+            raw_phashset tmp    = *this;
+            *this               = *src;
+            *src                = tmp;
         }
 
-        void *raw_pphash::get(const void *key, void *dfl)
+        void *raw_phashset::get(const void *value, void *dfl)
         {
-            size_t h        = (key != NULL) ? hash.hash(key, ksize) : 0;
-            tuple_t *tuple  = find_tuple(key, h);
+            size_t h        = (value != NULL) ? hash.hash(value, vsize) : 0;
+            tuple_t *tuple  = find_tuple(value, h);
             return (tuple != NULL) ? tuple->value : dfl;
         }
 
-        void **raw_pphash::wbget(const void *key)
+        void **raw_phashset::wbget(const void *value)
         {
-            size_t h        = (key != NULL) ? hash.hash(key, ksize) : 0;
-            tuple_t *tuple  = find_tuple(key, h);
+            size_t h        = (value != NULL) ? hash.hash(value, vsize) : 0;
+            tuple_t *tuple  = find_tuple(value, h);
             return (tuple != NULL) ? &tuple->value : NULL;
         }
 
-        void **raw_pphash::put(const void *key, void *value, void **ov)
+        void **raw_phashset::put(void *value, void **ret)
         {
-            size_t h        = (key != NULL) ? hash.hash(key, ksize) : 0;
+            size_t h        = (value != NULL) ? hash.hash(value, vsize) : 0;
 
             // Find tuple
-            tuple_t *tuple  = find_tuple(key, h);
+            tuple_t *tuple  = find_tuple(value, h);
             if (tuple != NULL)
             {
-                if (ov != NULL)
-                    *ov         = tuple->value;
+                if (ret != NULL)
+                    *ret        = tuple->value;
                 tuple->value    = value;
                 return &tuple->value;
             }
 
             // Not found, allocate new tuple
-            tuple           = create_tuple(key, h);
+            tuple           = create_tuple(h);
             if (tuple == NULL)
                 return NULL;
 
             tuple->value    = value;
-            if (ov != NULL)
-                *ov         = NULL;
+            if (ret != NULL)
+                *ret        = NULL;
 
             return &tuple->value;
         }
 
-        void **raw_pphash::create(const void *key, void *value)
+        void *raw_phashset::any()
         {
-            size_t h        = (key != NULL) ? hash.hash(key, ksize) : 0;
+            if (size <= 0)
+                return NULL;
+
+            for (size_t i=0; i<cap; ++i)
+            {
+                bin_t *b = &bins[i];
+                if (b->data != NULL)
+                    return b->data->value;
+            }
+
+            return NULL;
+        }
+
+        bool raw_phashset::toggle(void *value)
+        {
+            size_t h        = (value != NULL) ? hash.hash(value, vsize) : 0;
+
+            // Try to remove tuple
+            tuple_t *tuple  = remove_tuple(value, h);
+            if (tuple != NULL)
+            {
+                // Free tuple data
+                ::free(tuple);
+            }
+            else
+            {
+                // Create new tuple
+                tuple           = create_tuple(h);
+                if (tuple == NULL)
+                    return false;
+
+                tuple->value    = value;
+            }
+
+            return true;
+        }
+
+        void **raw_phashset::create(void *value)
+        {
+            size_t h        = (value != NULL) ? hash.hash(value, vsize) : 0;
 
             // Find tuple
-            tuple_t *tuple  = find_tuple(key, h);
+            tuple_t *tuple  = find_tuple(value, h);
             if (tuple != NULL)
                 return NULL;
 
             // Create new tuple
-            tuple           = create_tuple(key, h);
+            tuple           = create_tuple(h);
             if (tuple == NULL)
                 return NULL;
 
@@ -305,27 +328,12 @@ namespace lsp
             return &tuple->value;
         }
 
-        void **raw_pphash::replace(const void *key, void *value, void **ov)
+        bool raw_phashset::remove(const void *value, void **ov)
         {
-            size_t h        = (key != NULL) ? hash.hash(key, ksize) : 0;
+            size_t h        = (value != NULL) ? hash.hash(value, vsize) : 0;
 
             // Find tuple
-            tuple_t *tuple  = find_tuple(key, h);
-            if (tuple == NULL)
-                return NULL;
-
-            if (ov != NULL)
-                *ov         = tuple->value;
-            tuple->value    = value;
-            return &tuple->value;
-        }
-
-        bool raw_pphash::remove(const void *key, void **ov)
-        {
-            size_t h        = (key != NULL) ? hash.hash(key, ksize) : 0;
-
-            // Find tuple
-            tuple_t *tuple  = remove_tuple(key, h);
+            tuple_t *tuple  = remove_tuple(value, h);
             if (tuple == NULL)
                 return false;
 
@@ -333,40 +341,11 @@ namespace lsp
                 *ov         = tuple->value;
 
             // Free tuple data
-            if (tuple->key != NULL)
-                alloc.free(tuple->key);
             ::free(tuple);
             return true;
         }
 
-        bool raw_pphash::keys(raw_parray *k)
-        {
-            raw_parray kt;
-
-            // Initialize collection
-            kt.init();
-            if (!kt.grow(size))
-                return false;
-
-            // Make a snapshot
-            for (size_t i=0; i<cap; ++i)
-                for (tuple_t *t = bins[i].data; t != NULL; t = t->next)
-                {
-                    if (!kt.append(t->key))
-                    {
-                        kt.flush();
-                        return false;
-                    }
-                }
-
-            // Return collection data
-            kt.swap(k);
-            kt.flush();
-
-            return true;
-        }
-
-        bool raw_pphash::values(raw_parray *v)
+        bool raw_phashset::values(raw_parray *v)
         {
             raw_parray kv;
 
@@ -392,46 +371,5 @@ namespace lsp
 
             return true;
         }
-
-        bool raw_pphash::items(raw_parray *k, raw_parray *v)
-        {
-            raw_parray kt, vt;
-
-            // Initialize collections
-            kt.init();
-            vt.init();
-
-            if (!kt.grow(size))
-                return false;
-            if (!vt.grow(size))
-            {
-                kt.flush();
-                return false;
-            }
-
-            // Make a snapshot
-            for (size_t i=0; i<cap; ++i)
-                for (tuple_t *t = bins[i].data; t != NULL; t = t->next)
-                {
-                    if ((!kt.append(t->key)) ||
-                        (!vt.append(t->value)))
-                    {
-                        kt.flush();
-                        vt.flush();
-                        return false;
-                    }
-                }
-
-            // Return collection data
-            kt.swap(k);
-            vt.swap(v);
-
-            kt.flush();
-            vt.flush();
-
-            return true;
-        }
     }
 }
-
-
