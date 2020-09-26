@@ -153,7 +153,7 @@ Usage
 
 An example of transaction-safe widget creation:
 
-```
+```C++
 #include <stdlib.h>
 #include <lsp-plug.in/lltl/parray.h>
 
