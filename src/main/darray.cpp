@@ -187,7 +187,7 @@ namespace lsp
             return vItems;
         }
 
-        uint8_t *raw_darray::iset(size_t idx, const void *src, size_t n)
+        uint8_t *raw_darray::iset(size_t idx, size_t n, const void *src)
         {
             if ((idx + n) > nItems)
                 return NULL;

@@ -59,7 +59,7 @@ namespace lsp
                 uint8_t    *get_n(size_t idx, size_t size, void *dst);
 
                 uint8_t    *set(size_t n, const void *src);
-                uint8_t    *iset(size_t index, const void *src, size_t n);
+                uint8_t    *iset(size_t index, size_t n, const void *src);
                 uint8_t    *append(size_t n);
                 uint8_t    *append(size_t n, const void *src);
                 uint8_t    *insert(size_t index, size_t n);
@@ -159,7 +159,7 @@ namespace lsp
                     inline T *prepend()                                             { return cast(v.insert(0, 1));      }
                     inline T *insert(size_t idx)                                    { return cast(v.insert(idx, 1));    }
                     inline T *set(size_t idx, const T *x)                           { return cast(v.iset(idx, x, 1));   }
-                    inline T *set(size_t idx, const T &x)                           { return cast(v.iset(idx, &x, 1));  }
+                    inline T *set(size_t idx, const T &x)                           { return cast(v.iset(idx, 1, &x));  }
 
                     inline T *pop()                                                 { return cast(v.pop(1));            }
                     inline bool shift()                                             { return v.iremove(0, 1);           }
@@ -220,6 +220,7 @@ namespace lsp
                     inline T *unshift_n(size_t n, const T *x)                       { return cast(v.insert(0, n, x));   }
                     inline T *prepend_n(size_t n, const T *x)                       { return cast(v.insert(0, n, x));   }
                     inline T *insert_n(size_t idx, size_t n, const T *x)            { return cast(v.insert(idx, n, x)); }
+                    inline T *set_n(size_t idx, size_t n, const T *x)               { return cast(v.iset(idx, n, x));   }
 
                     inline T *pop_n(size_t n, T *x)                                 { return cast(v.pop(n, x));         }
                     inline T *shift_n(size_t n, T *x)                               { return cast(v.iremove(0, n, x));  }

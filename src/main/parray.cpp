@@ -155,7 +155,7 @@ namespace lsp
             return vItems;
         }
 
-        void **raw_parray::iset(size_t idx, void **src, size_t n)
+        void **raw_parray::iset(size_t idx, size_t n, void **src)
         {
             if ((idx + n) > nItems)
                 return NULL;
