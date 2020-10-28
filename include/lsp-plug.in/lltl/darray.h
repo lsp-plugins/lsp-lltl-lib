@@ -28,6 +28,7 @@
 #include <sys/types.h>
 
 #include <lsp-plug.in/lltl/version.h>
+#include <lsp-plug.in/lltl/spec.h>
 
 namespace lsp
 {
@@ -43,6 +44,13 @@ namespace lsp
                 uint8_t    *vItems;
                 size_t      nCapacity;
                 size_t      nSizeOf;
+
+            public:
+                typedef     int (* cmp_func_t)(const void *a, const void *b);
+
+            protected:
+                static int  closure_cmp(const void *a, const void *b, void *c);
+                static int  raw_cmp(const void *a, const void *b, void *c);
 
             public:
                 void        init(size_t n_sizeof);
@@ -74,6 +82,9 @@ namespace lsp
                 bool        iremove(size_t idx, size_t n);
                 uint8_t    *iremove(size_t idx, size_t n, void *dst);
                 uint8_t    *iremove(size_t idx, size_t n, raw_darray *cs);
+
+                void        qsort(cmp_func_t f);
+                void        qsort(sort_closure_t *c);
         };
 
         /**
@@ -91,6 +102,9 @@ namespace lsp
 
                     inline static T *cast(void *ptr)                                { return static_cast<T *>(ptr);         }
                     inline static const T *ccast(const void *ptr)                   { return static_cast<const T *>(ptr);   }
+
+                public:
+                    typedef int (* cmp_func_t)(const T *a, const T *b);
 
                 public:
                     explicit inline darray()
@@ -266,6 +280,34 @@ namespace lsp
                     inline T *shift_n(size_t n, darray<T> &x)                       { return shift_n(n, &x);                                    }
                     inline T *remove_n(size_t idx, size_t n, darray<T> &x)          { return remove_n(idx, n, &x);                              }
                     inline T *premove_n(const T *ptr, size_t n, darray<T> &x)       { return premove_n(ptr, n, &x);                             }
+
+                public:
+                    // Sorts
+                    inline void qsort(cmp_func_t cmp)                               { v.qsort(reinterpret_cast<raw_darray::cmp_func_t>(cmp));   }
+                    inline void qsort(compare_func_t cmp)
+                    {
+                        sort_closure_t c;
+                        c.compare       = cmp;
+                        c.size          = sizeof(T);
+                        v.qsort(&c);
+                    }
+
+                    inline void qsort(const compare_iface &cmp)
+                    {
+                        sort_closure_t c;
+                        c.compare       = cmp.compare;
+                        c.size          = sizeof(T);
+                        v.qsort(&c);
+                    }
+
+                    inline void qsort()
+                    {
+                        compare_spec<T> spec;
+                        sort_closure_t c;
+                        c.compare       = spec.compare;
+                        c.size          = sizeof(T);
+                        v.qsort(&c);
+                    }
 
                 public:
                     // Operators

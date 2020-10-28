@@ -441,6 +441,38 @@ namespace lsp
             return res;
         }
 
+        int raw_parray::closure_cmp(const void *a, const void *b, void *c)
+        {
+            sort_closure_t *sc = static_cast<sort_closure_t *>(c);
+            const void * const *_a = static_cast<const void * const *>(a);
+            const void * const *_b = static_cast<const void * const *>(b);
+            ssize_t res = sc->compare(*_a, *_b, sc->size);
+            return (res > 0) ? 1 : (res < 0) ? -1 : 0;
+        }
+
+        int raw_parray::raw_cmp(const void *a, const void *b, void *c)
+        {
+            cmp_func_t f = reinterpret_cast<cmp_func_t>(c);
+            const void * const *_a = static_cast<const void * const *>(a);
+            const void * const *_b = static_cast<const void * const *>(b);
+            return f(*_a, *_b);
+        }
+
+        void raw_parray::qsort(sort_closure_t *c)
+        {
+            qsort_r(vItems, nItems, sizeof(void *), closure_cmp, c);
+        }
+
+        void raw_parray::qsort(cmp_func_t f)
+        {
+            union
+            {
+                cmp_func_t f;
+                void *p;
+            } xf;
+            xf.f = f;
+            ::qsort_r(vItems, nItems, sizeof(void *), raw_cmp, xf.p);
+        }
     }
 }
 

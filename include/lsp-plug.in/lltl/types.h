@@ -47,7 +47,7 @@ namespace lsp
          * Comparison function
          * @param a pointer to object a, never NULL
          * @param b pointer to object b, never NULL
-         * @param size size of objects a and b
+         * @param size size of type for objects a and b
          * @return negative value if a less than b, positive if a is greater than b, 0 otherwise
          */
         typedef     ssize_t (* compare_func_t)(const void *a, const void *b, size_t size);
@@ -176,6 +176,15 @@ namespace lsp
             init_func_t         init;       // Initialization function
             fini_func_t         fini;       // Finalization function
             copy_func_t         copy;       // Copy function
+        };
+
+        /**
+         * Interface for sorting
+         */
+        struct sort_closure_t
+        {
+            size_t          size;
+            compare_func_t  compare;
         };
     }
 }

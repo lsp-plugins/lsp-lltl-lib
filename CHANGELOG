@@ -4,6 +4,7 @@
 
 === 0.5.4 ===
 * Added set_n to lltl::parray and lltl::darray with index specification.
+* Added qsort() methods for lltl::parray and lltl::darray.
 
 === 0.5.3 ===
 * Added lltl::bitset collection with basic methods for storing bit flags.

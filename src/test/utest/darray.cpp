@@ -22,6 +22,21 @@
 #include <lsp-plug.in/lltl/darray.h>
 #include <lsp-plug.in/test-fw/utest.h>
 
+namespace
+{
+    static int test_int_cmp(const int *a, const int *b)
+    {
+        return *a - *b;
+    }
+
+    static ssize_t test_int_cmp2(const void *a, const void *b, size_t size)
+    {
+        const int *_a = static_cast<const int *>(a);
+        const int *_b = static_cast<const int *>(b);
+        return *_b - *_a;
+    }
+}
+
 UTEST_BEGIN("lltl", darray)
 
     typedef struct large_struct_t
@@ -756,6 +771,39 @@ UTEST_BEGIN("lltl", darray)
         UTEST_ASSERT(!::memcmp(x.get(1), a, sizeof(large_struct_t)));
     }
 
+    void test_sort()
+    {
+        static const ssize_t N = 4;
+
+        printf("Testing qsort...\n");
+
+        int v[N];
+        for (ssize_t i=0; i<N; ++i)
+            v[i]    = N - i;
+
+        lltl::darray<int> a;
+        for (ssize_t i=0; i<N; ++i)
+            UTEST_ASSERT(a.add(&v[i]));
+        for (size_t i=0; i<N; ++i)
+            UTEST_ASSERT(*(a.get(i)) == v[i]);
+
+        a.qsort(test_int_cmp);
+        for (ssize_t i=0; i<N; ++i)
+        {
+            UTEST_ASSERT(*(a.get(i)) == v[N-i-1]);
+            printf("%d ", *a.get(i));
+        }
+        printf("\n");
+
+        a.qsort(test_int_cmp2);
+        for (ssize_t i=0; i<N; ++i)
+        {
+            UTEST_ASSERT(*(a.get(i)) == v[i]);
+            printf("%d ", *a.get(i));
+        }
+        printf("\n");
+    }
+
     UTEST_MAIN
     {
         test_single();
@@ -765,6 +813,7 @@ UTEST_BEGIN("lltl", darray)
         test_multiple_darray();
         test_xswap();
         test_long_xswap();
+        test_sort();
     }
 
 UTEST_END
