@@ -187,7 +187,7 @@ namespace lsp
             return vItems;
         }
 
-        uint8_t *raw_darray::iset(size_t idx, const void *src, size_t n)
+        uint8_t *raw_darray::iset(size_t idx, size_t n, const void *src)
         {
             if ((idx + n) > nItems)
                 return NULL;
@@ -412,6 +412,35 @@ namespace lsp
                 nItems          = size;
 
             return res;
+        }
+
+        int raw_darray::closure_cmp(const void *a, const void *b, void *c)
+        {
+            sort_closure_t *sc = static_cast<sort_closure_t *>(c);
+            ssize_t res = sc->compare(a, b, sc->size);
+            return (res > 0) ? 1 : (res < 0) ? -1 : 0;
+        }
+
+        int raw_darray::raw_cmp(const void *a, const void *b, void *c)
+        {
+            cmp_func_t f = reinterpret_cast<cmp_func_t>(c);
+            return f(a, b);
+        }
+
+        void raw_darray::qsort(sort_closure_t *c)
+        {
+            qsort_r(vItems, nItems, nSizeOf, closure_cmp, c);
+        }
+
+        void raw_darray::qsort(cmp_func_t f)
+        {
+            union
+            {
+                cmp_func_t f;
+                void *p;
+            } xf;
+            xf.f = f;
+            ::qsort_r(vItems, nItems, nSizeOf, raw_cmp, xf.p);
         }
     }
 }
