@@ -20,7 +20,7 @@
  */
 
 #include <lsp-plug.in/lltl/darray.h>
-#include <stdlib.h>
+#include <lsp-plug.in/stdlib/stdlib.h>
 
 namespace lsp
 {
@@ -429,7 +429,7 @@ namespace lsp
 
         void raw_darray::qsort(sort_closure_t *c)
         {
-            qsort_r(vItems, nItems, nSizeOf, closure_cmp, c);
+            lsp::qsort_r(vItems, nItems, nSizeOf, closure_cmp, c);
         }
 
         void raw_darray::qsort(cmp_func_t f)
@@ -440,7 +440,7 @@ namespace lsp
                 void *p;
             } xf;
             xf.f = f;
-            ::qsort_r(vItems, nItems, nSizeOf, raw_cmp, xf.p);
+            lsp::qsort_r(vItems, nItems, nSizeOf, raw_cmp, xf.p);
         }
     }
 }

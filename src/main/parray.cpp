@@ -20,7 +20,7 @@
  */
 
 #include <lsp-plug.in/lltl/parray.h>
-#include <stdlib.h>
+#include <lsp-plug.in/stdlib/stdlib.h>
 
 namespace lsp
 {
@@ -460,7 +460,7 @@ namespace lsp
 
         void raw_parray::qsort(sort_closure_t *c)
         {
-            qsort_r(vItems, nItems, sizeof(void *), closure_cmp, c);
+            lsp::qsort_r(vItems, nItems, sizeof(void *), closure_cmp, c);
         }
 
         void raw_parray::qsort(cmp_func_t f)
@@ -471,7 +471,7 @@ namespace lsp
                 void *p;
             } xf;
             xf.f = f;
-            ::qsort_r(vItems, nItems, sizeof(void *), raw_cmp, xf.p);
+            lsp::qsort_r(vItems, nItems, sizeof(void *), raw_cmp, xf.p);
         }
     }
 }
