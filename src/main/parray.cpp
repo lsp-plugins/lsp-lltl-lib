@@ -455,7 +455,8 @@ namespace lsp
             cmp_func_t f = reinterpret_cast<cmp_func_t>(c);
             const void * const *_a = static_cast<const void * const *>(a);
             const void * const *_b = static_cast<const void * const *>(b);
-            return f(*_a, *_b);
+            ssize_t res = f(*_a, *_b);
+            return (res > 0) ? 1 : (res < 0) ? -1 : 0;
         }
 
         void raw_parray::qsort(sort_closure_t *c)

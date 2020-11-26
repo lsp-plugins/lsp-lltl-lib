@@ -40,7 +40,7 @@ namespace lsp
         struct raw_parray
         {
             public:
-                typedef     int (* cmp_func_t)(const void *a, const void *b);
+                typedef     ssize_t (* cmp_func_t)(const void *a, const void *b);
 
             public:
                 size_t      nItems;
@@ -107,7 +107,7 @@ namespace lsp
                     parray<T> & operator = (const parray<T> & src);                 // Disable copying
 
                 public:
-                    typedef int (* cmp_func_t)(const T *a, const T *b);
+                    typedef ssize_t (* cmp_func_t)(const T *a, const T *b);
 
                 private:
                     mutable raw_parray    v;
