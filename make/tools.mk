@@ -80,10 +80,7 @@ ifeq ($(TEST),1)
   CFLAGS_EXT         += -DLSP_TESTING
   CXXFLAGS_EXT       += -DLSP_TESTING
 else
-  ifeq ($(ARTIFACT_EXPORT_ALL),1)
-    CFLAGS_EXT         += -fvisibility=default
-    CXXFLAGS_EXT       += -fvisibility=default
-  else
+  ifneq ($(ARTIFACT_EXPORT_ALL),1)
     CFLAGS_EXT         += -fvisibility=hidden
     CXXFLAGS_EXT       += -fvisibility=hidden
   endif
