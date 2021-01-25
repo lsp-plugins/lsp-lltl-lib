@@ -43,16 +43,20 @@ INSTALL            := install
 # Patch flags and tools
 FLAG_RELRO          = -Wl,-z,relro,-z,now
 FLAG_STDLIB         = -lc
-ifeq ($(PLATFORM),Solaris)
-  FLAG_RELRO              =
-  LD                      = gld
-else ifeq ($(PLATFORM),Windows)
-  FLAG_RELRO              =
-  FLAG_STDLIB             =
-endif
-
 CFLAGS_EXT          =
 CXXFLAGS_EXT        =
+LDFLAGS_EXT         =
+
+ifeq ($(PLATFORM),Solaris)
+  FLAG_RELRO          =
+  LD                  = gld
+else ifeq ($(PLATFORM),Windows)
+  FLAG_RELRO          =
+  FLAG_STDLIB         =
+else ifeq ($(PLATFORM),BSD)
+  EXE_FLAGS_EXT      += -L/usr/local/lib
+  SO_FLAGS_EXT       += -L/usr/local/lib
+endif
 
 ifeq ($(DEBUG),1)
   CFLAGS_EXT         += -O0 -g3 -DLSP_DEBUG
@@ -76,7 +80,10 @@ ifeq ($(TEST),1)
   CFLAGS_EXT         += -DLSP_TESTING
   CXXFLAGS_EXT       += -DLSP_TESTING
 else
-  ifneq ($(ARTIFACT_EXPORT_ALL),1)
+  ifeq ($(ARTIFACT_EXPORT_ALL),1)
+    CFLAGS_EXT         += -fvisibility=default
+    CXXFLAGS_EXT       += -fvisibility=default
+  else
     CFLAGS_EXT         += -fvisibility=hidden
     CXXFLAGS_EXT       += -fvisibility=hidden
   endif
