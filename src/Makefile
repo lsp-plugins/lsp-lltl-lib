@@ -117,7 +117,6 @@ $(CXX_OBJ_MAIN) $(CXX_OBJ_EXT) $(CXX_OBJ_TEST):
 # Producing large object files
 $(ARTIFACT_OBJ): $(CXX_OBJ)
 	@echo "  $(LD)   [$(ARTIFACT_NAME)] $(notdir $(ARTIFACT_OBJ))"
-	@echo $(LD) -o $(ARTIFACT_OBJ) -r $(CXX_OBJ)
 	@$(LD) -o $(ARTIFACT_OBJ) -r $(CXX_OBJ)
 	
 # Linking
