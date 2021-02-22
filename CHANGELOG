@@ -2,6 +2,8 @@
 * RECENT CHANGES
 *******************************************************************************
 
+=== 0.5.7 ===
+
 === 0.5.6 ===
 * Updated sort interface functions for darray and parray.
 * Updated build system.
