@@ -19,22 +19,29 @@
 #
 
 # Package version
+ARTIFACT_ID                 = LSP_LLTL_LIB
 ARTIFACT_NAME               = lsp-lltl-lib
 ARTIFACT_DESC               = Low-Level Template Library for C++
-ARTIFACT_VARS               = LSP_LLTL_LIB
 ARTIFACT_HEADERS            = lsp-plug.in
 ARTIFACT_EXPORT_ALL         = 1
-ARTIFACT_VERSION            = 0.5.5
+ARTIFACT_VERSION            = 0.5.6
 
 # List of dependencies
+DEPENDENCIES = \
+  LIBPTHREAD \
+  LSP_COMMON_LIB
+
 TEST_DEPENDENCIES = \
-  TEST_STDLIB \
   LSP_TEST_FW
 
-DEPENDENCIES = \
-  LSP_COMMON_LIB \
-  STDLIB
+# Platform-dependent
+ifeq ($(PLATFORM),Windows)
+  TEST_DEPENDENCIES += \
+    LIBSHLWAPI
+endif
 
+# Overall system dependencies
 ALL_DEPENDENCIES = \
   $(DEPENDENCIES) \
-  $(TEST_DEPENDENCIES)
+  $(TEST_DEPENDENCIES) \
+  LIBSHLWAPI

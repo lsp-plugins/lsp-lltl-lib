@@ -424,7 +424,8 @@ namespace lsp
         int raw_darray::raw_cmp(const void *a, const void *b, void *c)
         {
             cmp_func_t f = reinterpret_cast<cmp_func_t>(c);
-            return f(a, b);
+            ssize_t res = f(a, b);
+            return (res > 0) ? 1 : (res < 0) ? -1 : 0;
         }
 
         void raw_darray::qsort(sort_closure_t *c)

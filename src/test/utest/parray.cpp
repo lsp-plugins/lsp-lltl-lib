@@ -24,7 +24,7 @@
 
 namespace
 {
-    static int test_int_cmp(const int *a, const int *b)
+    static ssize_t test_int_cmp(const int *a, const int *b)
     {
         return *a - *b;
     }

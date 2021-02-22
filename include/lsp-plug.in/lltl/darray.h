@@ -46,7 +46,7 @@ namespace lsp
                 size_t      nSizeOf;
 
             public:
-                typedef     int (* cmp_func_t)(const void *a, const void *b);
+                typedef     ssize_t (* cmp_func_t)(const void *a, const void *b);
 
             protected:
                 static int  closure_cmp(const void *a, const void *b, void *c);
@@ -104,7 +104,7 @@ namespace lsp
                     inline static const T *ccast(const void *ptr)                   { return static_cast<const T *>(ptr);   }
 
                 public:
-                    typedef int (* cmp_func_t)(const T *a, const T *b);
+                    typedef ssize_t (* cmp_func_t)(const T *a, const T *b);
 
                 public:
                     explicit inline darray()

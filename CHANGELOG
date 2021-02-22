@@ -2,6 +2,10 @@
 * RECENT CHANGES
 *******************************************************************************
 
+=== 0.5.6 ===
+* Updated sort interface functions for darray and parray.
+* Updated build system.
+
 === 0.5.5 ===
 * Better support of <stdlib.h> qsort_r() calls for different platforms.
 
