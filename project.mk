@@ -24,7 +24,7 @@ ARTIFACT_NAME               = lsp-lltl-lib
 ARTIFACT_DESC               = Low-Level Template Library for C++
 ARTIFACT_HEADERS            = lsp-plug.in
 ARTIFACT_EXPORT_ALL         = 1
-ARTIFACT_VERSION            = 0.5.6-devel
+ARTIFACT_VERSION            = 0.5.6
 
 # List of dependencies
 DEPENDENCIES = \
