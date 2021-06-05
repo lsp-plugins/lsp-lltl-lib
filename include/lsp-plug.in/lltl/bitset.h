@@ -33,7 +33,8 @@ namespace lsp
         class bitset
         {
             private:
-                bitset &operator = (const bitset &);
+                bitset &operator = (const bitset &);        // Disable copying
+                bitset(const bitset &);                     // Disable copying
 
             protected:
                 size_t          nSize;
