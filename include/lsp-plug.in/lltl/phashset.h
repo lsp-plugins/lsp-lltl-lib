@@ -30,7 +30,7 @@ namespace lsp
 {
     namespace lltl
     {
-        struct raw_phashset
+        struct LSP_LLTL_LIB_EXPORT raw_phashset
         {
             public:
                 typedef struct tuple_t

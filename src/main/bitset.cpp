@@ -20,9 +20,7 @@
  */
 
 #include <lsp-plug.in/lltl/bitset.h>
-#include <lsp-plug.in/common/types.h>
-#include <lsp-plug.in/stdlib/string.h>
-#include <stdlib.h>
+#include <lsp-plug.in/stdlib/stdlib.h>
 
 namespace lsp
 {

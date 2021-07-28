@@ -30,7 +30,7 @@ namespace lsp
 {
     namespace lltl
     {
-        struct raw_pphash
+        struct LSP_LLTL_LIB_EXPORT raw_pphash
         {
             public:
                 typedef struct tuple_t

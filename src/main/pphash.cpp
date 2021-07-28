@@ -20,7 +20,7 @@
  */
 
 #include <lsp-plug.in/lltl/pphash.h>
-#include <stdlib.h>
+#include <lsp-plug.in/stdlib/stdlib.h>
 
 namespace lsp
 {

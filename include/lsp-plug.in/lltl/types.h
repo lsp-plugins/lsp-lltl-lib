@@ -23,6 +23,7 @@
 #define LSP_PLUG_IN_LLTL_TYPES_H_
 
 #include <lsp-plug.in/lltl/version.h>
+#include <lsp-plug.in/common/types.h>
 
 #include <stddef.h>
 #include <stdint.h>
@@ -96,6 +97,7 @@ namespace lsp
          * @param size size of the object in bytes
          * @return hash value
          */
+        LSP_LLTL_LIB_EXPORT
         size_t      default_hash_func(const void *ptr, size_t size);
 
         /**
@@ -106,6 +108,7 @@ namespace lsp
          * @param size size of the object in bytes (not used)
          * @return hash value
          */
+        LSP_LLTL_LIB_EXPORT
         size_t      ptr_hash_func(const void *ptr, size_t size);
 
         /**
@@ -114,6 +117,7 @@ namespace lsp
          * @param size size of char type
          * @return hash function
          */
+        LSP_LLTL_LIB_EXPORT
         size_t      char_hash_func(const void *ptr, size_t size);
 
         /**
@@ -123,6 +127,7 @@ namespace lsp
          * @param size size of char type
          * @return comparison result
          */
+        LSP_LLTL_LIB_EXPORT
         ssize_t     char_cmp_func(const void *a, const void *b, size_t size);
 
         /**
@@ -133,6 +138,7 @@ namespace lsp
          * @param size size of object, not used
          * @return comparison result
          */
+        LSP_LLTL_LIB_EXPORT
         ssize_t     ptr_cmp_func(const void *a, const void *b, size_t size);
 
         /**
@@ -141,6 +147,7 @@ namespace lsp
          * @param size size of char type
          * @return pointer to allocated C string
          */
+        LSP_LLTL_LIB_EXPORT
         void       *char_clone_func(const void *ptr, size_t size);
 
         /**
