@@ -4,6 +4,7 @@
 
 === 0.5.7 ===
 * Disabled copy constructor for bitset.
+* Updated build system.
 
 === 0.5.6 ===
 * Updated sort interface functions for darray and parray.
