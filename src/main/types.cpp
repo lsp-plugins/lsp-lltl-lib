@@ -20,7 +20,6 @@
  */
 
 #include <lsp-plug.in/lltl/types.h>
-#include <lsp-plug.in/common/types.h>
 
 namespace lsp
 {

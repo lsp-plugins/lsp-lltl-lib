@@ -30,10 +30,11 @@ namespace lsp
 {
     namespace lltl
     {
-        class bitset
+        class LSP_LLTL_LIB_EXPORT bitset
         {
             private:
-                bitset &operator = (const bitset &);
+                bitset &operator = (const bitset &);        // Disable copying
+                bitset(const bitset &);                     // Disable copying
 
             protected:
                 size_t          nSize;
