@@ -339,7 +339,7 @@ namespace lsp
             return true;
         }
 
-        bool raw_pphash::keys(raw_parray *k)
+        bool raw_pphash::keys(raw_parray *k) const
         {
             raw_parray kt;
 
@@ -366,7 +366,7 @@ namespace lsp
             return true;
         }
 
-        bool raw_pphash::values(raw_parray *v)
+        bool raw_pphash::values(raw_parray *v) const
         {
             raw_parray kv;
 
@@ -393,7 +393,7 @@ namespace lsp
             return true;
         }
 
-        bool raw_pphash::items(raw_parray *k, raw_parray *v)
+        bool raw_pphash::items(raw_parray *k, raw_parray *v) const
         {
             raw_parray kt, vt;
 

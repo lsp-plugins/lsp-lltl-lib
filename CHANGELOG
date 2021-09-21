@@ -3,6 +3,8 @@
 *******************************************************************************
 
 === 0.5.8 ===
+- Updated signature of pphash::keys, pphash::values and pphash::items methods
+  to const.
 
 === 0.5.7 ===
 * Disabled copy constructor for bitset.
