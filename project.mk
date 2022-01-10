@@ -25,23 +25,3 @@ ARTIFACT_DESC               = Low-Level Template Library for C++
 ARTIFACT_HEADERS            = lsp-plug.in
 ARTIFACT_EXPORT_ALL         = 1
 ARTIFACT_VERSION            = 0.5.8-devel
-
-# List of dependencies
-DEPENDENCIES = \
-  LIBPTHREAD \
-  LSP_COMMON_LIB
-
-TEST_DEPENDENCIES = \
-  LSP_TEST_FW
-
-# Platform-dependent
-ifeq ($(PLATFORM),Windows)
-  TEST_DEPENDENCIES += \
-    LIBSHLWAPI
-endif
-
-# Overall system dependencies
-ALL_DEPENDENCIES = \
-  $(DEPENDENCIES) \
-  $(TEST_DEPENDENCIES) \
-  LIBSHLWAPI
