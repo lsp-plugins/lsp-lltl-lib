@@ -2,6 +2,11 @@
 * RECENT CHANGES
 *******************************************************************************
 
+=== 1.0.0 ===
+* Updated build scripts.
+* Updated signature of pphash::keys, pphash::values and pphash::items methods
+  to const.
+
 === 0.5.7 ===
 * Disabled copy constructor for bitset.
 * Updated build system.

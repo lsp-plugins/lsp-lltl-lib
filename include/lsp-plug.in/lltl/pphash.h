@@ -73,9 +73,9 @@ namespace lsp
                 void          **replace(const void *key, void *value, void **ov);
                 void          **create(const void *key, void *value);
                 bool            remove(const void *key, void **ov);
-                bool            keys(raw_parray *k);
-                bool            values(raw_parray *v);
-                bool            items(raw_parray *k, raw_parray *v);
+                bool            keys(raw_parray *k) const;
+                bool            values(raw_parray *v) const;
+                bool            items(raw_parray *k, raw_parray *v) const;
         };
 
 
@@ -267,14 +267,14 @@ namespace lsp
                      * @param vk array to store keys
                      * @return true if all keys have been successfully stored
                      */
-                    inline bool keys(parray<K> *vk)                          { return v.keys(vk->raw());                        }
+                    inline bool keys(parray<K> *vk) const                    { return v.keys(vk->raw());                        }
 
                     /**
                      * Store all values to destination array
                      * @param vv array to store values
                      * @return true if all keys have been successfully stored
                      */
-                    inline bool values(parray<V> *vv)                        { return v.values(vv->raw());                      }
+                    inline bool values(parray<V> *vv) const                  { return v.values(vv->raw());                      }
 
                     /**
                      * Store all items to destination array
@@ -282,7 +282,7 @@ namespace lsp
                      * @param vv array to store values
                      * @return true if all keys have been successfully stored
                      */
-                    inline bool items(parray<K> *vk, parray<V> *vv)          { return v.items(vk->raw(), vv->raw());            }
+                    inline bool items(parray<K> *vk, parray<V> *vv) const   { return v.items(vk->raw(), vv->raw());            }
             };
     }
 }
