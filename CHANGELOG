@@ -2,8 +2,9 @@
 * RECENT CHANGES
 *******************************************************************************
 
-=== 0.5.8 ===
-- Updated signature of pphash::keys, pphash::values and pphash::items methods
+=== 1.0.0 ===
+* Updated build scripts.
+* Updated signature of pphash::keys, pphash::values and pphash::items methods
   to const.
 
 === 0.5.7 ===

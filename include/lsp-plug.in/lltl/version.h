@@ -22,9 +22,9 @@
 #ifndef LSP_PLUG_IN_LLTL_VERSION_H_
 #define LSP_PLUG_IN_LLTL_VERSION_H_
 
-#define LSP_LLTL_LIB_MAJOR      0
-#define LSP_LLTL_LIB_MINOR      5
-#define LSP_LLTL_LIB_MICRO      8
+#define LSP_LLTL_LIB_MAJOR      1
+#define LSP_LLTL_LIB_MINOR      0
+#define LSP_LLTL_LIB_MICRO      0
 
 #ifdef LSP_LLTL_LIB_BUILTIN
     #define LSP_LLTL_LIB_EXPORT
