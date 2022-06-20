@@ -2,6 +2,9 @@
 * RECENT CHANGES
 *******************************************************************************
 
+=== 1.0.2 ===
+* Updated build scripts.
+
 === 1.0.1 ===
 * Updated build scripts.
 
@@ -55,3 +58,4 @@
 * Initial release.
 * Implemented darray collection.
 * Implemented parray collection.
+
