@@ -2,12 +2,9 @@
 /.settings/*
 /.build/*
 /.test/*
-/Debug/*
-/Release/*
-/.cproject
-/.project
-/Debug/
-/Release
+/Debug Linux/
+/Debug Win/
+/Release/
 *.log
 /gmon.out
 **/*.gmon

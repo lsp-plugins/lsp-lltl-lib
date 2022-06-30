@@ -20,6 +20,7 @@
  */
 
 #include <lsp-plug.in/lltl/bitset.h>
+#include <lsp-plug.in/stdlib/string.h>
 #include <lsp-plug.in/test-fw/utest.h>
 
 UTEST_BEGIN("lltl", bitset)
