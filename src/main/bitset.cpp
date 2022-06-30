@@ -21,6 +21,7 @@
 
 #include <lsp-plug.in/lltl/bitset.h>
 #include <lsp-plug.in/stdlib/stdlib.h>
+#include <lsp-plug.in/stdlib/string.h>
 
 namespace lsp
 {

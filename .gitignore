@@ -3,6 +3,7 @@
 /.build/*
 /.test/*
 /Debug Linux/
+/Debug Win/
 /Release/
 *.log
 /gmon.out
