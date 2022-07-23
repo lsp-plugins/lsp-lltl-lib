@@ -68,6 +68,7 @@ namespace lsp
                 void            clear();
                 void            swap(raw_pphash *src);
                 void           *get(const void *key, void *dfl);
+                void           *key(const void *key, void *dfl);
                 void          **wbget(const void *key);
                 void          **put(const void *key, void *value, void **ov);
                 void          **replace(const void *key, void *value, void **ov);
@@ -93,6 +94,7 @@ namespace lsp
                 private:
                     mutable raw_pphash    v;
 
+                    inline static K *kcast(void *ptr)       { return static_cast<K *>(ptr);             }
                     inline static V *vcast(void *ptr)       { return static_cast<V *>(ptr);             }
                     inline static V **pvcast(void *ptr)     { return reinterpret_cast<V **>(ptr);       }
                     inline static K **pkcast(void *ptr)     { return reinterpret_cast<K **>(ptr);       }
@@ -177,6 +179,13 @@ namespace lsp
                      * @return true if value exists
                      */
                     inline bool contains(const K *key) const                { return v.wbget(key) != NULL;                                   }
+
+                    /**
+                     * Get pointer to the key in the storage
+                     * @param key key to use
+                     * @return associated key in the storage or NULL if not exists
+                     */
+                    inline K *key(const K *key) const                       { return kcast(v.key(key, NULL));                                }
 
                     /**
                      * Get value by key

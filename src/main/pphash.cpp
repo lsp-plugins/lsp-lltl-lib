@@ -253,6 +253,13 @@ namespace lsp
             return (tuple != NULL) ? tuple->value : dfl;
         }
 
+        void *raw_pphash::key(const void *key, void *dfl)
+        {
+            size_t h        = (key != NULL) ? hash.hash(key, ksize) : 0;
+            tuple_t *tuple  = find_tuple(key, h);
+            return (tuple != NULL) ? tuple->key : dfl;
+        }
+
         void **raw_pphash::wbget(const void *key)
         {
             size_t h        = (key != NULL) ? hash.hash(key, ksize) : 0;
