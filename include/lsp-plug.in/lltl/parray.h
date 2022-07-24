@@ -114,6 +114,7 @@ namespace lsp
 
                     inline static T *cast(void *ptr)                                { return static_cast<T *>(ptr);             }
                     inline static T **pcast(void **ptr)                             { return reinterpret_cast<T **>(ptr);       }
+                    inline static const T **pccast(void **ptr)                      { return const_cast<const T **>(pcast(ptr));}
                     inline static void **vcast(T **ptr)                             { return reinterpret_cast<void **>(ptr);    }
                     inline static const T *ccast(void *ptr)                         { return static_cast<const T *>(ptr);       }
 
@@ -170,12 +171,12 @@ namespace lsp
                 public:
                     // Accessing elements (const)
                     inline const T *get(size_t idx) const                           { return (idx < v.nItems) ? cast(v.vItems[idx]) : NULL; }
-                    inline T **get_n(size_t idx, size_t n, T **x) const             { return pcast(v.get_n(idx, n, x));  }
-                    inline const T *uget(size_t idx) const                          { return cast(v.vItems[idx]);       }
+                    inline const T **get_n(size_t idx, size_t n, T **x) const       { return pccast(v.get_n(idx, n, x));    }
+                    inline const T *uget(size_t idx) const                          { return cast(v.vItems[idx]);           }
                     inline const T *first() const                                   { return (v.nItems > 0) ? cast(v.vItems[0]) : NULL; }
                     inline const T *last() const                                    { return (v.nItems > 0) ? cast(v.vItems[v.nItems - 1]) : NULL;  }
-                    inline const T *array() const                                   { return ccast(v.vItems); }
-                    inline const T **slice(size_t idx, size_t size) const           { return pcast(v.slice(idx, size)); }
+                    inline const T **array() const                                  { return pccast(v.vItems);              }
+                    inline const T **slice(size_t idx, size_t size) const           { return pccast(v.slice(idx, size));    }
 
                 public:
                     // Single modifications
