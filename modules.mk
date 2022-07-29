@@ -18,7 +18,8 @@
 # along with lsp-lltl-lib.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-# Variables that describe dependencies
+#------------------------------------------------------------------------------
+# Variables that describe source code dependencies
 LSP_COMMON_LIB_VERSION     := 1.0.20
 LSP_COMMON_LIB_NAME        := lsp-common-lib
 LSP_COMMON_LIB_TYPE        := src
@@ -31,6 +32,8 @@ LSP_TEST_FW_TYPE           := src
 LSP_TEST_FW_URL_RO         := https://github.com/lsp-plugins/$(LSP_TEST_FW_NAME).git
 LSP_TEST_FW_URL_RW         := git@github.com:lsp-plugins/$(LSP_TEST_FW_NAME).git
 
+#------------------------------------------------------------------------------
+# Variables that describe system dependencies
 LIBSHLWAPI_VERSION         := system
 LIBSHLWAPI_NAME            := libshlwapi
 LIBSHLWAPI_TYPE            := opt
