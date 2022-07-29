@@ -25,6 +25,7 @@ namespace lsp
 {
     namespace lltl
     {
+        LSP_LLTL_LIB_PUBLIC
         size_t default_hash_func(const void *ptr, size_t size)
         {
             size_t v, hash = 0;
@@ -55,6 +56,7 @@ namespace lsp
             return hash;
         }
 
+        LSP_LLTL_LIB_PUBLIC
         size_t char_hash_func(const void *ptr, size_t size)
         {
             const uint8_t *s = static_cast<const uint8_t *>(ptr);
@@ -72,6 +74,7 @@ namespace lsp
             return hash;
         }
 
+        LSP_LLTL_LIB_PUBLIC
         size_t ptr_hash_func(const void *ptr, size_t size)
         {
             uintptr_t a     = uintptr_t(ptr);
@@ -94,16 +97,19 @@ namespace lsp
             return h1 ^ h2 ^ a;
         }
 
+        LSP_LLTL_LIB_PUBLIC
         ssize_t char_cmp_func(const void *a, const void *b, size_t size)
         {
             return ::strcmp(static_cast<const char *>(a), static_cast<const char *>(b));
         }
 
+        LSP_LLTL_LIB_PUBLIC
         ssize_t ptr_cmp_func(const void *a, const void *b, size_t size)
         {
             return (a > b) ? 1 : (a < b) ? -1 : 0;
         }
 
+        LSP_LLTL_LIB_PUBLIC
         void *char_clone_func(const void *ptr, size_t size)
         {
             return ::strdup(static_cast<const char *>(ptr));

@@ -37,7 +37,7 @@ namespace lsp
         /**
          * Raw data array implementation with fixed set of routines
          */
-        struct LSP_LLTL_LIB_EXPORT raw_darray
+        struct LSP_LLTL_LIB_PUBLIC raw_darray
         {
             public:
                 size_t      nItems;

@@ -97,7 +97,7 @@ namespace lsp
          * @param size size of the object in bytes
          * @return hash value
          */
-        LSP_LLTL_LIB_EXPORT
+        LSP_LLTL_LIB_PUBLIC
         size_t      default_hash_func(const void *ptr, size_t size);
 
         /**
@@ -108,7 +108,7 @@ namespace lsp
          * @param size size of the object in bytes (not used)
          * @return hash value
          */
-        LSP_LLTL_LIB_EXPORT
+        LSP_LLTL_LIB_PUBLIC
         size_t      ptr_hash_func(const void *ptr, size_t size);
 
         /**
@@ -117,7 +117,7 @@ namespace lsp
          * @param size size of char type
          * @return hash function
          */
-        LSP_LLTL_LIB_EXPORT
+        LSP_LLTL_LIB_PUBLIC
         size_t      char_hash_func(const void *ptr, size_t size);
 
         /**
@@ -127,7 +127,7 @@ namespace lsp
          * @param size size of char type
          * @return comparison result
          */
-        LSP_LLTL_LIB_EXPORT
+        LSP_LLTL_LIB_PUBLIC
         ssize_t     char_cmp_func(const void *a, const void *b, size_t size);
 
         /**
@@ -138,7 +138,7 @@ namespace lsp
          * @param size size of object, not used
          * @return comparison result
          */
-        LSP_LLTL_LIB_EXPORT
+        LSP_LLTL_LIB_PUBLIC
         ssize_t     ptr_cmp_func(const void *a, const void *b, size_t size);
 
         /**
@@ -147,7 +147,7 @@ namespace lsp
          * @param size size of char type
          * @return pointer to allocated C string
          */
-        LSP_LLTL_LIB_EXPORT
+        LSP_LLTL_LIB_PUBLIC
         void       *char_clone_func(const void *ptr, size_t size);
 
         /**
