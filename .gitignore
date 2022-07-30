@@ -11,3 +11,4 @@
 *.core
 /.config.mk
 /DebugLinux/
+/DebugWin/
