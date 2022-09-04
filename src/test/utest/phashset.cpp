@@ -143,6 +143,17 @@ UTEST_BEGIN("lltl", phashset)
     void test_large()
     {
         lltl::parray<item_t> v, rv;
+        lsp_finally {
+            // Drop allocated items
+            for (size_t i=0, n=v.size(); i<n; ++i)
+            {
+                item_t *item = v.uget(i);
+                if (item != NULL)
+                    delete item;
+            }
+            v.flush();
+        };
+
         lltl::phashset<item_t> s;
         item_t *p = NULL;
 

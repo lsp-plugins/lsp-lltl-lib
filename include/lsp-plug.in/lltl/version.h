@@ -24,18 +24,14 @@
 
 #define LSP_LLTL_LIB_MAJOR      1
 #define LSP_LLTL_LIB_MINOR      0
-#define LSP_LLTL_LIB_MICRO      4
+#define LSP_LLTL_LIB_MICRO      5
 
-#ifdef LSP_LLTL_LIB_BUILTIN
-    #define LSP_LLTL_LIB_EXPORT
-    #define LSP_LLTL_LIB_CEXPORT
-    #define LSP_LLTL_LIB_IMPORT         LSP_SYMBOL_IMPORT
-    #define LSP_LLTL_LIB_CIMPORT        LSP_CSYMBOL_IMPORT
+#if defined(LSP_LLTL_LIB_PUBLISHER)
+    #define LSP_LLTL_LIB_PUBLIC         LSP_EXPORT_MODIFIER
+#elif defined(LSP_LLTL_LIB_BUILTIN) || defined(LSP_IDE_DEBUG)
+    #define LSP_LLTL_LIB_PUBLIC
 #else
-    #define LSP_LLTL_LIB_EXPORT         LSP_SYMBOL_EXPORT
-    #define LSP_LLTL_LIB_CEXPORT        LSP_CSYMBOL_EXPORT
-    #define LSP_LLTL_LIB_IMPORT         LSP_SYMBOL_IMPORT
-    #define LSP_LLTL_LIB_CIMPORT        LSP_CSYMBOL_IMPORT
+    #define LSP_LLTL_LIB_PUBLIC         LSP_SYMBOL_EXTERN
 #endif
 
 #endif /* LSP_PLUG_IN_LLTL_VERSION_H_ */

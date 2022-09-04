@@ -37,7 +37,7 @@ namespace lsp
         /**
          * Raw pointer array implementation with fixed set of routines
          */
-        struct LSP_LLTL_LIB_EXPORT raw_parray
+        struct LSP_LLTL_LIB_PUBLIC raw_parray
         {
             public:
                 typedef     ssize_t (* cmp_func_t)(const void *a, const void *b);

@@ -64,7 +64,7 @@ namespace lsp
         /**
          * Raw iterator interface with set of required functions
          */
-        struct LSP_LLTL_LIB_EXPORT raw_iterator
+        struct LSP_LLTL_LIB_PUBLIC raw_iterator
         {
             public:
                 size_t              refs;       // Number of references

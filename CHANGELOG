@@ -2,6 +2,10 @@
 * RECENT CHANGES
 *******************************************************************************
 
+=== 1.0.5 ===
+* Several fixes in unit tests.
+* Updated build scripts.
+
 === 1.0.4 ===
 * Updated improper implementation of several const-methods for the lltl::parray
   collection.

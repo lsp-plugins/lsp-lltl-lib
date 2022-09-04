@@ -747,7 +747,12 @@ UTEST_BEGIN("lltl", darray)
         printf("Testing long xswap...\n");
 
         large_struct_t *a = new large_struct_t;
+        UTEST_ASSERT(a != NULL);
+        lsp_finally{ delete a; };
+
         large_struct_t *b = new large_struct_t;
+        UTEST_ASSERT(b != NULL);
+        lsp_finally{ delete b; };
 
         lltl::darray<large_struct_t> x;
 

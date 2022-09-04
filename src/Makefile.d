@@ -76,6 +76,7 @@ $(LSP_LLTL_LIB_BIN)/test/utest/pphash.o: test/utest/pphash.cpp \
  $(LSP_TEST_FW_INC)/lsp-plug.in/test-fw/main/config.h \
  $(LSP_TEST_FW_INC)/lsp-plug.in/test-fw/main/dynarray.h \
  $(LSP_TEST_FW_INC)/lsp-plug.in/test-fw/types.h \
+ $(LSP_TEST_FW_INC)/lsp-plug.in/test-fw/main/status.h \
  $(LSP_COMMON_LIB_INC)/lsp-plug.in/stdlib/string.h
 $(LSP_LLTL_LIB_BIN)/test/utest/phashset.o: test/utest/phashset.cpp \
  $(LSP_LLTL_LIB_INC)/lsp-plug.in/lltl/parray.h \
@@ -93,6 +94,7 @@ $(LSP_LLTL_LIB_BIN)/test/utest/phashset.o: test/utest/phashset.cpp \
  $(LSP_TEST_FW_INC)/lsp-plug.in/test-fw/main/config.h \
  $(LSP_TEST_FW_INC)/lsp-plug.in/test-fw/main/dynarray.h \
  $(LSP_TEST_FW_INC)/lsp-plug.in/test-fw/types.h \
+ $(LSP_TEST_FW_INC)/lsp-plug.in/test-fw/main/status.h \
  $(LSP_COMMON_LIB_INC)/lsp-plug.in/stdlib/string.h
 $(LSP_LLTL_LIB_BIN)/test/utest/parray.o: test/utest/parray.cpp \
  $(LSP_LLTL_LIB_INC)/lsp-plug.in/lltl/parray.h \
@@ -108,7 +110,8 @@ $(LSP_LLTL_LIB_BIN)/test/utest/parray.o: test/utest/parray.cpp \
  $(LSP_TEST_FW_INC)/lsp-plug.in/test-fw/env.h \
  $(LSP_TEST_FW_INC)/lsp-plug.in/test-fw/main/config.h \
  $(LSP_TEST_FW_INC)/lsp-plug.in/test-fw/main/dynarray.h \
- $(LSP_TEST_FW_INC)/lsp-plug.in/test-fw/types.h
+ $(LSP_TEST_FW_INC)/lsp-plug.in/test-fw/types.h \
+ $(LSP_TEST_FW_INC)/lsp-plug.in/test-fw/main/status.h
 $(LSP_LLTL_LIB_BIN)/test/utest/darray.o: test/utest/darray.cpp \
  $(LSP_LLTL_LIB_INC)/lsp-plug.in/lltl/darray.h \
  $(LSP_LLTL_LIB_INC)/lsp-plug.in/lltl/version.h \
@@ -123,7 +126,8 @@ $(LSP_LLTL_LIB_BIN)/test/utest/darray.o: test/utest/darray.cpp \
  $(LSP_TEST_FW_INC)/lsp-plug.in/test-fw/env.h \
  $(LSP_TEST_FW_INC)/lsp-plug.in/test-fw/main/config.h \
  $(LSP_TEST_FW_INC)/lsp-plug.in/test-fw/main/dynarray.h \
- $(LSP_TEST_FW_INC)/lsp-plug.in/test-fw/types.h
+ $(LSP_TEST_FW_INC)/lsp-plug.in/test-fw/types.h \
+ $(LSP_TEST_FW_INC)/lsp-plug.in/test-fw/main/status.h
 $(LSP_LLTL_LIB_BIN)/test/utest/bitset.o: test/utest/bitset.cpp \
  $(LSP_LLTL_LIB_INC)/lsp-plug.in/lltl/bitset.h \
  $(LSP_LLTL_LIB_INC)/lsp-plug.in/lltl/version.h \
@@ -139,7 +143,8 @@ $(LSP_LLTL_LIB_BIN)/test/utest/bitset.o: test/utest/bitset.cpp \
  $(LSP_TEST_FW_INC)/lsp-plug.in/test-fw/env.h \
  $(LSP_TEST_FW_INC)/lsp-plug.in/test-fw/main/config.h \
  $(LSP_TEST_FW_INC)/lsp-plug.in/test-fw/main/dynarray.h \
- $(LSP_TEST_FW_INC)/lsp-plug.in/test-fw/types.h
+ $(LSP_TEST_FW_INC)/lsp-plug.in/test-fw/types.h \
+ $(LSP_TEST_FW_INC)/lsp-plug.in/test-fw/main/status.h
 $(LSP_LLTL_LIB_BIN)/test/mtest/func/ptrhash.o: \
  test/mtest/func/ptrhash.cpp \
  $(LSP_TEST_FW_INC)/lsp-plug.in/test-fw/mtest.h \
@@ -149,6 +154,7 @@ $(LSP_LLTL_LIB_BIN)/test/mtest/func/ptrhash.o: \
  $(LSP_TEST_FW_INC)/lsp-plug.in/test-fw/main/config.h \
  $(LSP_TEST_FW_INC)/lsp-plug.in/test-fw/main/dynarray.h \
  $(LSP_TEST_FW_INC)/lsp-plug.in/test-fw/types.h \
+ $(LSP_TEST_FW_INC)/lsp-plug.in/test-fw/main/status.h \
  $(LSP_LLTL_LIB_INC)/lsp-plug.in/lltl/types.h \
  $(LSP_LLTL_LIB_INC)/lsp-plug.in/lltl/version.h \
  $(LSP_COMMON_LIB_INC)/lsp-plug.in/common/types.h \
