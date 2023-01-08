@@ -91,6 +91,22 @@ namespace lsp
         typedef     void  (* copy_func_t)(void *dst, const void *src, size_t size);
 
         /**
+         * Default comparison function, performs byte-precise comparison of one
+         * memory block to another memory block. Note that the result depends on
+         * the byte order, so the function is safe to use for equal comparison.
+         *
+         * @param a pointer to first memory block
+         * @param b pointer to second memory block
+         * @param size size of each block in bytes
+         * @return comparison result:
+         *    - negative if a < b
+         *    - positive if a > b
+         *    - zero if a == 0
+         */
+        LSP_LLTL_LIB_PUBLIC
+        ssize_t     default_compare_func(const void *a, const void *b, size_t size);
+
+        /**
          * Default hashing function
          *
          * @param ptr pointer to the object to retrieve hash value

@@ -23,6 +23,7 @@
 #define LSP_PLUG_IN_LLTL_SPEC_H_
 
 #include <lsp-plug.in/lltl/version.h>
+#include <lsp-plug.in/lltl/new.h>
 #include <lsp-plug.in/lltl/types.h>
 
 namespace lsp
@@ -54,83 +55,82 @@ namespace lsp
          * Default specialization for hash interface
          */
         template <class T>
-            struct hash_spec: public hash_iface
+        struct hash_spec: public hash_iface
+        {
+            inline hash_spec()
             {
-                inline hash_spec()
-                {
-                    hash        = default_hash_func;
-                }
-            };
+                hash        = default_hash_func;
+            }
+        };
 
         /**
          * Default specialization for compare interface
          */
         template <class T>
-            struct compare_spec: public compare_iface
+        struct compare_spec: public compare_iface
+        {
+            inline compare_spec()
             {
-                inline compare_spec()
-                {
-                    compare     = ::memcmp;
-                }
-            };
+                compare     = default_compare_func;
+            }
+        };
 
         /**
          * Default specialization for allocator interface
          */
         template <class T>
-            struct allocator_spec: public allocator_iface
+        struct allocator_spec: public allocator_iface
+        {
+            static void *clone_func(const void *src, size_t size)
             {
-                static inline void *operator new(size_t size, void *ptr) { return ptr; }
+                allocator_tag_t tag;
+                void *dst = ::malloc(size);
+                return (dst) ? new(dst, tag) T(*static_cast<const T *>(src)) : NULL;
+            }
 
-                static void *clone_func(const void *src, size_t size)
-                {
-                    void *dst = ::malloc(size);
-                    return (dst) ? new(dst) T(static_cast<const T *>(src)) : NULL;
-                }
+            static void free_func(void *ptr)
+            {
+                (static_cast<T *>(ptr))->~T();
+                ::free(ptr);
+            }
 
-                static void free_func(void *ptr)
-                {
-                    (static_cast<T *>(ptr))->~T();
-                    ::free(ptr);
-                }
-
-                inline allocator_spec()
-                {
-                    clone       = clone_func;
-                    free        = free_func;
-                }
-            };
+            inline allocator_spec()
+            {
+                clone       = clone_func;
+                free        = free_func;
+            }
+        };
 
         //---------------------------------------------------------------------
         // Specialization for C-strings: char *
         template <>
-            struct hash_spec<char>: public hash_iface
+        struct hash_spec<char>: public hash_iface
+        {
+            inline hash_spec()
             {
-                inline hash_spec()
-                {
-                    hash        = char_hash_func;
-                }
-            };
+                hash        = char_hash_func;
+            }
+        };
 
         template <>
-            struct compare_spec<char>: public compare_iface
+        struct compare_spec<char>: public compare_iface
+        {
+            inline compare_spec()
             {
-                inline compare_spec()
-                {
-                    compare     = char_cmp_func;
-                }
-            };
+                compare     = char_cmp_func;
+            }
+        };
 
         template <>
-            struct allocator_spec<char>: public allocator_iface
+        struct allocator_spec<char>: public allocator_iface
+        {
+            inline allocator_spec()
             {
-                inline allocator_spec()
-                {
-                    clone       = char_clone_func;
-                    free        = ::free;
-                }
-            };
-    }
-}
+                clone       = char_clone_func;
+                free        = ::free;
+            }
+        };
+    } /* namespace lltl */
+} /* namespace lsp */
 
 #endif /* LSP_PLUG_IN_LLTL_SPEC_H_ */

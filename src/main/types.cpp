@@ -26,6 +26,12 @@ namespace lsp
     namespace lltl
     {
         LSP_LLTL_LIB_PUBLIC
+        ssize_t  default_compare_func(const void *a, const void *b, size_t size)
+        {
+            return ::memcmp(a, b, size);
+        }
+
+        LSP_LLTL_LIB_PUBLIC
         size_t default_hash_func(const void *ptr, size_t size)
         {
             size_t v, hash = 0;
@@ -114,7 +120,7 @@ namespace lsp
         {
             return ::strdup(static_cast<const char *>(ptr));
         }
-    }
-}
+    } /* namespace lltl */
+} /* namespace lsp */
 
 
