@@ -2,6 +2,10 @@
 * RECENT CHANGES
 *******************************************************************************
 
+=== 1.0.8 ===
+* Updated default data copy specification for the generic data type.
+* Added Clang build for the CI.
+
 === 1.0.7 ===
 * Updated build scripts.
 
