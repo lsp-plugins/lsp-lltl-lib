@@ -482,48 +482,48 @@ UTEST_BEGIN("lltl", darray)
         dump(x);
         UTEST_ASSERT(x.index_of(pv) < 0);
         UTEST_ASSERT(pv == vv);
-        UTEST_ASSERT(vv[0] == 8)
-        UTEST_ASSERT(vv[1] == 9)
-        UTEST_ASSERT(vv[2] == 10)
-        UTEST_ASSERT(vv[3] == 11)
-        UTEST_ASSERT(vv[4] == -1)
+        UTEST_ASSERT(vv[0] == 8);
+        UTEST_ASSERT(vv[1] == 9);
+        UTEST_ASSERT(vv[2] == 10);
+        UTEST_ASSERT(vv[3] == 11);
+        UTEST_ASSERT(vv[4] == -1);
 
         // Get items
         UTEST_ASSERT(pv = x.get_n(10, 2, vv));
         dump(x);
         UTEST_ASSERT(x.index_of(pv) < 0);
         UTEST_ASSERT(pv == vv);
-        UTEST_ASSERT(vv[0] == 6)
-        UTEST_ASSERT(vv[1] == 7)
-        UTEST_ASSERT(vv[2] == 10)
+        UTEST_ASSERT(vv[0] == 6);
+        UTEST_ASSERT(vv[1] == 7);
+        UTEST_ASSERT(vv[2] == 10);
 
         // Shift items
         UTEST_ASSERT(pv = x.shift_n(3,  vv));
         dump(x);
         UTEST_ASSERT(x.index_of(pv) < 0);
         UTEST_ASSERT(pv == vv);
-        UTEST_ASSERT(vv[0] == 14)
-        UTEST_ASSERT(vv[1] == 15)
-        UTEST_ASSERT(vv[2] == 12)
-        UTEST_ASSERT(vv[3] == 11)
+        UTEST_ASSERT(vv[0] == 14);
+        UTEST_ASSERT(vv[1] == 15);
+        UTEST_ASSERT(vv[2] == 12);
+        UTEST_ASSERT(vv[3] == 11);
 
         // Remove items
         UTEST_ASSERT(pv = x.remove_n(8, 2, vv));
         dump(x);
         UTEST_ASSERT(x.index_of(pv) < 0);
         UTEST_ASSERT(pv == vv);
-        UTEST_ASSERT(vv[0] == 7)
-        UTEST_ASSERT(vv[1] == 16)
-        UTEST_ASSERT(vv[2] == 12)
+        UTEST_ASSERT(vv[0] == 7);
+        UTEST_ASSERT(vv[1] == 16);
+        UTEST_ASSERT(vv[2] == 12);
 
         // Remove pointer
         UTEST_ASSERT(pv = x.premove_n(x.get(2), 2, vv));
         dump(x);
         UTEST_ASSERT(x.index_of(pv) < 0);
         UTEST_ASSERT(pv == vv);
-        UTEST_ASSERT(vv[0] == 1)
-        UTEST_ASSERT(vv[1] == 2)
-        UTEST_ASSERT(vv[2] == 12)
+        UTEST_ASSERT(vv[0] == 1);
+        UTEST_ASSERT(vv[1] == 2);
+        UTEST_ASSERT(vv[2] == 12);
 
         // Check final size
         UTEST_ASSERT(x.size() == 9);
