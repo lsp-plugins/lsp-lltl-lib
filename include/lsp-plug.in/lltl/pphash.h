@@ -117,6 +117,17 @@ namespace lsp
                         v.alloc         = alloc;
                     }
 
+                    explicit inline pphash(hash_iface hash, compare_iface cmp, allocator_iface alloc)
+                    {
+                        v.size          = 0;
+                        v.cap           = 0;
+                        v.bins          = NULL;
+                        v.ksize         = sizeof(K);
+                        v.hash          = hash;
+                        v.cmp           = cmp;
+                        v.alloc         = alloc;
+                    }
+
                     ~pphash()                                               { v.flush();                                                    }
 
                 public:

@@ -3,7 +3,8 @@
 *******************************************************************************
 
 === 1.0.11 ===
-
+* Added possibility to implicitly specify data interfaces in constructors
+  for lltl::pphash and lltl::phashset.
 
 === 1.0.10 ===
 * Updated module versions in dependencies.
