@@ -2,6 +2,9 @@
 * RECENT CHANGES
 *******************************************************************************
 
+=== 1.0.12 ===
+
+
 === 1.0.11 ===
 * Added possibility to implicitly specify data interfaces in constructors
   for lltl::pphash and lltl::phashset.
