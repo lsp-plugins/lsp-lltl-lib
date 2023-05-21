@@ -108,6 +108,16 @@ namespace lsp
                         v.cmp           = cmp;
                     }
 
+                    explicit inline phashset(hash_iface hash, compare_iface cmp)
+                    {
+                        v.size          = 0;
+                        v.cap           = 0;
+                        v.bins          = NULL;
+                        v.vsize         = sizeof(V);
+                        v.hash          = hash;
+                        v.cmp           = cmp;
+                    }
+
                     ~phashset()                                             { v.flush();                                                    }
 
                 public:
