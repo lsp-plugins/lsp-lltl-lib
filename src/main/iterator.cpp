@@ -25,33 +25,34 @@ namespace lsp
 {
     namespace lltl
     {
-        raw_iterator *raw_iterator::reference(raw_iterator *src)
+        void invalid_iter_move(raw_iterator *i, ssize_t n)
         {
-            if (src == NULL)
-                return NULL;
-            ++src->refs;
-            return src;
         }
 
-        raw_iterator *raw_iterator::dereference(raw_iterator *src)
+        void *invalid_iter_get(raw_iterator *i)
         {
-            if (src != NULL)
-            {
-                if ((--src->refs) <= 0)
-                    ::free(src);
-            }
-
             return NULL;
         }
 
-        raw_iterator *raw_iterator::replace(raw_iterator *xold, raw_iterator *xnew)
+        ssize_t invalid_iter_compare(const raw_iterator *a, const raw_iterator *b)
         {
-            if (xold == xnew)
-                return xold;
-
-            raw_iterator *ref = reference(xnew);
-            dereference(xold);
-            return ref;
+            return ssize_t(b->container == NULL);
         }
-    }
-}
+
+        const iter_vtbl_t raw_iterator::invalid_vtbl =
+        {
+            invalid_iter_move,
+            invalid_iter_get,
+            invalid_iter_compare
+        };
+
+        const raw_iterator raw_iterator::invalid =
+        {
+            &invalid_vtbl,
+            NULL,
+            NULL,
+            0
+        };
+
+    } /* namespace lltl */
+} /* namespace lsp */

@@ -64,15 +64,13 @@ namespace lsp
         {
             public:
                 static const iter_vtbl_t invalid_vtbl; // Virtual table for invalid iterator
+                static const raw_iterator invalid;
 
             public:
                 const iter_vtbl_t      *vtable;     // Virtual table, SHOULD NEVER be NULL, use invalid_vtbl for invalid iterators
                 void                   *container;  // Pointer to container that holds data, SHOULD be NULL if iterator is invalid
                 void                   *item;       // Pointer to current item
-                ssize_t                 offset;     // Offset from the beginning of the container
-
-            public:
-                void                    make_invalid();
+                size_t                  offset;     // Offset from the beginning of the container
         };
 
         /**
@@ -81,8 +79,15 @@ namespace lsp
         template <class T>
         class iterator
         {
+            public:
+                static const iterator<T> invalid;
+
             protected:
                 mutable raw_iterator        v;
+
+            private:
+                inline static T *cast(void *ptr)                                { return reinterpret_cast<T *>(ptr);       }
+                inline static const T *ccast(void *ptr)                         { return const_cast<const T *>(cast(ptr));  }
 
             public: // Construction/destruction
                 inline explicit iterator(const raw_iterator & begin)
@@ -107,7 +112,7 @@ namespace lsp
 
                 ~iterator()
                 {
-                    v.make_invalid();
+                    v   = raw_iterator::invalid;
                 }
 
             public: // Assignment
@@ -160,27 +165,27 @@ namespace lsp
                 inline bool operator !() const  { return v.container == NULL; }
 
             public: // Dereferencing, should be applied for valid iterators only
-                inline T & operator *()
+                inline T * operator *()
                 {
-                    T *tmp     = static_cast<T *>(v.vtable->get(&v));
-                    return *tmp;
+                    T *tmp          = cast(v.vtable->get(&v));
+                    return tmp;
                 }
 
-                inline const T & operator *() const
+                inline const T * operator *() const
                 {
-                    const T *tmp     = const_cast<const T *>(static_cast<T *>(v.vtable->get(&v)));
-                    return *tmp;
+                    const T *tmp    = ccast(v.vtable->get(&v));
+                    return tmp;
                 }
 
                 inline T & operator ->()
                 {
-                    T *tmp     = static_cast<T *>(v.vtable->get(&v));
+                    T *tmp          = cast(v.vtable->get(&v));
                     return *tmp;
                 }
 
                 inline const T & operator ->() const
                 {
-                    const T *tmp     = const_cast<const T *>(static_cast<T *>(v.vtable->get(&v)));
+                    const T *tmp    = ccast(v.vtable->get(&v));
                     return *tmp;
                 }
 
@@ -221,6 +226,9 @@ namespace lsp
                         (v.vtable->cmp(&v, &it.v) > 0);
                 }
         };
+
+        template <class T>
+        const iterator<T> iterator<T>::invalid = iterator<T>(raw_iterator::invalid);
 
     } /* namespace lltl */
 } /* namespace lsp */
