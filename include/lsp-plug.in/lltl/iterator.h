@@ -23,6 +23,8 @@
 #define LSP_PLUG_IN_LLTL_ITERATOR_H_
 
 #include <lsp-plug.in/lltl/version.h>
+
+#include <lsp-plug.in/common/variadic.h>
 #include <lsp-plug.in/lltl/types.h>
 
 namespace lsp
@@ -32,34 +34,28 @@ namespace lsp
         struct raw_iterator;
 
         /**
-         * Function to check validity of the raw iterator
-         * @param i iterator to check validity
-         * @return true if iterator is valid
-         */
-        typedef bool (*iter_check_t)(raw_iterator *i);
-
-        /**
          * Advance to next record in post-increment/pre-increment mode.
          * Post-increment mode should malloc() and return copy of iterator advanced to n steps.
          *
          * @param i pointer to the iterator
-         * @param n nummber of steps to advance
+         * @param n number of steps to advance (can be negative)
          * @return pointer to modified raw iterator
          */
-        typedef raw_iterator *(*iter_move_t)(raw_iterator *i, size_t n);
+        typedef void (*iter_move_t)(raw_iterator *i, ssize_t n);
 
-        /**
-         * Obtain current value the iterator points to
-         * @param i pointer to iterator
-         */
         typedef void *(*iter_get_t)(raw_iterator *i);
 
+        typedef ssize_t (*iter_compare_t)(const raw_iterator *a, const raw_iterator *b);
+
         /**
-         * Remove current value the iterator points to and advance to the next value
-         * @param i pointer to iterator
-         * @return pointer to the item that has been removed
+         * Virtual table of functions for the iterator
          */
-        typedef void *(*iter_remove_t)(raw_iterator *i);
+        struct LSP_LLTL_LIB_PUBLIC iter_vtbl_t
+        {
+            iter_move_t         move;
+            iter_get_t          get;
+            iter_compare_t      cmp;
+        };
 
         /**
          * Raw iterator interface with set of required functions
@@ -67,140 +63,166 @@ namespace lsp
         struct LSP_LLTL_LIB_PUBLIC raw_iterator
         {
             public:
-                size_t              refs;       // Number of references
-                size_t              change;     // Counter of changes for validity check
-                iter_check_t        valid;      // Validity check
-                iter_check_t        has_more;   // Check that there are still items to advance
-                iter_move_t         bnext;      // Advance to next record (pre-increment)
-                iter_move_t         anext;      // Advance to next record (post-increment)
-                iter_get_t          get;        // Get current record
-                iter_remove_t       remove;     // Current item removal
+                static const iter_vtbl_t invalid_vtbl; // Virtual table for invalid iterator
 
             public:
-                explicit raw_iterator();
+                const iter_vtbl_t      *vtable;     // Virtual table, SHOULD NEVER be NULL, use invalid_vtbl for invalid iterators
+                void                   *container;  // Pointer to container that holds data, SHOULD be NULL if iterator is invalid
+                void                   *item;       // Pointer to current item
+                ssize_t                 offset;     // Offset from the beginning of the container
 
             public:
-                static raw_iterator    *reference(raw_iterator *src);
-                static raw_iterator    *dereference(raw_iterator *src);
-                static raw_iterator    *replace(raw_iterator *it, raw_iterator *rep);
+                void                    make_invalid();
         };
 
+        /**
+         * Iterator class
+         */
         template <class T>
-            class iterator
-            {
-                protected:
-                    mutable raw_iterator    *it;    // Iterator reference
+        class iterator
+        {
+            protected:
+                mutable raw_iterator        v;
 
-                protected:
-                    inline static T *cast(void *ptr)                    { return static_cast<T *>(ptr);                     }
+            public: // Construction/destruction
+                inline explicit iterator(const raw_iterator & begin)
+                {
+                    v   = begin;
+                }
 
-                protected:
-                    template <class X>
-                        friend iterator<X>  make_iterator(raw_iterator *it);
+                inline explicit iterator(raw_iterator && begin)
+                {
+                    v   = lsp::move(begin);
+                }
 
-                    explicit inline iterator(raw_iterator *src)         { it = raw_iterator::reference(src);                }
+                iterator(const iterator<T> & src)
+                {
+                    v   = src.v;
+                }
 
-                public:
-                    explicit inline iterator(iterator<T> *src)          { it = raw_iterator::reference(src->it);            }
-                    explicit inline iterator(iterator<T> &src)          { it = raw_iterator::reference(src.it);             }
-                    inline ~iterator()                                  { it = raw_iterator::dereference(it); it = NULL;    }
+                iterator(iterator<T> && src)
+                {
+                    v   = lsp::move(src.v);
+                }
 
-                    inline iterator<T> &operator = (iterator<T> &src)   { it = raw_iterator::replace(it, src.it); return *this;  }
-                    inline iterator<T> &operator = (iterator<T> *src)   { it = raw_iterator::replace(it, src->it); return *this; }
+                ~iterator()
+                {
+                    v.make_invalid();
+                }
 
-                public:
-                    /**
-                     * Check iterator for validity
-                     * @return true if iterator is valid
-                     */
-                    inline bool         valid() const       { return (it != NULL) && (it->valid(it));               }
+            public: // Assignment
+                inline iterator<T> & operator = (const iterator<T> & src)
+                {
+                    v   = src.v;
+                    return *this;
+                }
 
-                    /**
-                     * Check that iterator is valid and can advance
-                     * @return true if iterator can advance
-                     */
-                    inline bool         contains() const    { return (it != NULL) && (it->has_more(it));            }
-                    inline operator     bool() const        { return contains();                                    }
+                inline iterator<T> & operator = (iterator<T> && src)
+                {
+                    v   = lsp::move(src.v);
+                    return *this;
+                }
 
-                    /**
-                     * Check that iterator is valid and is pointing at the end of the collection
-                     * @return true if iterator is valid and is pointing at the end of the collection
-                     */
-                    inline bool         end() const         { return (it == NULL) || (!it->has_more(it));           }
-                    inline bool operator !() const          { return end();                                         }
+            public: // Positioning
+                inline iterator<T> & operator ++() { v.vtable->move(&v, 1); return *this; }
+                inline iterator<T> & operator --() { v.vtable->move(&v, -1); return *this; }
 
-                    /** Advance iterator (pre-increment)
-                     *
-                     * @return advanced iterator
-                     */
-                    inline iterator<T> &bnext()
-                    {
-                        if (it != NULL) it = it->bnext(it, 1);
-                        return *this;
-                    }
-                    inline iterator<T> &operator ++()       { return bnext();                                       }
+                inline iterator<T> operator ++ (int)
+                {
+                    raw_iterator tmp = v;
+                    v.vtable->move(&v, 1);
+                    return iterator<T>(lsp::move(tmp));
+                }
 
-                    /** Advance iterator for the specified number of elements
-                     *
-                     * @return
-                     */
-                    inline iterator<T> &advance(size_t n)
-                    {
-                        if (it != NULL) it = it->bnext(it, n);
-                        return *this;
-                    }
-                    inline iterator<T> &operator +=(ssize_t n)  { return advance(n);                                }
+                inline iterator<T> operator -- (int)
+                {
+                    raw_iterator tmp = v;
+                    v.vtable->move(&v, -1);
+                    return iterator<T>(lsp::move(tmp));
+                }
 
-                    /** Advance iterator (post-increment)
-                     *
-                     * @return advanced iterator
-                     */
-                    inline iterator<T>  anext()
-                    {
-                        raw_iterator *prev = it;
-                        raw_iterator *xit  = (it != NULL) ? it->anext(it, 1) : NULL;
-                        it = raw_iterator::replace(it, xit);
-                        return iterator<T>(prev);
-                    }
-                    inline iterator<T>  operator ++(int)    { return anext();                                       }
+                inline iterator<T> operator + (ssize_t offset)
+                {
+                    raw_iterator tmp = v;
+                    v.vtable->move(&v, offset);
+                    return iterator<T>(lsp::move(tmp));
+                }
 
-                    /** Get current item or return NULL if there is no item
-                     *
-                     * @return current item
-                     */
-                    inline T           *get()               { return (it != NULL) ? cast(it->get(it)) : NULL;       }
-                    inline T *operator *()                  { return get();                                         }
-                    inline T *operator ->()                 { return get();                                         }
+                inline iterator<T> operator - (ssize_t offset)
+                {
+                    raw_iterator tmp = v;
+                    v.vtable->move(&v, -offset);
+                    return iterator<T>(lsp::move(tmp));
+                }
 
-                    /**
-                     * Remove current item and advance to the next one (if it is present)
-                     * @return true on success
-                     */
-                    inline T           *remove()            { return (it != NULL) ? cast(it->remove(it)) : NULL;    }
+            public: // Validation
+                inline operator bool() const    { return v.container != NULL; }
+                inline bool operator !() const  { return v.container == NULL; }
 
-                    /**
-                     * Swap data between two iterators
-                     * @param src source iterator
-                     */
-                    inline void         swap(iterator<T> *src)  { T *tmp = it; it = src->it; src->it = tmp;         }
-                    inline void         swap(iterator<T> &src)  { T *tmp = it; it = src.it; src.it = tmp;           }
+            public: // Dereferencing, should be applied for valid iterators only
+                inline T & operator *()
+                {
+                    T *tmp     = static_cast<T *>(v.vtable->get(&v));
+                    return *tmp;
+                }
 
-                    /**
-                     * Get number of change for collection
-                     * @return number of change for collection
-                     */
-                    inline size_t       change() const      { return (it != NULL) ? it->change : 0;                 }
+                inline const T & operator *() const
+                {
+                    const T *tmp     = const_cast<const T *>(static_cast<T *>(v.vtable->get(&v)));
+                    return *tmp;
+                }
 
-                    /**
-                     * Get number of references
-                     * @return number of references
-                     */
-                    inline size_t       refs() const      { return (it != NULL) ? it->refs : 0;                     }
-            };
+                inline T & operator ->()
+                {
+                    T *tmp     = static_cast<T *>(v.vtable->get(&v));
+                    return *tmp;
+                }
 
-        template <class T>
-            inline iterator<T>  make_iterator(raw_iterator *it)     { return iterator<T>(it);                       }
-    }
-}
+                inline const T & operator ->() const
+                {
+                    const T *tmp     = const_cast<const T *>(static_cast<T *>(v.vtable->get(&v)));
+                    return *tmp;
+                }
+
+            public:  // Comparison operators
+                inline bool operator < (const iterator<T> & it) const
+                {
+                    return (v.container == it.v.container) &&
+                        (v.vtable->cmp(&v, &it.v) < 0);
+                }
+
+                inline bool operator <= (const iterator<T> & it) const
+                {
+                    return (v.container == it.v.container) &&
+                        (v.vtable->cmp(&v, &it.v) <= 0);
+                }
+
+                inline bool operator == (const iterator<T> & it) const
+                {
+                    return (v.container == it.v.container) &&
+                        (v.vtable->cmp(&v, &it.v) == 0);
+                }
+
+                inline bool operator != (const iterator<T> & it) const
+                {
+                    return (v.container == it.v.container) &&
+                        (v.vtable->cmp(&v, &it.v) != 0);
+                }
+
+                inline bool operator >= (const iterator<T> & it) const
+                {
+                    return (v.container == it.v.container) &&
+                        (v.vtable->cmp(&v, &it.v) >= 0);
+                }
+
+                inline bool operator > (const iterator<T> & it) const
+                {
+                    return (v.container == it.v.container) &&
+                        (v.vtable->cmp(&v, &it.v) > 0);
+                }
+        };
+
+    } /* namespace lltl */
+} /* namespace lsp */
 
 #endif /* LSP_PLUG_IN_LLTL_ITERATOR_H_ */
