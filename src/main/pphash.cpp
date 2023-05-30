@@ -31,8 +31,8 @@ namespace lsp
             for (tuple_t *curr = bin->data; curr != NULL; )
             {
                 tuple_t *next   = curr->next;
-                if (curr->key != NULL)
-                    alloc.free(curr->key);
+                if (curr->v.key != NULL)
+                    alloc.free(curr->v.key);
                 ::free(curr);
                 curr            = next;
             }
@@ -50,7 +50,7 @@ namespace lsp
             {
                 for (tuple_t *curr = bin->data; curr != NULL; curr = curr->next)
                 {
-                    if ((curr->hash == hash) && (cmp.compare(key, curr->key, ksize) == 0))
+                    if ((curr->hash == hash) && (cmp.compare(key, curr->v.key, ksize) == 0))
                         return curr;
                 }
             }
@@ -58,7 +58,7 @@ namespace lsp
             {
                 for (tuple_t *curr = bin->data; curr != NULL; curr = curr->next)
                 {
-                    if (curr->key == NULL)
+                    if (curr->v.key == NULL)
                         return curr;
                 }
             }
@@ -76,7 +76,7 @@ namespace lsp
                 for (tuple_t **pcurr = &bin->data; *pcurr != NULL; )
                 {
                     tuple_t *curr = *pcurr;
-                    if ((curr->hash == hash) && (cmp.compare(key, curr->key, ksize) == 0))
+                    if ((curr->hash == hash) && (cmp.compare(key, curr->v.key, ksize) == 0))
                     {
                         *pcurr      = curr->next;
                         curr->next  = NULL;
@@ -92,7 +92,7 @@ namespace lsp
                 for (tuple_t **pcurr = &bin->data; *pcurr != NULL; )
                 {
                     tuple_t *curr = *pcurr;
-                    if (curr->key == NULL)
+                    if (curr->v.key == NULL)
                     {
                         *pcurr      = curr->next;
                         curr->next  = NULL;
@@ -142,7 +142,7 @@ namespace lsp
             ++size;
 
             tuple->hash     = hash;
-            tuple->key      = kcopy;
+            tuple->v.key    = kcopy;
             tuple->next     = bin->data;
             bin->data       = tuple;
 
@@ -250,21 +250,21 @@ namespace lsp
         {
             size_t h        = (key != NULL) ? hash.hash(key, ksize) : 0;
             tuple_t *tuple  = find_tuple(key, h);
-            return (tuple != NULL) ? tuple->value : dfl;
+            return (tuple != NULL) ? tuple->v.value : dfl;
         }
 
         void *raw_pphash::key(const void *key, void *dfl)
         {
             size_t h        = (key != NULL) ? hash.hash(key, ksize) : 0;
             tuple_t *tuple  = find_tuple(key, h);
-            return (tuple != NULL) ? tuple->key : dfl;
+            return (tuple != NULL) ? tuple->v.key : dfl;
         }
 
         void **raw_pphash::wbget(const void *key)
         {
             size_t h        = (key != NULL) ? hash.hash(key, ksize) : 0;
             tuple_t *tuple  = find_tuple(key, h);
-            return (tuple != NULL) ? &tuple->value : NULL;
+            return (tuple != NULL) ? &tuple->v.value : NULL;
         }
 
         void **raw_pphash::put(const void *key, void *value, void **ov)
@@ -276,9 +276,9 @@ namespace lsp
             if (tuple != NULL)
             {
                 if (ov != NULL)
-                    *ov         = tuple->value;
-                tuple->value    = value;
-                return &tuple->value;
+                    *ov         = tuple->v.value;
+                tuple->v.value  = value;
+                return &tuple->v.value;
             }
 
             // Not found, allocate new tuple
@@ -286,11 +286,11 @@ namespace lsp
             if (tuple == NULL)
                 return NULL;
 
-            tuple->value    = value;
+            tuple->v.value  = value;
             if (ov != NULL)
                 *ov         = NULL;
 
-            return &tuple->value;
+            return &tuple->v.value;
         }
 
         void **raw_pphash::create(const void *key, void *value)
@@ -307,9 +307,9 @@ namespace lsp
             if (tuple == NULL)
                 return NULL;
 
-            tuple->value    = value;
+            tuple->v.value  = value;
 
-            return &tuple->value;
+            return &tuple->v.value;
         }
 
         void **raw_pphash::replace(const void *key, void *value, void **ov)
@@ -322,9 +322,9 @@ namespace lsp
                 return NULL;
 
             if (ov != NULL)
-                *ov         = tuple->value;
-            tuple->value    = value;
-            return &tuple->value;
+                *ov         = tuple->v.value;
+            tuple->v.value  = value;
+            return &tuple->v.value;
         }
 
         bool raw_pphash::remove(const void *key, void **ov)
@@ -337,11 +337,11 @@ namespace lsp
                 return false;
 
             if (ov != NULL)
-                *ov         = tuple->value;
+                *ov         = tuple->v.value;
 
             // Free tuple data
-            if (tuple->key != NULL)
-                alloc.free(tuple->key);
+            if (tuple->v.key != NULL)
+                alloc.free(tuple->v.key);
             ::free(tuple);
             return true;
         }
@@ -359,7 +359,7 @@ namespace lsp
             for (size_t i=0; i<cap; ++i)
                 for (tuple_t *t = bins[i].data; t != NULL; t = t->next)
                 {
-                    if (!kt.append(t->key))
+                    if (!kt.append(t->v.key))
                     {
                         kt.flush();
                         return false;
@@ -386,7 +386,7 @@ namespace lsp
             for (size_t i=0; i<cap; ++i)
                 for (tuple_t *t = bins[i].data; t != NULL; t = t->next)
                 {
-                    if (!kv.append(t->value))
+                    if (!kv.append(t->v.value))
                     {
                         kv.flush();
                         return false;
@@ -420,8 +420,8 @@ namespace lsp
             for (size_t i=0; i<cap; ++i)
                 for (tuple_t *t = bins[i].data; t != NULL; t = t->next)
                 {
-                    if ((!kt.append(t->key)) ||
-                        (!vt.append(t->value)))
+                    if ((!kt.append(t->v.key)) ||
+                        (!vt.append(t->v.value)))
                     {
                         kt.flush();
                         vt.flush();
@@ -438,7 +438,7 @@ namespace lsp
 
             return true;
         }
-    }
-}
+    } /* namespace lltl */
+} /* namespace lsp */
 
 

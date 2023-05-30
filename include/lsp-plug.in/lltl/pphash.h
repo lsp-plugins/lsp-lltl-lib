@@ -36,8 +36,7 @@ namespace lsp
                 typedef struct tuple_t
                 {
                     size_t      hash;       // Hash code
-                    void       *key;        // Key
-                    void       *value;      // Value
+                    raw_pair_t  v;          // Contained key-value pair
                     tuple_t    *next;       // Next tuple
                 } tuple_t;
 
