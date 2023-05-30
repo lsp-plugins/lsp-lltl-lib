@@ -779,6 +779,36 @@ UTEST_BEGIN("lltl", parray)
         printf("\n");
     }
 
+    void test_iterator()
+    {
+        static const ssize_t N = 8;
+
+        printf("Testing iterator...\n");
+        int v[N];
+        for (ssize_t i=0; i<N; ++i)
+            v[i]    = i;
+
+        lltl::parray<int> a;
+        for (ssize_t i=0; i<N; ++i)
+            UTEST_ASSERT(a.add(&v[i]));
+        for (size_t i=0; i<N; ++i)
+            UTEST_ASSERT(a.get(i) == &v[i]);
+
+        size_t x, n;
+
+        x = 0;
+        n = 0;
+        for (lltl::iterator<int> it = a.values(); it; ++it, ++x, ++n)
+            UTEST_ASSERT(*it == &v[x]);
+        UTEST_ASSERT(n == N);
+
+        x = N - 1;
+        n = 0;
+        for (lltl::iterator<int> it = a.rvalues(); it; ++it, --x, ++n)
+            UTEST_ASSERT(*it == &v[x]);
+        UTEST_ASSERT(n == N);
+    }
+
     UTEST_MAIN
     {
         test_single();
@@ -788,6 +818,7 @@ UTEST_BEGIN("lltl", parray)
         test_multiple_parray();
         test_xswap();
         test_sort();
+        test_iterator();
     }
 
 UTEST_END

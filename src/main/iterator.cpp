@@ -36,7 +36,7 @@ namespace lsp
 
         ssize_t invalid_iter_compare(const raw_iterator *a, const raw_iterator *b)
         {
-            return ssize_t(b->container == NULL);
+            return (a->container != NULL) || (a->container != b->container);
         }
 
         const iter_vtbl_t raw_iterator::invalid_vtbl =
@@ -51,8 +51,37 @@ namespace lsp
             &invalid_vtbl,
             NULL,
             NULL,
-            0
+            0,
+            false
         };
+
+        void raw_iterator::advance(ssize_t n)
+        {
+            if (reversive)
+                n       = -n;
+            vtable->move(this, n);
+        }
+
+        iter_cmp_result_t raw_iterator::compare_to(const raw_iterator *b) const
+        {
+            // Do usual stuff if container matches
+            ssize_t res;
+            if (container == b->container)
+                res = vtable->cmp(this, b);
+            else if (b->container == NULL) // Compare with invalid
+                res = container != NULL;
+            else
+                return iter_cmp_result_t { 0, false };
+
+            return (reversive) ?
+                iter_cmp_result_t {  res, true } :
+                iter_cmp_result_t { -res, true };
+        }
+
+        bool raw_iterator::valid() const
+        {
+            return container != NULL;
+        }
 
     } /* namespace lltl */
 } /* namespace lsp */

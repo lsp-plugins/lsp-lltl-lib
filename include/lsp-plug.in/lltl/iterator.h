@@ -33,6 +33,12 @@ namespace lsp
     {
         struct raw_iterator;
 
+        struct LSP_LLTL_LIB_PUBLIC iter_cmp_result_t
+        {
+            ssize_t             res;
+            bool                valid;
+        };
+
         /**
          * Advance to next record in post-increment/pre-increment mode.
          * Post-increment mode should malloc() and return copy of iterator advanced to n steps.
@@ -71,6 +77,12 @@ namespace lsp
                 void                   *container;  // Pointer to container that holds data, SHOULD be NULL if iterator is invalid
                 void                   *item;       // Pointer to current item
                 size_t                  offset;     // Offset from the beginning of the container
+                bool                    reversive;  // Reversive flag
+
+            public:
+                void                    advance(ssize_t n);
+                iter_cmp_result_t       compare_to(const raw_iterator *b) const;
+                bool                    valid() const;
         };
 
         /**
@@ -129,40 +141,43 @@ namespace lsp
                 }
 
             public: // Positioning
-                inline iterator<T> & operator ++() { v.vtable->move(&v, 1); return *this; }
-                inline iterator<T> & operator --() { v.vtable->move(&v, -1); return *this; }
+                inline iterator<T> & operator ++() { v.advance(1);  return *this; }
+                inline iterator<T> & operator --() { v.advance(-1); return *this; }
 
                 inline iterator<T> operator ++ (int)
                 {
                     raw_iterator tmp = v;
-                    v.vtable->move(&v, 1);
+                    v.advance(1);
                     return iterator<T>(lsp::move(tmp));
                 }
 
                 inline iterator<T> operator -- (int)
                 {
                     raw_iterator tmp = v;
-                    v.vtable->move(&v, -1);
+                    v.advance(-1);
                     return iterator<T>(lsp::move(tmp));
                 }
 
                 inline iterator<T> operator + (ssize_t offset)
                 {
                     raw_iterator tmp = v;
-                    v.vtable->move(&v, offset);
+                    v.advance(offset);
                     return iterator<T>(lsp::move(tmp));
                 }
 
                 inline iterator<T> operator - (ssize_t offset)
                 {
                     raw_iterator tmp = v;
-                    v.vtable->move(&v, -offset);
+                    v.advance(-offset);
                     return iterator<T>(lsp::move(tmp));
                 }
 
+                inline iterator<T> operator += (ssize_t offset) { v.advance(offset);   return *this; }
+                inline iterator<T> operator -= (ssize_t offset) { v.advance(-offset);  return *this; }
+
             public: // Validation
-                inline operator bool() const    { return v.container != NULL; }
-                inline bool operator !() const  { return v.container == NULL; }
+                inline operator bool() const    { return v.valid(); }
+                inline bool operator !() const  { return v.valid(); }
 
             public: // Dereferencing, should be applied for valid iterators only
                 inline T * operator *()
@@ -192,38 +207,38 @@ namespace lsp
             public:  // Comparison operators
                 inline bool operator < (const iterator<T> & it) const
                 {
-                    return (v.container == it.v.container) &&
-                        (v.vtable->cmp(&v, &it.v) < 0);
+                    iter_cmp_result_t res = v.compare_to(&it.v);
+                    return (res.valid) ? res.res < 0 : false;
                 }
 
                 inline bool operator <= (const iterator<T> & it) const
                 {
-                    return (v.container == it.v.container) &&
-                        (v.vtable->cmp(&v, &it.v) <= 0);
+                    iter_cmp_result_t res = v.compare_to(&it.v);
+                    return (res.valid) ? res.res <= 0 : false;
                 }
 
                 inline bool operator == (const iterator<T> & it) const
                 {
-                    return (v.container == it.v.container) &&
-                        (v.vtable->cmp(&v, &it.v) == 0);
+                    iter_cmp_result_t res = v.compare_to(&it.v);
+                    return (res.valid) ? res.res == 0 : false;
                 }
 
                 inline bool operator != (const iterator<T> & it) const
                 {
-                    return (v.container == it.v.container) &&
-                        (v.vtable->cmp(&v, &it.v) != 0);
+                    iter_cmp_result_t res = v.compare_to(&it.v);
+                    return (res.valid) ? res.res != 0 : false;
                 }
 
                 inline bool operator >= (const iterator<T> & it) const
                 {
-                    return (v.container == it.v.container) &&
-                        (v.vtable->cmp(&v, &it.v) >= 0);
+                    iter_cmp_result_t res = v.compare_to(&it.v);
+                    return (res.valid) ? res.res >= 0 : false;
                 }
 
                 inline bool operator > (const iterator<T> & it) const
                 {
-                    return (v.container == it.v.container) &&
-                        (v.vtable->cmp(&v, &it.v) > 0);
+                    iter_cmp_result_t res = v.compare_to(&it.v);
+                    return (res.valid) ? res.res > 0 : false;
                 }
         };
 
