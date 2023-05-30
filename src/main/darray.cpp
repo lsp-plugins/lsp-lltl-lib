@@ -28,6 +28,13 @@ namespace lsp
     {
         inline size_t nonzero(size_t count, size_t n) { return ((count + n) > 0) ? n : 1; }
 
+        const iter_vtbl_t raw_darray::iterator_vtbl =
+        {
+            iter_move,
+            iter_get,
+            iter_compare
+        };
+
         void raw_darray::init(size_t n_sizeof)
         {
             nItems      = 0;
@@ -443,5 +450,55 @@ namespace lsp
             xf.f = f;
             lsp::qsort_r(vItems, nItems, nSizeOf, raw_cmp, xf.p);
         }
-    }
-}
+
+        raw_iterator raw_darray::iter()
+        {
+            if (nItems <= 0)
+                return raw_iterator::invalid;
+
+            return raw_iterator {
+                &iterator_vtbl,
+                this,
+                NULL,
+                0,
+                false
+            };
+        }
+
+        raw_iterator raw_darray::riter()
+        {
+            if (nItems <= 0)
+                return raw_iterator::invalid;
+
+            return raw_iterator {
+                &iterator_vtbl,
+                this,
+                NULL,
+                nItems - 1,
+                true
+            };
+        }
+
+        void raw_darray::iter_move(raw_iterator *i, ssize_t n)
+        {
+            raw_darray *self    = static_cast<raw_darray *>(i->container);
+            ssize_t off = i->offset + n;
+            if ((off >= 0) && (size_t(off) < self->nItems))
+                i->offset       = off;
+            else
+                *i              = raw_iterator::invalid;
+        }
+
+        void *raw_darray::iter_get(raw_iterator *i)
+        {
+            raw_darray *self = static_cast<raw_darray *>(i->container);
+            return (i->offset < self->nItems) ? &self->vItems[i->offset * self->nSizeOf] : NULL;
+        }
+
+        ssize_t raw_darray::iter_compare(const raw_iterator *a, const raw_iterator *b)
+        {
+            return a->offset - b->offset;
+        }
+
+    } /* namespace lltl */
+} /* namespace lsp */
