@@ -32,6 +32,7 @@ namespace lsp
         {
             iter_move,
             iter_get,
+            iter_compare,
             iter_compare
         };
 
@@ -492,6 +493,7 @@ namespace lsp
                 this,
                 NULL,
                 0,
+                0,
                 false
             };
         }
@@ -506,6 +508,7 @@ namespace lsp
                 this,
                 NULL,
                 nItems - 1,
+                0,
                 true
             };
         }

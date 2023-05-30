@@ -39,11 +39,17 @@ namespace lsp
             return (a->container != NULL) || (a->container != b->container);
         }
 
+        ssize_t invalid_iter_diff(const raw_iterator *a, const raw_iterator *b)
+        {
+            return 0;
+        }
+
         const iter_vtbl_t raw_iterator::invalid_vtbl =
         {
             invalid_iter_move,
             invalid_iter_get,
-            invalid_iter_compare
+            invalid_iter_compare,
+            invalid_iter_diff
         };
 
         const raw_iterator raw_iterator::invalid =
@@ -51,6 +57,7 @@ namespace lsp
             &invalid_vtbl,
             NULL,
             NULL,
+            0,
             0,
             false
         };
@@ -76,6 +83,13 @@ namespace lsp
             return (reversive) ?
                 iter_cmp_result_t {  res, true } :
                 iter_cmp_result_t { -res, true };
+        }
+
+        ssize_t raw_iterator::diff(const raw_iterator *b) const
+        {
+            if (container != b->container)
+                return 0;
+            return vtable->diff(this, b);
         }
 
         bool raw_iterator::valid() const

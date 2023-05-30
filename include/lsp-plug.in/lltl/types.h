@@ -223,7 +223,7 @@ namespace lsp
          * Pair definition
          */
         template <class K, class V>
-        struct pair_t
+        struct pair
         {
             const K * const key;
             V              *value;

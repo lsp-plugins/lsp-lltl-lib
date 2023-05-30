@@ -53,6 +53,8 @@ namespace lsp
 
         typedef ssize_t (*iter_compare_t)(const raw_iterator *a, const raw_iterator *b);
 
+        typedef ssize_t (*iter_diff_t)(const raw_iterator *a, const raw_iterator *b);
+
         /**
          * Virtual table of functions for the iterator
          */
@@ -61,6 +63,7 @@ namespace lsp
             iter_move_t         move;
             iter_get_t          get;
             iter_compare_t      cmp;
+            iter_diff_t         diff;
         };
 
         /**
@@ -77,12 +80,14 @@ namespace lsp
                 void                   *container;  // Pointer to container that holds data, SHOULD be NULL if iterator is invalid
                 void                   *item;       // Pointer to current item
                 size_t                  offset;     // Offset from the beginning of the container
+                size_t                  index;      // The overall index in the collection (may be not used)
                 bool                    reversive;  // Reversive flag
 
             public:
                 void                    advance(ssize_t n);
                 iter_cmp_result_t       compare_to(const raw_iterator *b) const;
                 bool                    valid() const;
+                ssize_t                 diff(const raw_iterator *b) const;
         };
 
         /**
@@ -172,12 +177,29 @@ namespace lsp
                     return iterator<T>(lsp::move(tmp));
                 }
 
+                inline ssize_t operator - (const iterator<T> & it)
+                {
+                    return v.diff(&it.v);
+                }
+
                 inline iterator<T> operator += (ssize_t offset) { v.advance(offset);   return *this; }
                 inline iterator<T> operator -= (ssize_t offset) { v.advance(-offset);  return *this; }
 
             public: // Validation
                 inline operator bool() const    { return v.valid(); }
                 inline bool operator !() const  { return v.valid(); }
+
+                inline bool sibling_of(const iterator<T> *it) const { return v.container == it->v.container;   }
+                inline bool sibling_of(const iterator<T> &it) const { return v.container == it.v.container;    }
+
+                inline bool operator & (const iterator<T> *it) const { return sibling_of(it);       }
+                inline bool operator & (const iterator<T> &it) const { return sibling_of(it);       }
+
+                inline bool not_sibling_of(const iterator<T> *it) const { return v.container != it->v.container;   }
+                inline bool not_sibling_of(const iterator<T> &it) const { return v.container != it.v.container;    }
+
+                inline bool operator | (const iterator<T> *it) const { return not_sibling_of(it);   }
+                inline bool operator | (const iterator<T> &it) const { return not_sibling_of(it);   }
 
             public: // Dereferencing, should be applied for valid iterators only
                 inline T * operator *()
