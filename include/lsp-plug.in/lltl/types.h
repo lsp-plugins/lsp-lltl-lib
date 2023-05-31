@@ -209,8 +209,28 @@ namespace lsp
             size_t          size;
             compare_func_t  compare;
         };
-    }
-}
+
+        /**
+         * Raw pair definition
+         */
+        struct raw_pair_t
+        {
+            void           *key;
+            void           *value;
+        };
+
+        /**
+         * Pair definition
+         */
+        template <class K, class V>
+        struct pair
+        {
+            const K * const key;
+            V              *value;
+        };
+
+    } /* namespace lltl */
+} /* namespace lsp */
 
 // Include default specialization
 #include <lsp-plug.in/lltl/spec.h>

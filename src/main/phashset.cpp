@@ -25,6 +25,15 @@ namespace lsp
 {
     namespace lltl
     {
+        const iter_vtbl_t raw_phashset::iterator_vtbl =
+        {
+            iter_move,
+            iter_get,
+            iter_compare,
+            iter_compare,
+            iter_count
+        };
+
         void raw_phashset::destroy_bin(bin_t *bin)
         {
             for (tuple_t *curr = bin->data; curr != NULL; )
@@ -111,7 +120,7 @@ namespace lsp
                 return NULL;
 
             // Need to grow?
-            if (size >= cap)
+            if (size >= cap * 4)
             {
                 if (!grow())
                 {
@@ -370,5 +379,168 @@ namespace lsp
 
             return true;
         }
-    }
-}
+
+        raw_iterator raw_phashset::iter(const iter_vtbl_t *vtbl)
+        {
+            if (size <= 0)
+                return raw_iterator::INVALID;
+
+            // Find first item and return iterator record
+            for (size_t i=0; i<cap; ++i)
+            {
+                bin_t *bin  = &bins[i];
+                if (bin->data != NULL)
+                    return raw_iterator {
+                        vtbl,
+                        this,
+                        bin->data,
+                        0,
+                        i,
+                        false
+                    };
+            }
+
+            return raw_iterator::INVALID;
+        }
+
+        raw_iterator raw_phashset::riter(const iter_vtbl_t *vtbl)
+        {
+            if (size <= 0)
+                return raw_iterator::INVALID;
+
+            // Find last item and return iterator record
+            for (size_t i=cap; i>0; )
+            {
+                bin_t *bin  = &bins[--i];
+                tuple_t *tuple = bin->data;
+                if (tuple == NULL)
+                    continue;
+
+                // Find last tuple in list
+                while (tuple->next != NULL)
+                    tuple   = tuple->next;
+
+                return raw_iterator {
+                    vtbl,
+                    this,
+                    tuple,
+                    size - 1,
+                    i,
+                    true
+                };
+            }
+
+            return raw_iterator::INVALID;
+        }
+
+        raw_phashset::tuple_t *raw_phashset::prev_tuple(bin_t *bin, const tuple_t *tuple)
+        {
+            tuple_t *prev   = NULL;
+            for (tuple_t *t = bin->data; t != tuple; t = t->next)
+                prev = t;
+
+            return prev;
+        }
+
+        void raw_phashset::iter_move(raw_iterator *i, ssize_t n)
+        {
+            // Ensure that we don't get out of bounds
+            raw_phashset *self  = static_cast<raw_phashset *>(i->container);
+            ssize_t new_idx     = i->index + n;
+            if ((new_idx < 0) || (size_t(new_idx) >= self->size))
+            {
+                *i = raw_iterator::INVALID;
+                return;
+            }
+
+            // Iterate forward
+            bin_t *bin;
+            tuple_t *tuple;
+
+            while (n > 0)
+            {
+                tuple  = static_cast<tuple_t *>(i->item);
+
+                // Try to advance in the bin list
+                i->item = (tuple != NULL) ? tuple->next : NULL;
+                if (i->item != NULL)
+                {
+                    ++i->index;
+                    --n;
+                    continue;
+                }
+
+                // Try to advance the bin
+                if ((++i->offset) >= self->cap)
+                {
+                    *i = raw_iterator::INVALID;
+                    return;
+                }
+
+                // Obtain new bin
+                bin         = &self->bins[i->offset];
+                if (bin->size < size_t(n))
+                {
+                    n          -= bin->size;
+                    i->index   += bin->size;
+                    continue;
+                }
+
+                // Get item from the bin
+                i->item     = bin->data;
+                ++i->index;
+                --n;
+            }
+
+            // Iterate backward
+            while (n < 0)
+            {
+                tuple           = static_cast<tuple_t *>(i->item);
+                bin             = &self->bins[i->offset];
+
+                // Try to advance in the bin list
+                i->item         = prev_tuple(bin, tuple);
+                if (i->item != NULL)
+                {
+                    --i->index;
+                    ++n;
+                    continue;
+                }
+
+                // Try to advance the bin
+                if ((i->offset--) <= 0)
+                {
+                    *i = raw_iterator::INVALID;
+                    return;
+                }
+
+                // Obtain new bin
+                bin             = &self->bins[i->offset];
+                if (bin->size < size_t(-n))
+                {
+                    n          += bin->size;
+                    i->index   -= bin->size;
+                    continue;
+                }
+            }
+        }
+
+        void *raw_phashset::iter_get(raw_iterator *i)
+        {
+            tuple_t *tuple = static_cast<tuple_t *>(i->item);
+            return tuple->value;
+        }
+
+        ssize_t raw_phashset::iter_compare(const raw_iterator *a, const raw_iterator *b)
+        {
+            return a->index - b->index;
+        }
+
+        size_t raw_phashset::iter_count(const raw_iterator *i)
+        {
+            raw_phashset *self  = static_cast<raw_phashset *>(i->container);
+            return self->size;
+        }
+
+    } /* namespace lltl */
+} /* namespace lsp */

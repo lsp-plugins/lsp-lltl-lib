@@ -23,6 +23,7 @@
 #define LSP_PLUG_IN_LLTL_PPHASH_H_
 
 #include <lsp-plug.in/lltl/version.h>
+#include <lsp-plug.in/lltl/iterator.h>
 #include <lsp-plug.in/lltl/types.h>
 #include <lsp-plug.in/lltl/parray.h>
 
@@ -33,11 +34,15 @@ namespace lsp
         struct LSP_LLTL_LIB_PUBLIC raw_pphash
         {
             public:
+                static const iter_vtbl_t    key_iterator_vtbl;
+                static const iter_vtbl_t    value_iterator_vtbl;
+                static const iter_vtbl_t    pair_iterator_vtbl;
+
+            public:
                 typedef struct tuple_t
                 {
                     size_t      hash;       // Hash code
-                    void       *key;        // Key
-                    void       *value;      // Value
+                    raw_pair_t  v;          // Contained key-value pair
                     tuple_t    *next;       // Next tuple
                 } tuple_t;
 
@@ -62,6 +67,7 @@ namespace lsp
                 tuple_t        *find_tuple(const void *key, size_t hash);
                 tuple_t        *remove_tuple(const void *key, size_t hash);
                 tuple_t        *create_tuple(const void *key, size_t hash);
+                static tuple_t *prev_tuple(bin_t *bin, const tuple_t *tuple);
 
             public:
                 void            flush();
@@ -77,6 +83,18 @@ namespace lsp
                 bool            keys(raw_parray *k) const;
                 bool            values(raw_parray *v) const;
                 bool            items(raw_parray *k, raw_parray *v) const;
+
+            public:
+                raw_iterator    iter(const iter_vtbl_t *vtbl);
+                raw_iterator    riter(const iter_vtbl_t *vtbl);
+
+            public:
+                static void     iter_move(raw_iterator *i, ssize_t n);
+                static void    *iter_get_key(raw_iterator *i);
+                static void    *iter_get_value(raw_iterator *i);
+                static void    *iter_get_pair(raw_iterator *i);
+                static ssize_t  iter_compare(const raw_iterator *a, const raw_iterator *b);
+                static size_t   iter_count(const raw_iterator *i);
         };
 
 
@@ -303,9 +321,20 @@ namespace lsp
                      * @return true if all keys have been successfully stored
                      */
                     inline bool items(parray<K> *vk, parray<V> *vv) const   { return v.items(vk->raw(), vv->raw());            }
+
+                public:
+                    // Iterators
+                    inline iterator<K> keys()                               { return iterator<K>(v.iter(&raw_pphash::key_iterator_vtbl));       }
+                    inline iterator<K> rkeys()                              { return iterator<K>(v.riter(&raw_pphash::key_iterator_vtbl));      }
+
+                    inline iterator<V> values()                             { return iterator<V>(v.iter(&raw_pphash::value_iterator_vtbl));     }
+                    inline iterator<V> rvalues()                            { return iterator<V>(v.riter(&raw_pphash::value_iterator_vtbl));    }
+
+                    inline iterator<pair<K, V>> items()                     { return iterator<pair<K, V>>(v.iter(&raw_pphash::pair_iterator_vtbl));      }
+                    inline iterator<pair<K, V>> ritems()                    { return iterator<pair<K, V>>(v.riter(&raw_pphash::pair_iterator_vtbl));     }
             };
-    }
-}
+    } /* namespace lltl */
+} /* namespace lsp */
 
 
 

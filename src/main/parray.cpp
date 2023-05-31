@@ -28,6 +28,15 @@ namespace lsp
     {
         inline size_t nonzero(size_t count, size_t n) { return ((count + n) > 0) ? n : 1; }
 
+        const iter_vtbl_t raw_parray::iterator_vtbl =
+        {
+            iter_move,
+            iter_get,
+            iter_compare,
+            iter_compare,
+            iter_count
+        };
+
         void raw_parray::init()
         {
             nItems      = 0;
@@ -474,7 +483,65 @@ namespace lsp
             xf.f = f;
             lsp::qsort_r(vItems, nItems, sizeof(void *), raw_cmp, xf.p);
         }
-    }
-}
+
+        raw_iterator raw_parray::iter()
+        {
+            if (nItems <= 0)
+                return raw_iterator::INVALID;
+
+            return raw_iterator {
+                &iterator_vtbl,
+                this,
+                NULL,
+                0,
+                0,
+                false
+            };
+        }
+
+        raw_iterator raw_parray::riter()
+        {
+            if (nItems <= 0)
+                return raw_iterator::INVALID;
+
+            return raw_iterator {
+                &iterator_vtbl,
+                this,
+                NULL,
+                nItems - 1,
+                0,
+                true
+            };
+        }
+
+        void raw_parray::iter_move(raw_iterator *i, ssize_t n)
+        {
+            raw_parray *self    = static_cast<raw_parray *>(i->container);
+            ssize_t off = i->index + n;
+            if ((off >= 0) && (size_t(off) < self->nItems))
+                i->index        = off;
+            else
+                *i              = raw_iterator::INVALID;
+        }
+
+        void *raw_parray::iter_get(raw_iterator *i)
+        {
+            raw_parray *self = static_cast<raw_parray *>(i->container);
+            return (i->index < self->nItems) ? self->vItems[i->index] : NULL;
+        }
+
+        ssize_t raw_parray::iter_compare(const raw_iterator *a, const raw_iterator *b)
+        {
+            return a->index - b->index;
+        }
+
+        size_t raw_parray::iter_count(const raw_iterator *i)
+        {
+            raw_parray *self    = static_cast<raw_parray *>(i->container);
+            return self->nItems;
+        }
+
+    } /* namespace lltl */
+} /* namespace lsp */
 
 

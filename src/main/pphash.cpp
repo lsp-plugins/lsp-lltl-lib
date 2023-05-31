@@ -26,13 +26,40 @@ namespace lsp
 {
     namespace lltl
     {
+        const iter_vtbl_t raw_pphash::key_iterator_vtbl =
+        {
+            iter_move,
+            iter_get_key,
+            iter_compare,
+            iter_compare,
+            iter_count
+        };
+
+        const iter_vtbl_t raw_pphash::value_iterator_vtbl =
+        {
+            iter_move,
+            iter_get_value,
+            iter_compare,
+            iter_compare,
+            iter_count
+        };
+
+        const iter_vtbl_t raw_pphash::pair_iterator_vtbl =
+        {
+            iter_move,
+            iter_get_pair,
+            iter_compare,
+            iter_compare,
+            iter_count
+        };
+
         void raw_pphash::destroy_bin(bin_t *bin)
         {
             for (tuple_t *curr = bin->data; curr != NULL; )
             {
                 tuple_t *next   = curr->next;
-                if (curr->key != NULL)
-                    alloc.free(curr->key);
+                if (curr->v.key != NULL)
+                    alloc.free(curr->v.key);
                 ::free(curr);
                 curr            = next;
             }
@@ -50,7 +77,7 @@ namespace lsp
             {
                 for (tuple_t *curr = bin->data; curr != NULL; curr = curr->next)
                 {
-                    if ((curr->hash == hash) && (cmp.compare(key, curr->key, ksize) == 0))
+                    if ((curr->hash == hash) && (cmp.compare(key, curr->v.key, ksize) == 0))
                         return curr;
                 }
             }
@@ -58,7 +85,7 @@ namespace lsp
             {
                 for (tuple_t *curr = bin->data; curr != NULL; curr = curr->next)
                 {
-                    if (curr->key == NULL)
+                    if (curr->v.key == NULL)
                         return curr;
                 }
             }
@@ -76,7 +103,7 @@ namespace lsp
                 for (tuple_t **pcurr = &bin->data; *pcurr != NULL; )
                 {
                     tuple_t *curr = *pcurr;
-                    if ((curr->hash == hash) && (cmp.compare(key, curr->key, ksize) == 0))
+                    if ((curr->hash == hash) && (cmp.compare(key, curr->v.key, ksize) == 0))
                     {
                         *pcurr      = curr->next;
                         curr->next  = NULL;
@@ -92,7 +119,7 @@ namespace lsp
                 for (tuple_t **pcurr = &bin->data; *pcurr != NULL; )
                 {
                     tuple_t *curr = *pcurr;
-                    if (curr->key == NULL)
+                    if (curr->v.key == NULL)
                     {
                         *pcurr      = curr->next;
                         curr->next  = NULL;
@@ -125,7 +152,7 @@ namespace lsp
             }
 
             // Need to grow?
-            if (size >= cap)
+            if (size >= cap*4)
             {
                 if (!grow())
                 {
@@ -142,7 +169,7 @@ namespace lsp
             ++size;
 
             tuple->hash     = hash;
-            tuple->key      = kcopy;
+            tuple->v.key    = kcopy;
             tuple->next     = bin->data;
             bin->data       = tuple;
 
@@ -250,21 +277,21 @@ namespace lsp
         {
             size_t h        = (key != NULL) ? hash.hash(key, ksize) : 0;
             tuple_t *tuple  = find_tuple(key, h);
-            return (tuple != NULL) ? tuple->value : dfl;
+            return (tuple != NULL) ? tuple->v.value : dfl;
         }
 
         void *raw_pphash::key(const void *key, void *dfl)
         {
             size_t h        = (key != NULL) ? hash.hash(key, ksize) : 0;
             tuple_t *tuple  = find_tuple(key, h);
-            return (tuple != NULL) ? tuple->key : dfl;
+            return (tuple != NULL) ? tuple->v.key : dfl;
         }
 
         void **raw_pphash::wbget(const void *key)
         {
             size_t h        = (key != NULL) ? hash.hash(key, ksize) : 0;
             tuple_t *tuple  = find_tuple(key, h);
-            return (tuple != NULL) ? &tuple->value : NULL;
+            return (tuple != NULL) ? &tuple->v.value : NULL;
         }
 
         void **raw_pphash::put(const void *key, void *value, void **ov)
@@ -276,9 +303,9 @@ namespace lsp
             if (tuple != NULL)
             {
                 if (ov != NULL)
-                    *ov         = tuple->value;
-                tuple->value    = value;
-                return &tuple->value;
+                    *ov         = tuple->v.value;
+                tuple->v.value  = value;
+                return &tuple->v.value;
             }
 
             // Not found, allocate new tuple
@@ -286,11 +313,11 @@ namespace lsp
             if (tuple == NULL)
                 return NULL;
 
-            tuple->value    = value;
+            tuple->v.value  = value;
             if (ov != NULL)
                 *ov         = NULL;
 
-            return &tuple->value;
+            return &tuple->v.value;
         }
 
         void **raw_pphash::create(const void *key, void *value)
@@ -307,9 +334,9 @@ namespace lsp
             if (tuple == NULL)
                 return NULL;
 
-            tuple->value    = value;
+            tuple->v.value  = value;
 
-            return &tuple->value;
+            return &tuple->v.value;
         }
 
         void **raw_pphash::replace(const void *key, void *value, void **ov)
@@ -322,9 +349,9 @@ namespace lsp
                 return NULL;
 
             if (ov != NULL)
-                *ov         = tuple->value;
-            tuple->value    = value;
-            return &tuple->value;
+                *ov         = tuple->v.value;
+            tuple->v.value  = value;
+            return &tuple->v.value;
         }
 
         bool raw_pphash::remove(const void *key, void **ov)
@@ -337,11 +364,11 @@ namespace lsp
                 return false;
 
             if (ov != NULL)
-                *ov         = tuple->value;
+                *ov         = tuple->v.value;
 
             // Free tuple data
-            if (tuple->key != NULL)
-                alloc.free(tuple->key);
+            if (tuple->v.key != NULL)
+                alloc.free(tuple->v.key);
             ::free(tuple);
             return true;
         }
@@ -359,7 +386,7 @@ namespace lsp
             for (size_t i=0; i<cap; ++i)
                 for (tuple_t *t = bins[i].data; t != NULL; t = t->next)
                 {
-                    if (!kt.append(t->key))
+                    if (!kt.append(t->v.key))
                     {
                         kt.flush();
                         return false;
@@ -386,7 +413,7 @@ namespace lsp
             for (size_t i=0; i<cap; ++i)
                 for (tuple_t *t = bins[i].data; t != NULL; t = t->next)
                 {
-                    if (!kv.append(t->value))
+                    if (!kv.append(t->v.value))
                     {
                         kv.flush();
                         return false;
@@ -420,8 +447,8 @@ namespace lsp
             for (size_t i=0; i<cap; ++i)
                 for (tuple_t *t = bins[i].data; t != NULL; t = t->next)
                 {
-                    if ((!kt.append(t->key)) ||
-                        (!vt.append(t->value)))
+                    if ((!kt.append(t->v.key)) ||
+                        (!vt.append(t->v.value)))
                     {
                         kt.flush();
                         vt.flush();
@@ -438,7 +465,182 @@ namespace lsp
 
             return true;
         }
-    }
-}
+
+        raw_iterator raw_pphash::iter(const iter_vtbl_t *vtbl)
+        {
+            if (size <= 0)
+                return raw_iterator::INVALID;
+
+            // Find first item and return iterator record
+            for (size_t i=0; i<cap; ++i)
+            {
+                bin_t *bin  = &bins[i];
+                if (bin->data != NULL)
+                    return raw_iterator {
+                        vtbl,
+                        this,
+                        bin->data,
+                        0,
+                        i,
+                        false
+                    };
+            }
+
+            return raw_iterator::INVALID;
+        }
+
+        raw_iterator raw_pphash::riter(const iter_vtbl_t *vtbl)
+        {
+            if (size <= 0)
+                return raw_iterator::INVALID;
+
+            // Find last item and return iterator record
+            for (size_t i=cap; i>0; )
+            {
+                bin_t *bin  = &bins[--i];
+                tuple_t *tuple = bin->data;
+                if (tuple == NULL)
+                    continue;
+
+                // Find last tuple in list
+                while (tuple->next != NULL)
+                    tuple   = tuple->next;
+
+                return raw_iterator {
+                    vtbl,
+                    this,
+                    tuple,
+                    size - 1,
+                    i,
+                    true
+                };
+            }
+
+            return raw_iterator::INVALID;
+        }
+
+        raw_pphash::tuple_t *raw_pphash::prev_tuple(bin_t *bin, const tuple_t *tuple)
+        {
+            tuple_t *prev   = NULL;
+            for (tuple_t *t = bin->data; t != tuple; t = t->next)
+                prev = t;
+
+            return prev;
+        }
+
+        void raw_pphash::iter_move(raw_iterator *i, ssize_t n)
+        {
+            // Ensure that we don't get out of bounds
+            raw_pphash *self    = static_cast<raw_pphash *>(i->container);
+            ssize_t new_idx     = i->index + n;
+            if ((new_idx < 0) || (size_t(new_idx) >= self->size))
+            {
+                *i = raw_iterator::INVALID;
+                return;
+            }
+
+            // Iterate forward
+            bin_t *bin;
+            tuple_t *tuple;
+
+            while (n > 0)
+            {
+                tuple  = static_cast<tuple_t *>(i->item);
+
+                // Try to advance in the bin list
+                i->item = (tuple != NULL) ? tuple->next : NULL;
+                if (i->item != NULL)
+                {
+                    ++i->index;
+                    --n;
+                    continue;
+                }
+
+                // Try to advance the bin
+                if ((++i->offset) >= self->cap)
+                {
+                    *i = raw_iterator::INVALID;
+                    return;
+                }
+
+                // Obtain new bin
+                bin         = &self->bins[i->offset];
+                if (bin->size < size_t(n))
+                {
+                    n          -= bin->size;
+                    i->index   += bin->size;
+                    continue;
+                }
+
+                // Get item from the bin
+                i->item     = bin->data;
+                ++i->index;
+                --n;
+            }
+
+            // Iterate backward
+            while (n < 0)
+            {
+                tuple           = static_cast<tuple_t *>(i->item);
+                bin             = &self->bins[i->offset];
+
+                // Try to advance in the bin list
+                i->item         = prev_tuple(bin, tuple);
+                if (i->item != NULL)
+                {
+                    --i->index;
+                    ++n;
+                    continue;
+                }
+
+                // Try to advance the bin
+                if ((i->offset--) <= 0)
+                {
+                    *i = raw_iterator::INVALID;
+                    return;
+                }
+
+                // Obtain new bin
+                bin             = &self->bins[i->offset];
+                if (bin->size < size_t(-n))
+                {
+                    n          += bin->size;
+                    i->index   -= bin->size;
+                    continue;
+                }
+            }
+        }
+
+        void *raw_pphash::iter_get_key(raw_iterator *i)
+        {
+            tuple_t *tuple = static_cast<tuple_t *>(i->item);
+            return tuple->v.key;
+        }
+
+        void *raw_pphash::iter_get_value(raw_iterator *i)
+        {
+            tuple_t *tuple = static_cast<tuple_t *>(i->item);
+            return tuple->v.value;
+        }
+
+        void *raw_pphash::iter_get_pair(raw_iterator *i)
+        {
+            tuple_t *tuple = static_cast<tuple_t *>(i->item);
+            return &tuple->v;
+        }
+
+        ssize_t raw_pphash::iter_compare(const raw_iterator *a, const raw_iterator *b)
+        {
+            return a->index - b->index;
+        }
+
+        size_t raw_pphash::iter_count(const raw_iterator *i)
+        {
+            raw_pphash *self  = static_cast<raw_pphash *>(i->container);
+            return self->size;
+        }
+
+    } /* namespace lltl */
+} /* namespace lsp */
 
 

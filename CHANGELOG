@@ -3,6 +3,8 @@
 *******************************************************************************
 
 === 1.0.12 ===
+* Implemented the lltl::iterator class free of dynamic allocations.
+* Implemented iterators for lltl::parray, lltl::darray, lltl::phashset, lltl::pphash.
 * Updated build scripts.
 
 === 1.0.11 ===

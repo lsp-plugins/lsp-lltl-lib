@@ -177,7 +177,7 @@ UTEST_BEGIN("lltl", pphash)
                 printf("  generated %d keys\n", int(i+1));
         }
         UTEST_ASSERT(h.size() == 100000);
-        UTEST_ASSERT(h.capacity() == 0x20000);
+        UTEST_ASSERT(h.capacity() == 0x8000);
 
         printf("Validating contents...\n");
         for (size_t i=0; i<100000; ++i)
@@ -190,13 +190,376 @@ UTEST_BEGIN("lltl", pphash)
                 printf("  validated %d keys\n", int(i+1));
         }
         UTEST_ASSERT(h.size() == 100000);
-        UTEST_ASSERT(h.capacity() == 0x20000);
+        UTEST_ASSERT(h.capacity() == 0x8000);
+    }
+
+    void test_iterator(size_t count)
+    {
+        char key[20], value[20];
+
+        printf("Testing iterators for %d items...\n", int(count));
+
+        // Fill hash data
+        lltl::pphash<char, char> h;
+        for (size_t i=0; i<count; ++i)
+        {
+            sprintf(key, "%04d", int(i));
+            sprintf(value, "0x%04x", int(i));
+            UTEST_ASSERT(h.create(key, strdup(value)));
+        }
+
+        // Fill keys
+        printf("  testing keys...\n", int(count));
+        lltl::iterator<char> kstart = h.keys();
+        lltl::parray<char> keys, rkeys;
+        ssize_t x;
+
+        x = 0;
+        for (lltl::iterator<char> it = h.keys(); it; ++it, ++x)
+        {
+            // Check for validation
+            UTEST_ASSERT(it);
+            UTEST_ASSERT(it.valid());
+            UTEST_ASSERT(!(!it));
+            UTEST_ASSERT(!(it.invalid()));
+
+            // Check for siblings
+            UTEST_ASSERT(it & kstart);
+            UTEST_ASSERT(it.sibling_of(kstart));
+            UTEST_ASSERT(!(it | kstart));
+            UTEST_ASSERT(!it.not_sibling_of(kstart));
+
+            // Calc position, size and remaining
+            UTEST_ASSERT(it.forward());
+            UTEST_ASSERT(!it.reversive());
+            UTEST_ASSERT(it.index() == size_t(x));
+            UTEST_ASSERT(it.remaining() == size_t(count - x));
+            UTEST_ASSERT(it.max_advance() == size_t(count - x - 1));
+            UTEST_ASSERT(it.count() == count);
+
+            // Check distance computation
+            UTEST_ASSERT((it - kstart) == x);
+            UTEST_ASSERT((kstart - it) == -x);
+
+            // Check comparisons
+            UTEST_ASSERT(it != lltl::iterator<int>::INVALID);
+            UTEST_ASSERT(!(it == lltl::iterator<int>::INVALID));
+            UTEST_ASSERT(it >= kstart);
+            UTEST_ASSERT(kstart <= it);
+            if (x > 0)
+            {
+                UTEST_ASSERT(it != kstart);
+                UTEST_ASSERT(kstart != it);
+                UTEST_ASSERT(it > kstart);
+                UTEST_ASSERT(kstart < it);
+            }
+            else
+            {
+                UTEST_ASSERT(it == kstart);
+                UTEST_ASSERT(kstart == it);
+            }
+
+            // Store the value
+            UTEST_ASSERT(keys.push(*it));
+        }
+        UTEST_ASSERT(keys.size() == h.size());
+
+        x = count - 1;
+        for (lltl::iterator<char> it = h.rkeys(); it; ++it, --x)
+        {
+            // Check for validation
+            UTEST_ASSERT(it);
+            UTEST_ASSERT(it.valid());
+            UTEST_ASSERT(!(!it));
+            UTEST_ASSERT(!(it.invalid()));
+
+            // Check for siblings
+            UTEST_ASSERT(it & kstart);
+            UTEST_ASSERT(it.sibling_of(kstart));
+            UTEST_ASSERT(!(it | kstart));
+            UTEST_ASSERT(!it.not_sibling_of(kstart));
+
+            // Calc position, size and remaining
+            UTEST_ASSERT(!it.forward());
+            UTEST_ASSERT(it.reversive());
+            UTEST_ASSERT(it.index() == size_t(x));
+            UTEST_ASSERT(it.remaining() == size_t(x + 1));
+            UTEST_ASSERT(it.max_advance() == size_t(x));
+            UTEST_ASSERT(it.count() == count);
+
+            // Check distance computation
+            UTEST_ASSERT((it - kstart) == x);
+            UTEST_ASSERT((kstart - it) == -x);
+
+            // Check comparisons
+            UTEST_ASSERT(it != lltl::iterator<int>::INVALID);
+            UTEST_ASSERT(!(it == lltl::iterator<int>::INVALID));
+            UTEST_ASSERT(it <= kstart);
+            UTEST_ASSERT(kstart <= it);
+            if (x > 0)
+            {
+                UTEST_ASSERT(it != kstart);
+                UTEST_ASSERT(kstart != it);
+                UTEST_ASSERT(it < kstart);
+                UTEST_ASSERT(kstart < it);
+            }
+            else
+            {
+                UTEST_ASSERT(it == kstart);
+                UTEST_ASSERT(kstart == it);
+            }
+
+            // Store the value
+            UTEST_ASSERT(rkeys.unshift(*it));
+        }
+        UTEST_ASSERT(rkeys.size() == h.size());
+
+        // Validate keys
+        for (size_t i=0; i<h.size(); ++i)
+            UTEST_ASSERT(keys.uget(i) == rkeys.uget(i));
+
+        // Fill values
+        printf("  testing values...\n", int(count));
+        lltl::iterator<char> vstart = h.values();
+        lltl::parray<char> values, rvalues;
+
+        x = 0;
+        for (lltl::iterator<char> it = h.values(); it; ++it, ++x)
+        {
+            // Check for validation
+            UTEST_ASSERT(it);
+            UTEST_ASSERT(it.valid());
+            UTEST_ASSERT(!(!it));
+            UTEST_ASSERT(!(it.invalid()));
+
+            // Check for siblings
+            UTEST_ASSERT(it & vstart);
+            UTEST_ASSERT(it.sibling_of(vstart));
+            UTEST_ASSERT(!(it | vstart));
+            UTEST_ASSERT(!it.not_sibling_of(vstart));
+
+            // Calc position, size and remaining
+            UTEST_ASSERT(it.forward());
+            UTEST_ASSERT(!it.reversive());
+            UTEST_ASSERT(it.index() == size_t(x));
+            UTEST_ASSERT(it.remaining() == size_t(count - x));
+            UTEST_ASSERT(it.max_advance() == size_t(count - x - 1));
+            UTEST_ASSERT(it.count() == count);
+
+            // Check distance computation
+            UTEST_ASSERT((it - vstart) == x);
+            UTEST_ASSERT((vstart - it) == -x);
+
+            // Check comparisons
+            UTEST_ASSERT(it != lltl::iterator<int>::INVALID);
+            UTEST_ASSERT(!(it == lltl::iterator<int>::INVALID));
+            UTEST_ASSERT(it >= vstart);
+            UTEST_ASSERT(vstart <= it);
+            if (x > 0)
+            {
+                UTEST_ASSERT(it != vstart);
+                UTEST_ASSERT(vstart != it);
+                UTEST_ASSERT(it > vstart);
+                UTEST_ASSERT(vstart < it);
+            }
+            else
+            {
+                UTEST_ASSERT(it == vstart);
+                UTEST_ASSERT(vstart == it);
+            }
+
+            // Store the value
+            UTEST_ASSERT(values.push(*it));
+        }
+        UTEST_ASSERT(values.size() == h.size());
+
+        x = count - 1;
+        for (lltl::iterator<char> it = h.rvalues(); it; ++it, --x)
+        {
+            // Check for validation
+            UTEST_ASSERT(it);
+            UTEST_ASSERT(it.valid());
+            UTEST_ASSERT(!(!it));
+            UTEST_ASSERT(!(it.invalid()));
+
+            // Check for siblings
+            UTEST_ASSERT(it & vstart);
+            UTEST_ASSERT(it.sibling_of(vstart));
+            UTEST_ASSERT(!(it | vstart));
+            UTEST_ASSERT(!it.not_sibling_of(vstart));
+
+            // Calc position, size and remaining
+            UTEST_ASSERT(!it.forward());
+            UTEST_ASSERT(it.reversive());
+            UTEST_ASSERT(it.index() == size_t(x));
+            UTEST_ASSERT(it.remaining() == size_t(x + 1));
+            UTEST_ASSERT(it.max_advance() == size_t(x));
+            UTEST_ASSERT(it.count() == count);
+
+            // Check distance computation
+            UTEST_ASSERT((it - vstart) == x);
+            UTEST_ASSERT((vstart - it) == -x);
+
+            // Check comparisons
+            UTEST_ASSERT(it != lltl::iterator<int>::INVALID);
+            UTEST_ASSERT(!(it == lltl::iterator<int>::INVALID));
+            UTEST_ASSERT(it <= vstart);
+            UTEST_ASSERT(vstart <= it);
+            if (x > 0)
+            {
+                UTEST_ASSERT(it != vstart);
+                UTEST_ASSERT(vstart != it);
+                UTEST_ASSERT(it < vstart);
+                UTEST_ASSERT(vstart < it);
+            }
+            else
+            {
+                UTEST_ASSERT(it == vstart);
+                UTEST_ASSERT(vstart == it);
+            }
+
+            // Store the value
+            UTEST_ASSERT(rvalues.unshift(*it));
+        }
+        UTEST_ASSERT(rvalues.size() == h.size());
+
+        // Validate values
+        for (size_t i=0; i<h.size(); ++i)
+            UTEST_ASSERT(values.uget(i) == rvalues.uget(i));
+
+        // Fill pairs
+        printf("  testing pairs...\n", int(count));
+        lltl::iterator<lltl::pair<char, char>> istart = h.items();
+        lltl::parray<lltl::pair<char, char>> items, ritems;
+
+        x = 0;
+        for (lltl::iterator<lltl::pair<char, char>> it = h.items(); it; ++it, ++x)
+        {
+            // Check for validation
+            UTEST_ASSERT(it);
+            UTEST_ASSERT(it.valid());
+            UTEST_ASSERT(!(!it));
+            UTEST_ASSERT(!(it.invalid()));
+
+            // Check for siblings
+            UTEST_ASSERT(it & istart);
+            UTEST_ASSERT(it.sibling_of(istart));
+            UTEST_ASSERT(!(it | istart));
+            UTEST_ASSERT(!it.not_sibling_of(istart));
+
+            // Calc position, size and remaining
+            UTEST_ASSERT(it.forward());
+            UTEST_ASSERT(!it.reversive());
+            UTEST_ASSERT(it.index() == size_t(x));
+            UTEST_ASSERT(it.remaining() == size_t(count - x));
+            UTEST_ASSERT(it.max_advance() == size_t(count - x - 1));
+            UTEST_ASSERT(it.count() == count);
+
+            // Check distance computation
+            UTEST_ASSERT((it - istart) == x);
+            UTEST_ASSERT((istart - it) == -x);
+
+            // Check comparisons
+            UTEST_ASSERT(it != lltl::iterator<int>::INVALID);
+            UTEST_ASSERT(!(it == lltl::iterator<int>::INVALID));
+            UTEST_ASSERT(it >= istart);
+            UTEST_ASSERT(istart <= it);
+            if (x > 0)
+            {
+                UTEST_ASSERT(it != istart);
+                UTEST_ASSERT(istart != it);
+                UTEST_ASSERT(it > istart);
+                UTEST_ASSERT(istart < it);
+            }
+            else
+            {
+                UTEST_ASSERT(it == istart);
+                UTEST_ASSERT(istart == it);
+            }
+
+            // Store the value
+            UTEST_ASSERT(items.push(*it));
+        }
+        UTEST_ASSERT(items.size() == h.size());
+
+        x = count - 1;
+        for (lltl::iterator<lltl::pair<char, char>> it = h.ritems(); it; ++it, --x)
+        {
+            // Check for validation
+            UTEST_ASSERT(it);
+            UTEST_ASSERT(it.valid());
+            UTEST_ASSERT(!(!it));
+            UTEST_ASSERT(!(it.invalid()));
+
+            // Check for siblings
+            UTEST_ASSERT(it & istart);
+            UTEST_ASSERT(it.sibling_of(istart));
+            UTEST_ASSERT(!(it | istart));
+            UTEST_ASSERT(!it.not_sibling_of(istart));
+
+            // Calc position, size and remaining
+            UTEST_ASSERT(!it.forward());
+            UTEST_ASSERT(it.reversive());
+            UTEST_ASSERT(it.index() == size_t(x));
+            UTEST_ASSERT(it.remaining() == size_t(x + 1));
+            UTEST_ASSERT(it.max_advance() == size_t(x));
+            UTEST_ASSERT(it.count() == count);
+
+            // Check distance computation
+            UTEST_ASSERT((it - istart) == x);
+            UTEST_ASSERT((istart - it) == -x);
+
+            // Check comparisons
+            UTEST_ASSERT(it != lltl::iterator<int>::INVALID);
+            UTEST_ASSERT(!(it == lltl::iterator<int>::INVALID));
+            UTEST_ASSERT(it <= istart);
+            UTEST_ASSERT(istart <= it);
+            if (x > 0)
+            {
+                UTEST_ASSERT(it != istart);
+                UTEST_ASSERT(istart != it);
+                UTEST_ASSERT(it < istart);
+                UTEST_ASSERT(istart < it);
+            }
+            else
+            {
+                UTEST_ASSERT(it == istart);
+                UTEST_ASSERT(istart == it);
+            }
+
+            // Store the value
+            UTEST_ASSERT(ritems.unshift(*it));
+        }
+        UTEST_ASSERT(ritems.size() == h.size());
+
+        // Validate pairs
+        for (size_t i=0; i<h.size(); ++i)
+            UTEST_ASSERT(items.uget(i) == ritems.uget(i));
+
+        // Validate order
+        printf("  checking order...\n", int(count));
+        for (size_t i=0; i<h.size(); ++i)
+        {
+            lltl::pair<char, char> *p = items.uget(i);
+            const char *xkey = keys.uget(i);
+            const char *xvalue = values.uget(i);
+
+            UTEST_ASSERT(p->key   == xkey);
+            UTEST_ASSERT(p->value == xvalue);
+        }
+
+        // Drop values
+        for (lltl::iterator<char> it = values.values(); it; ++it)
+            free(*it);
     }
 
     UTEST_MAIN
     {
         test_basic();
         test_large();
+        test_iterator(10);
+        test_iterator(100);
+        test_iterator(1000);
     }
 
 UTEST_END
