@@ -261,6 +261,10 @@ UTEST_BEGIN("lltl", pphash)
             UTEST_ASSERT(p->key   == xkey);
             UTEST_ASSERT(p->value == xvalue);
         }
+
+        // Drop values
+        for (lltl::iterator<char> it = values.values(); it; ++it)
+            free(*it);
     }
 
     UTEST_MAIN

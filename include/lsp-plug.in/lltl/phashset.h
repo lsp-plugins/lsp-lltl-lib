@@ -23,6 +23,7 @@
 #define LSP_PLUG_IN_LLTL_PHASHSET_H_
 
 #include <lsp-plug.in/lltl/version.h>
+#include <lsp-plug.in/lltl/iterator.h>
 #include <lsp-plug.in/lltl/types.h>
 #include <lsp-plug.in/lltl/parray.h>
 
@@ -32,6 +33,9 @@ namespace lsp
     {
         struct LSP_LLTL_LIB_PUBLIC raw_phashset
         {
+            public:
+                static const iter_vtbl_t    iterator_vtbl;
+
             public:
                 typedef struct tuple_t
                 {
@@ -60,6 +64,7 @@ namespace lsp
                 tuple_t        *find_tuple(const void *value, size_t hash);
                 tuple_t        *remove_tuple(const void *value, size_t hash);
                 tuple_t        *create_tuple(size_t hash);
+                static tuple_t *prev_tuple(bin_t *bin, const tuple_t *tuple);
 
             public:
                 void            flush();
@@ -73,6 +78,15 @@ namespace lsp
                 bool            remove(const void *value, void **ret);
                 bool            values(raw_parray *v);
                 void           *any();
+
+            public:
+                raw_iterator    iter(const iter_vtbl_t *vtbl);
+                raw_iterator    riter(const iter_vtbl_t *vtbl);
+
+            public:
+                static void     iter_move(raw_iterator *i, ssize_t n);
+                static void    *iter_get(raw_iterator *i);
+                static ssize_t  iter_compare(const raw_iterator *a, const raw_iterator *b);
         };
 
         /**
@@ -241,9 +255,15 @@ namespace lsp
                      * @return true if all keys have been successfully stored
                      */
                     inline bool values(parray<V> *vv)                        { return v.values(vv->raw());                      }
+
+                public:
+                    // Iterators
+                    inline iterator<V> values()                             { return iterator<V>(v.iter(&raw_phashset::iterator_vtbl));     }
+                    inline iterator<V> rvalues()                            { return iterator<V>(v.riter(&raw_phashset::iterator_vtbl));    }
+
             };
-    }
-}
+    } /* namespace lltl */
+} /* namespace lsp */
 
 
 
