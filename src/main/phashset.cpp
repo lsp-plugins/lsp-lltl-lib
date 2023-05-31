@@ -30,7 +30,8 @@ namespace lsp
             iter_move,
             iter_get,
             iter_compare,
-            iter_compare
+            iter_compare,
+            iter_count
         };
 
         void raw_phashset::destroy_bin(bin_t *bin)
@@ -382,7 +383,7 @@ namespace lsp
         raw_iterator raw_phashset::iter(const iter_vtbl_t *vtbl)
         {
             if (size <= 0)
-                return raw_iterator::invalid;
+                return raw_iterator::INVALID;
 
             // Find first item and return iterator record
             for (size_t i=0; i<cap; ++i)
@@ -393,19 +394,19 @@ namespace lsp
                         vtbl,
                         this,
                         bin->data,
-                        i,
                         0,
+                        i,
                         false
                     };
             }
 
-            return raw_iterator::invalid;
+            return raw_iterator::INVALID;
         }
 
         raw_iterator raw_phashset::riter(const iter_vtbl_t *vtbl)
         {
             if (size <= 0)
-                return raw_iterator::invalid;
+                return raw_iterator::INVALID;
 
             // Find last item and return iterator record
             for (size_t i=cap; i>0; )
@@ -423,13 +424,13 @@ namespace lsp
                     vtbl,
                     this,
                     tuple,
-                    i,
                     size - 1,
+                    i,
                     true
                 };
             }
 
-            return raw_iterator::invalid;
+            return raw_iterator::INVALID;
         }
 
         raw_phashset::tuple_t *raw_phashset::prev_tuple(bin_t *bin, const tuple_t *tuple)
@@ -448,7 +449,7 @@ namespace lsp
             ssize_t new_idx     = i->index + n;
             if ((new_idx < 0) || (size_t(new_idx) >= self->size))
             {
-                *i = raw_iterator::invalid;
+                *i = raw_iterator::INVALID;
                 return;
             }
 
@@ -472,7 +473,7 @@ namespace lsp
                 // Try to advance the bin
                 if ((++i->offset) >= self->cap)
                 {
-                    *i = raw_iterator::invalid;
+                    *i = raw_iterator::INVALID;
                     return;
                 }
 
@@ -509,7 +510,7 @@ namespace lsp
                 // Try to advance the bin
                 if ((i->offset--) <= 0)
                 {
-                    *i = raw_iterator::invalid;
+                    *i = raw_iterator::INVALID;
                     return;
                 }
 
@@ -534,5 +535,12 @@ namespace lsp
         {
             return a->index - b->index;
         }
+
+        size_t raw_phashset::iter_count(const raw_iterator *i)
+        {
+            raw_phashset *self  = static_cast<raw_phashset *>(i->container);
+            return self->size;
+        }
+
     } /* namespace lltl */
 } /* namespace lsp */

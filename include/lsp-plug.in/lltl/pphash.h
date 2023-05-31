@@ -94,6 +94,7 @@ namespace lsp
                 static void    *iter_get_value(raw_iterator *i);
                 static void    *iter_get_pair(raw_iterator *i);
                 static ssize_t  iter_compare(const raw_iterator *a, const raw_iterator *b);
+                static size_t   iter_count(const raw_iterator *i);
         };
 
 

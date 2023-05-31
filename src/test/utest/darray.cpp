@@ -824,18 +824,109 @@ UTEST_BEGIN("lltl", darray)
         for (size_t i=0; i<N; ++i)
             UTEST_ASSERT(*(a.get(i)) == v[i]);
 
-        size_t x, n;
+        lltl::iterator<int> start = a.values();
+        ssize_t x, n;
 
         x = 0;
         n = 0;
         for (lltl::iterator<int> it = a.values(); it; ++it, ++x, ++n)
+        {
+            // Check for validation
+            UTEST_ASSERT(it);
+            UTEST_ASSERT(it.valid());
+            UTEST_ASSERT(!(!it));
+            UTEST_ASSERT(!(it.invalid()));
+
+            // Check for siblings
+            UTEST_ASSERT(it & start);
+            UTEST_ASSERT(it.sibling_of(start));
+            UTEST_ASSERT(!(it | start));
+            UTEST_ASSERT(!it.not_sibling_of(start));
+
+            // Calc position, size and remaining
+            UTEST_ASSERT(it.forward());
+            UTEST_ASSERT(!it.reversive());
+            UTEST_ASSERT(it.index() == size_t(x));
+            UTEST_ASSERT(it.remaining() == size_t(N - x));
+            UTEST_ASSERT(it.max_advance() == size_t(N - x - 1));
+            UTEST_ASSERT(it.count() == N);
+
+            // Check distance computation
+            UTEST_ASSERT((it - start) == x);
+            UTEST_ASSERT((start - it) == -x);
+
+            // Check comparisons
+            UTEST_ASSERT(it != lltl::iterator<int>::INVALID);
+            UTEST_ASSERT(!(it == lltl::iterator<int>::INVALID));
+            UTEST_ASSERT(it >= start);
+            UTEST_ASSERT(start <= it);
+            if (x > 0)
+            {
+                UTEST_ASSERT(it != start);
+                UTEST_ASSERT(start != it);
+                UTEST_ASSERT(it > start);
+                UTEST_ASSERT(start < it);
+            }
+            else
+            {
+                UTEST_ASSERT(it == start);
+                UTEST_ASSERT(start == it);
+            }
+
+            // Check value read
             UTEST_ASSERT(**it == v[x]);
+        }
         UTEST_ASSERT(n == N);
 
         x = N - 1;
         n = 0;
         for (lltl::iterator<int> it = a.rvalues(); it; ++it, --x, ++n)
+        {
+            // Check for validation
+            UTEST_ASSERT(it);
+            UTEST_ASSERT(it.valid());
+            UTEST_ASSERT(!(!it));
+            UTEST_ASSERT(!(it.invalid()));
+
+            // Check for siblings
+            UTEST_ASSERT(it & start);
+            UTEST_ASSERT(it.sibling_of(start));
+            UTEST_ASSERT(!(it | start));
+            UTEST_ASSERT(!it.not_sibling_of(start));
+
+            // Calc position, size and remaining
+            UTEST_ASSERT(!it.forward());
+            UTEST_ASSERT(it.reversive());
+            UTEST_ASSERT(it.index() == size_t(x));
+            UTEST_ASSERT(it.remaining() == size_t(x + 1));
+            UTEST_ASSERT(it.max_advance() == size_t(x));
+            UTEST_ASSERT(it.count() == N);
+
+            // Check distance computation
+            UTEST_ASSERT((it - start) == x);
+            UTEST_ASSERT((start - it) == -x);
+
+            // Check comparisons
+            UTEST_ASSERT(it != lltl::iterator<int>::INVALID);
+            UTEST_ASSERT(!(it == lltl::iterator<int>::INVALID));
+            UTEST_ASSERT(it <= start);
+            UTEST_ASSERT(start <= it);
+            if (x > 0)
+            {
+                UTEST_ASSERT(it != start);
+                UTEST_ASSERT(start != it);
+                UTEST_ASSERT(it < start);
+                UTEST_ASSERT(start < it);
+            }
+            else
+            {
+                UTEST_ASSERT(it == start);
+                UTEST_ASSERT(start == it);
+            }
+
+            // Check value read
             UTEST_ASSERT(**it == v[x]);
+        }
         UTEST_ASSERT(n == N);
     }
 

@@ -31,7 +31,8 @@ namespace lsp
             iter_move,
             iter_get_key,
             iter_compare,
-            iter_compare
+            iter_compare,
+            iter_count
         };
 
         const iter_vtbl_t raw_pphash::value_iterator_vtbl =
@@ -39,7 +40,8 @@ namespace lsp
             iter_move,
             iter_get_value,
             iter_compare,
-            iter_compare
+            iter_compare,
+            iter_count
         };
 
         const iter_vtbl_t raw_pphash::pair_iterator_vtbl =
@@ -47,7 +49,8 @@ namespace lsp
             iter_move,
             iter_get_pair,
             iter_compare,
-            iter_compare
+            iter_compare,
+            iter_count
         };
 
         void raw_pphash::destroy_bin(bin_t *bin)
@@ -466,7 +469,7 @@ namespace lsp
         raw_iterator raw_pphash::iter(const iter_vtbl_t *vtbl)
         {
             if (size <= 0)
-                return raw_iterator::invalid;
+                return raw_iterator::INVALID;
 
             // Find first item and return iterator record
             for (size_t i=0; i<cap; ++i)
@@ -477,19 +480,19 @@ namespace lsp
                         vtbl,
                         this,
                         bin->data,
-                        i,
                         0,
+                        i,
                         false
                     };
             }
 
-            return raw_iterator::invalid;
+            return raw_iterator::INVALID;
         }
 
         raw_iterator raw_pphash::riter(const iter_vtbl_t *vtbl)
         {
             if (size <= 0)
-                return raw_iterator::invalid;
+                return raw_iterator::INVALID;
 
             // Find last item and return iterator record
             for (size_t i=cap; i>0; )
@@ -507,13 +510,13 @@ namespace lsp
                     vtbl,
                     this,
                     tuple,
-                    i,
                     size - 1,
+                    i,
                     true
                 };
             }
 
-            return raw_iterator::invalid;
+            return raw_iterator::INVALID;
         }
 
         raw_pphash::tuple_t *raw_pphash::prev_tuple(bin_t *bin, const tuple_t *tuple)
@@ -532,7 +535,7 @@ namespace lsp
             ssize_t new_idx     = i->index + n;
             if ((new_idx < 0) || (size_t(new_idx) >= self->size))
             {
-                *i = raw_iterator::invalid;
+                *i = raw_iterator::INVALID;
                 return;
             }
 
@@ -556,7 +559,7 @@ namespace lsp
                 // Try to advance the bin
                 if ((++i->offset) >= self->cap)
                 {
-                    *i = raw_iterator::invalid;
+                    *i = raw_iterator::INVALID;
                     return;
                 }
 
@@ -593,7 +596,7 @@ namespace lsp
                 // Try to advance the bin
                 if ((i->offset--) <= 0)
                 {
-                    *i = raw_iterator::invalid;
+                    *i = raw_iterator::INVALID;
                     return;
                 }
 
@@ -629,6 +632,12 @@ namespace lsp
         ssize_t raw_pphash::iter_compare(const raw_iterator *a, const raw_iterator *b)
         {
             return a->index - b->index;
+        }
+
+        size_t raw_pphash::iter_count(const raw_iterator *i)
+        {
+            raw_pphash *self  = static_cast<raw_pphash *>(i->container);
+            return self->size;
         }
 
     } /* namespace lltl */

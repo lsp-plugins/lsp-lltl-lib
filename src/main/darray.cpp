@@ -33,7 +33,8 @@ namespace lsp
             iter_move,
             iter_get,
             iter_compare,
-            iter_compare
+            iter_compare,
+            iter_count
         };
 
         void raw_darray::init(size_t n_sizeof)
@@ -455,7 +456,7 @@ namespace lsp
         raw_iterator raw_darray::iter()
         {
             if (nItems <= 0)
-                return raw_iterator::invalid;
+                return raw_iterator::INVALID;
 
             return raw_iterator {
                 &iterator_vtbl,
@@ -470,7 +471,7 @@ namespace lsp
         raw_iterator raw_darray::riter()
         {
             if (nItems <= 0)
-                return raw_iterator::invalid;
+                return raw_iterator::INVALID;
 
             return raw_iterator {
                 &iterator_vtbl,
@@ -485,22 +486,28 @@ namespace lsp
         void raw_darray::iter_move(raw_iterator *i, ssize_t n)
         {
             raw_darray *self    = static_cast<raw_darray *>(i->container);
-            ssize_t off = i->offset + n;
+            ssize_t off = i->index + n;
             if ((off >= 0) && (size_t(off) < self->nItems))
-                i->offset       = off;
+                i->index        = off;
             else
-                *i              = raw_iterator::invalid;
+                *i              = raw_iterator::INVALID;
         }
 
         void *raw_darray::iter_get(raw_iterator *i)
         {
             raw_darray *self = static_cast<raw_darray *>(i->container);
-            return (i->offset < self->nItems) ? &self->vItems[i->offset * self->nSizeOf] : NULL;
+            return (i->index < self->nItems) ? &self->vItems[i->index * self->nSizeOf] : NULL;
         }
 
         ssize_t raw_darray::iter_compare(const raw_iterator *a, const raw_iterator *b)
         {
-            return a->offset - b->offset;
+            return a->index - b->index;
+        }
+
+        size_t raw_darray::iter_count(const raw_iterator *i)
+        {
+            raw_darray *self    = static_cast<raw_darray *>(i->container);
+            return self->nItems;
         }
 
     } /* namespace lltl */

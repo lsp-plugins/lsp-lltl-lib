@@ -87,6 +87,7 @@ namespace lsp
                 static void     iter_move(raw_iterator *i, ssize_t n);
                 static void    *iter_get(raw_iterator *i);
                 static ssize_t  iter_compare(const raw_iterator *a, const raw_iterator *b);
+                static size_t   iter_count(const raw_iterator *i);
         };
 
         /**

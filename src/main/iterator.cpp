@@ -44,15 +44,21 @@ namespace lsp
             return 0;
         }
 
+        size_t invalid_iter_count(const raw_iterator *i)
+        {
+            return 0;
+        }
+
         const iter_vtbl_t raw_iterator::invalid_vtbl =
         {
             invalid_iter_move,
             invalid_iter_get,
             invalid_iter_compare,
-            invalid_iter_diff
+            invalid_iter_diff,
+            invalid_iter_count
         };
 
-        const raw_iterator raw_iterator::invalid =
+        const raw_iterator raw_iterator::INVALID =
         {
             &invalid_vtbl,
             NULL,
@@ -81,15 +87,30 @@ namespace lsp
                 return iter_cmp_result_t { 0, false };
 
             return (reversive) ?
-                iter_cmp_result_t {  res, true } :
-                iter_cmp_result_t { -res, true };
+                iter_cmp_result_t { -res, true } :
+                iter_cmp_result_t {  res, true };
         }
 
         ssize_t raw_iterator::diff(const raw_iterator *b) const
         {
-            if (container != b->container)
+            if (container == b->container)
+                return vtable->diff(this, b);
+
+            if (container == NULL)
+                return (b->container != NULL) ? b->remaining() : 0;
+            return (b->container == NULL) ? remaining() : 0;
+        }
+
+        size_t raw_iterator::remaining() const
+        {
+            return (reversive) ? index + 1 : vtable->count(this) - index;
+        }
+
+        size_t raw_iterator::max_advance() const
+        {
+            if (container == NULL)
                 return 0;
-            return vtable->diff(this, b);
+            return (reversive) ? index : vtable->count(this) - index - 1;
         }
 
         bool raw_iterator::valid() const
