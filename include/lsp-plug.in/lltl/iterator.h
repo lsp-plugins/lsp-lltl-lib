@@ -398,20 +398,18 @@ namespace lsp
                  * Read the value the iterator is currently pointing to
                  * @return the value the iterator is currently pointing to
                  */
-                inline T & operator ->()
+                inline T * operator ->()
                 {
-                    T *tmp          = cast(v.vtable->get(&v));
-                    return *tmp;
+                    return cast(v.vtable->get(&v));
                 }
 
                 /**
                  * Read the value the iterator is currently pointing to
                  * @return the value the iterator is currently pointing to
                  */
-                inline const T & operator ->() const
+                inline const T * operator ->() const
                 {
-                    const T *tmp    = ccast(v.vtable->get(&v));
-                    return *tmp;
+                    return ccast(v.vtable->get(&v));
                 }
 
             public:  // Comparison operators
