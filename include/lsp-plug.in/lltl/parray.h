@@ -28,6 +28,7 @@
 #include <sys/types.h>
 
 #include <lsp-plug.in/lltl/version.h>
+#include <lsp-plug.in/lltl/iterator.h>
 #include <lsp-plug.in/lltl/spec.h>
 
 namespace lsp
@@ -41,6 +42,9 @@ namespace lsp
         {
             public:
                 typedef     ssize_t (* cmp_func_t)(const void *a, const void *b);
+
+            public:
+                static const iter_vtbl_t    iterator_vtbl;
 
             public:
                 size_t      nItems;
@@ -92,9 +96,16 @@ namespace lsp
                 void       *qremove(size_t idx);
                 void        qsort(cmp_func_t f);
                 void        qsort(sort_closure_t *c);
+
+                raw_iterator    iter();
+                raw_iterator    riter();
+
+            public:
+                static void     iter_move(raw_iterator *i, ssize_t n);
+                static void    *iter_get(raw_iterator *i);
+                static ssize_t  iter_compare(const raw_iterator *a, const raw_iterator *b);
+                static size_t   iter_count(const raw_iterator *i);
         };
-
-
 
         /**
          * Data array template
@@ -318,8 +329,13 @@ namespace lsp
                     // Operators
                     inline T *operator[](size_t idx)                                { return get(idx);                      }
                     inline const T *operator[](size_t idx) const                    { return get(idx);                      }
+
+                public:
+                    // Iterators
+                    inline iterator<T> values()                                     { return iterator<T>(v.iter());         }
+                    inline iterator<T> rvalues()                                    { return iterator<T>(v.riter());        }
             };
-    }
-}
+    } /* namespace lltl */
+} /* namespace lsp */
 
 #endif /* LSP_PLUG_IN_LLTL_PARRAY_H_ */
