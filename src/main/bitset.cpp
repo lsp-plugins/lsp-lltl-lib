@@ -75,7 +75,8 @@ namespace lsp
             }
 
             // Clear unused bits
-            vData[nCapacity-1] &= ~(UMWORD_MAX << bits);
+            if (bits > 0)
+                vData[nCapacity-1] &= ~(UMWORD_MAX << bits);
             nSize               = size;
             return true;
         }
@@ -104,7 +105,8 @@ namespace lsp
 
             ::memset(vData, 0xff, nCapacity * sizeof(umword_t));
             size_t bits         = nSize % UMWORD_BITS;
-            vData[nCapacity-1] &= ~(UMWORD_MAX << bits);
+            if (bits > 0)
+                vData[nCapacity-1]  = ~(UMWORD_MAX << bits);
         }
 
         bool bitset::set(size_t index)
