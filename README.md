@@ -7,8 +7,7 @@ parts of STL with generalized templates (generics). Since STL template
 instantiation may blow up the code with many additional functions, this library
 tries to economy code space used by collections by generalizing data pointers.
 
-The Paradigm
-======
+## The Paradigm
 
 Let's look at the paradigm by taking `std::vector` as example.
 
@@ -55,8 +54,7 @@ to initialize/free data. This responsibility is delegated to the caller code (if
 Also, for automatic managment of objects and lookup, additional interfaces like `lsp::lltl::hash_spec`,
 `lsp::lltl::compare_spec` and `lsp::lltl::allocator_spec` should be defined.
 
-Library Contents
-======
+## Library Contents
 
 Available collections:
   - `lltl::darray` - dynamic array of plain data structures of the same type.
@@ -104,16 +102,14 @@ Required specifications:
                                 of the object, required by:
     - `lltl::pphash` for key object
 
-Requirements
-======
+## Requirements
 
 The following packages need to be installed for building:
 
 * gcc >= 4.9
 * make >= 4.0
 
-Building
-======
+## Building
 
 To build the library, perform the following commands:
 
@@ -202,4 +198,7 @@ bool create_form(lltl::parray<Widget> &list)
 
 ```
 
+## SAST Tools
+
+* [PVS-Studio](https://pvs-studio.com/en/pvs-studio/?utm_source=website&utm_medium=github&utm_campaign=open_source) - static analyzer for C, C++, C#, and Java code.
 

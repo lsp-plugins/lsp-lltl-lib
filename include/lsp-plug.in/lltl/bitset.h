@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2020 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2020 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2023 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2023 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-lltl-lib
  * Created on: 30 июл. 2020 г.
@@ -32,10 +32,6 @@ namespace lsp
     {
         class LSP_LLTL_LIB_PUBLIC bitset
         {
-            private:
-                bitset &operator = (const bitset &);        // Disable copying
-                bitset(const bitset &);                     // Disable copying
-
             protected:
                 size_t          nSize;
                 size_t          nCapacity;
@@ -43,7 +39,12 @@ namespace lsp
 
             public:
                 explicit        bitset();
+                bitset(const bitset &) = delete;
+                bitset(bitset &&) = delete;
                 ~bitset();
+
+                bitset &operator = (const bitset &) = delete;
+                bitset &operator = (bitset &&) = delete;
 
             public:
                 inline bool     is_empty() const            { return nSize == 0;                    }
@@ -75,7 +76,8 @@ namespace lsp
             public:
                 void            swap(bitset *dst);
         };
-    }
-}
+
+    } /* namespace lltl */
+} /* namespace lsp */
 
 #endif /* LSP_PLUG_IN_LLTL_BITSET_H_ */

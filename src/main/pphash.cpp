@@ -445,7 +445,9 @@ namespace lsp
 
             // Make a snapshot
             for (size_t i=0; i<cap; ++i)
-                for (tuple_t *t = bins[i].data; t != NULL; t = t->next)
+            {
+                tuple_t *t = bins[i].data;
+                for (; t != NULL; t = t->next)
                 {
                     if ((!kt.append(t->v.key)) ||
                         (!vt.append(t->v.value)))
@@ -455,6 +457,7 @@ namespace lsp
                         return false;
                     }
                 }
+            }
 
             // Return collection data
             kt.swap(k);

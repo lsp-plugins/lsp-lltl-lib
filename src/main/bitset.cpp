@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2020 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2020 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2023 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2023 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-lltl-lib
  * Created on: 30 июл. 2020 г.
@@ -60,7 +60,7 @@ namespace lsp
             }
 
             size_t cap  = (size + UMWORD_BITS-1) / UMWORD_BITS;
-            size_t bits = UMWORD_BITS - (size % UMWORD_BITS);
+            size_t bits = size % UMWORD_BITS;
 
             // Need to realloc data?
             if (cap != nCapacity)
@@ -75,7 +75,8 @@ namespace lsp
             }
 
             // Clear unused bits
-            vData[nCapacity-1] &= (UMWORD_MAX >> bits);
+            if (bits > 0)
+                vData[nCapacity-1] &= ~(UMWORD_MAX << bits);
             nSize               = size;
             return true;
         }
@@ -103,8 +104,9 @@ namespace lsp
                 return;
 
             ::memset(vData, 0xff, nCapacity * sizeof(umword_t));
-            size_t bits = UMWORD_BITS - (nSize % UMWORD_BITS);
-            vData[nCapacity-1] &= (UMWORD_MAX >> bits);
+            size_t bits         = nSize % UMWORD_BITS;
+            if (bits > 0)
+                vData[nCapacity-1]  = ~(UMWORD_MAX << bits);
         }
 
         bool bitset::set(size_t index)
@@ -357,5 +359,6 @@ namespace lsp
             lsp::swap(nCapacity, dst->nCapacity);
             lsp::swap(vData, dst->vData);
         }
-    }
-}
+
+    } /* namespace lltl */
+} /* namespace lsp */
