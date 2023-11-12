@@ -242,9 +242,8 @@ namespace lsp
 
                     /**
                      * Remove the associated key
-                     * @param key the key to use for seacrh
-                     * @param ok key removed from hash
-                     * @param ov value removed from hash
+                     * @param value the value to use for search
+                     * @param ov value removed from set
                      * @return true if the data has been removed
                      */
                     inline bool remove(const V *value, V **ov = NULL)       { return v.remove(value, pvcast(ov));               }
