@@ -411,6 +411,20 @@ namespace lsp
             return res;
         }
 
+        void *raw_parray::qpremove(const void *ptr)
+        {
+            ssize_t idx = index_of(ptr);
+            if (idx < 0)
+                return NULL;
+
+            void *res   = vItems[idx];
+            ssize_t size= nItems - 1;
+            if (idx < size)
+                vItems[idx] = vItems[size];
+            nItems      = size;
+            return res;
+        }
+
         bool raw_parray::iremove(size_t idx, size_t n)
         {
             size_t last = idx + n;
