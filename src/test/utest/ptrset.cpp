@@ -328,7 +328,7 @@ UTEST_BEGIN("lltl", ptrset)
 
         // Drop values
         for (lltl::iterator<int> it = values.values(); it; ++it)
-            free(*it);
+            delete *it;
     }
 
     UTEST_MAIN
