@@ -102,6 +102,29 @@ namespace lsp
         };
 
         //---------------------------------------------------------------------
+        // Specialization for raw pointers
+        template <class T>
+        struct hash_spec<T *>: public hash_iface
+        {
+            inline hash_spec()
+            {
+                hash        = ptr_hash_func;
+            }
+        };
+
+        /**
+         * Default specialization for compare interface
+         */
+        template <class T>
+        struct compare_spec<T *>: public compare_iface
+        {
+            inline compare_spec()
+            {
+                compare     = ptr_cmp_func;
+            }
+        };
+
+        //---------------------------------------------------------------------
         // Specialization for C-strings: char *
         template <>
         struct hash_spec<char>: public hash_iface

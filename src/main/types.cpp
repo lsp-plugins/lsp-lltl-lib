@@ -84,7 +84,7 @@ namespace lsp
         size_t ptr_hash_func(const void *ptr, size_t size)
         {
             uintptr_t a     = uintptr_t(ptr);
-            uintptr_t v     = (a >> 3) | (a << (sizeof(uintptr_t)*8 - 3));
+            uintptr_t v     = (a >> 5) | (a << (sizeof(uintptr_t)*8 - 5));
 
             // Generate two pseudo-random values
             uintptr_t h1    = v * 0x4ef1d1e9 + 0x46777db9;
