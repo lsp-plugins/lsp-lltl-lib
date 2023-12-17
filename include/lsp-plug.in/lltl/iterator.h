@@ -412,6 +412,26 @@ namespace lsp
                     return ccast(v.vtable->get(&v));
                 }
 
+                /**
+                 * Read the value the iterator is currently pointing to
+                 * @return the value the iterator is currently pointing to
+                 */
+                inline T * get()
+                {
+                    T *tmp          = cast(v.vtable->get(&v));
+                    return tmp;
+                }
+
+                /**
+                 * Read the value the iterator is currently pointing to
+                 * @return the value the iterator is currently pointing to
+                 */
+                inline const T * get() const
+                {
+                    const T *tmp    = ccast(v.vtable->get(&v));
+                    return tmp;
+                }
+
             public:  // Comparison operators
                 /**
                  * Compare two iterators. The result true if both iterators are siblings and

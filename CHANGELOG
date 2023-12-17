@@ -6,6 +6,7 @@
 * Implemented lltl::ptrset collection for unordered pointer storage.
 * Implemented raw_parray::qpremove method.
 * Implemented raw_darray::qremove and raw_darray::qpremove methods.
+* Added get() method to lltl::iterator.
 * Updated build scripts.
 
 === 1.0.15 ===
