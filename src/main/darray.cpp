@@ -388,6 +388,32 @@ namespace lsp
             return res;
         }
 
+        void *raw_darray::qremove(size_t idx)
+        {
+            if (idx >= nItems)
+                return NULL;
+            void *res   = &vItems[idx * nSizeOf];
+            size_t size = nItems - 1;
+            if (idx < size)
+                ::memmove(res, &vItems[size * nSizeOf], nSizeOf);
+            nItems      = size;
+            return res;
+        }
+
+        void *raw_darray::qpremove(const void *ptr)
+        {
+            ssize_t idx = index_of(ptr);
+            if (idx < 0)
+                return NULL;
+
+            void *res   = &vItems[idx * nSizeOf];
+            ssize_t size= nItems - 1;
+            if (idx < size)
+                ::memmove(res, &vItems[size * nSizeOf], nSizeOf);
+            nItems      = size;
+            return res;
+        }
+
         uint8_t *raw_darray::pop(size_t n)
         {
             if (nItems < n)
