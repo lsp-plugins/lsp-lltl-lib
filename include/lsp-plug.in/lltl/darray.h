@@ -87,6 +87,9 @@ namespace lsp
                 uint8_t    *iremove(size_t idx, size_t n, void *dst);
                 uint8_t    *iremove(size_t idx, size_t n, raw_darray *cs);
 
+                void       *qremove(size_t idx);
+                void       *qpremove(const void *ptr);
+
                 void        qsort(cmp_func_t f);
                 void        qsort(sort_closure_t *c);
 
@@ -191,7 +194,9 @@ namespace lsp
                     inline T *pop()                                                 { return cast(v.pop(1));            }
                     inline bool shift()                                             { return v.iremove(0, 1);           }
                     inline bool remove(size_t idx)                                  { return v.iremove(idx, 1);         }
+                    inline T *qremove(size_t idx)                                   { return cast(v.qremove(idx));      }
                     inline bool premove(const T *ptr)                               { return v.premove(ptr, 1);         }
+                    inline T *qpremove(const T *ptr)                                { return cast(v.qpremove(ptr));     }
 
                     inline bool xswap(size_t i1, size_t i2)                         { return v.xswap(i1, i2);           }
                     inline void uswap(size_t i1, size_t i2)                         { v.uswap(i1, i2);                  }

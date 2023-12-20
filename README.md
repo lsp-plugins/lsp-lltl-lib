@@ -59,9 +59,10 @@ Also, for automatic managment of objects and lookup, additional interfaces like 
 Available collections:
   - `lltl::darray` - dynamic array of plain data structures of the same type.
   - `lltl::parray` - dynamic array of pointers to any data structure of the same base type.
+  - `lltl::phashset` - hash set of pointers, each pointer is managed by the caller.
   - `lltl::pphash` - pointer to pointer hash map, where keys are managed automatically and values
                        are managed by caller.
-  - `lltl::phashset` - hash set of pointers, each pointer is managed by the caller.
+  - `lltl::ptrset` - set for organize quick storage of raw pointers.
   - `lltl::bitset` - set of bits stored in the optimal for the CPU form for quick data processing 
                        and memory economy. 
 
