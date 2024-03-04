@@ -127,7 +127,7 @@ namespace lsp
                 for (size_t i=0; i<bin->size; ++i)
                 {
                     void *value         = bin->data[i];
-                    size_t hval         = (value != NULL) ? hash.hash(value, sizeof(value)) : 0;
+                    size_t hval         = (value != NULL) ? hash.hash(value, sizeof(void *)) : 0;
                     bin_t *dbin         = (hval & mask) ? ybin : xbin;
                     if (!append(dbin, value))
                         return false;
@@ -301,7 +301,7 @@ namespace lsp
             if (bins == NULL)
                 return dfl;
 
-            size_t hval         = (value != NULL) ? hash.hash(value, sizeof(value)) : 0;
+            size_t hval         = (value != NULL) ? hash.hash(value, sizeof(void *)) : 0;
             bin_t *bin          = &bins[hval & (cap - 1)];
             ssize_t idx         = index_of(bin, value);
             return (idx < 0) ? dfl : bin->data[idx];
@@ -312,7 +312,7 @@ namespace lsp
             if (bins == NULL)
                 return false;
 
-            size_t hval         = (value != NULL) ? hash.hash(value, sizeof(value)) : 0;
+            size_t hval         = (value != NULL) ? hash.hash(value, sizeof(void *)) : 0;
             bin_t *bin          = &bins[hval & (cap - 1)];
             ssize_t idx         = index_of(bin, value);
 
@@ -337,7 +337,7 @@ namespace lsp
         bool raw_ptrset::put(void *value)
         {
             // Grow the size of the set if it is too small
-            size_t hval         = (value != NULL) ? hash.hash(value, sizeof(value)) : 0;
+            size_t hval         = (value != NULL) ? hash.hash(value, sizeof(void *)) : 0;
             bin_t *bin          = (bins != NULL) ? &bins[hval & (cap - 1)] : NULL;
             if ((bin == NULL) || (bin->size >= (ptrset_tuple_items << 1)))
             {
@@ -365,7 +365,7 @@ namespace lsp
                 return put(value);
 
             // Insert value if the bin is empty
-            size_t hval         = (value != NULL) ? hash.hash(value, sizeof(value)) : 0;
+            size_t hval         = (value != NULL) ? hash.hash(value, sizeof(void *)) : 0;
             bin_t *bin          = &bins[hval & (cap - 1)];
             if (bin->size <= 0)
             {
@@ -403,7 +403,7 @@ namespace lsp
                 return false;
 
             // Find tuple
-            size_t hval         = (value != NULL) ? hash.hash(value, sizeof(value)) : 0;
+            size_t hval         = (value != NULL) ? hash.hash(value, sizeof(void *)) : 0;
             bin_t *bin          = &bins[hval & (cap - 1)];
             ssize_t idx         = index_of(bin, value);
             if (idx < 0)
