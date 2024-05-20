@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2020 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2020 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2024 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2024 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-lltl-lib
  * Created on: 9 июн. 2020 г.
@@ -23,7 +23,8 @@
 #define LSP_PLUG_IN_LLTL_SPEC_H_
 
 #include <lsp-plug.in/lltl/version.h>
-#include <lsp-plug.in/lltl/new.h>
+
+#include <lsp-plug.in/common/new.h>
 #include <lsp-plug.in/lltl/types.h>
 
 namespace lsp
@@ -83,9 +84,8 @@ namespace lsp
         {
             static void *clone_func(const void *src, size_t size)
             {
-                allocator_tag_t tag;
                 void *dst = ::malloc(size);
-                return (dst) ? new(dst, tag) T(*static_cast<const T *>(src)) : NULL;
+                return (dst) ? new(dst, inplace_new_tag_t()) T(*static_cast<const T *>(src)) : NULL;
             }
 
             static void free_func(void *ptr)
