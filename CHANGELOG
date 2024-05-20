@@ -2,6 +2,9 @@
 * RECENT CHANGES
 *******************************************************************************
 
+=== 1.0.20 ===
+
+
 === 1.0.19 ===
 * Using inplace new from common library.
 * Updated module versions in dependencies.
