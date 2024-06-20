@@ -71,6 +71,8 @@ namespace lsp
                 void *ptr = atomic_swap(&bins[i], NULL);
                 cleanup(ptr);
             }
+            deleter2    = NULL;
+            deleter1    = NULL;
         }
 
         void raw_state::push(void *new_state)
@@ -130,7 +132,7 @@ namespace lsp
                 return false;
 
             // Read pending state
-            void *garbage = atomic_swap(&bins[B_PENDING], NULL);
+            void *garbage = atomic_swap(&bins[B_PENDING], new_state);
             if (garbage == NULL)
                 return true;
 

@@ -38,8 +38,8 @@ namespace lsp
             private:
                 enum bin_t
                 {
-                    B_STATE,
                     B_PENDING,
+                    B_STATE,
                     B_GARBAGE,
 
                     B_TOTAL
