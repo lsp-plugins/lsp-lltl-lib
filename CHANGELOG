@@ -3,6 +3,7 @@
 *******************************************************************************
 
 === 1.0.20 ===
+* Implemented lltl::state for safe state transfer between threads.
 * Updated build scripts.
 
 === 1.0.19 ===
