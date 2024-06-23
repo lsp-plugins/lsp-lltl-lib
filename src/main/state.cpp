@@ -75,6 +75,13 @@ namespace lsp
             deleter1    = NULL;
         }
 
+        void raw_state::gc()
+        {
+            // Cleanup garbage
+            void *garbage = atomic_swap(&bins[B_GARBAGE], NULL);
+            cleanup(garbage);
+        }
+
         void raw_state::push(void *new_state)
         {
             // Cleanup garbage
@@ -139,6 +146,11 @@ namespace lsp
             // Push garbage to queue
             atomic_swap(&bins[B_GARBAGE], garbage);
             return true;
+        }
+
+        void *raw_state::current() const
+        {
+            return atomic_load(&bins[B_STATE]);
         }
 
     } /* namespace lltl */

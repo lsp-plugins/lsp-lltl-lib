@@ -67,6 +67,8 @@ namespace lsp
                 bool            set(void *new_state);
                 void           *pull();
                 void           *get();
+                void           *current() const;
+                void            gc();
         };
 
 
@@ -110,6 +112,11 @@ namespace lsp
 
             public:
                 /**
+                 * Cleanup all garbage that can be stored in the state
+                 */
+                inline void gc()                        { v.gc();                               }
+
+                /**
                  * Update state. Call deleter for garbage and previous pending state.
                  * This is RT-unsafe method.
                  * @param new_state new state to set
@@ -117,7 +124,7 @@ namespace lsp
                 inline void push(T *new_state)          { v.push(new_state);                    }
 
                 /**
-                 * Get current state. Call deleter for garbage and previous pending state.
+                 * Refresh and get current state. Call deleter for garbage and previous pending state.
                  * This is RT-unsafe method.
                  * @param new_state new state to set
                  * @return pointer to current state
@@ -134,7 +141,7 @@ namespace lsp
                 inline bool set(T *new_state)           { return v.set(new_state);              }
 
                 /**
-                 * Get current state. Do not call deleter for garbage and previous pending state.
+                 * Refresh and get current state. Do not call deleter for garbage and previous pending state.
                  * This is RT-safe method that should be called only in conjunction with push().
                  * Otherwise it won't update until garbage is properly cleaned up.
                  *
@@ -142,6 +149,14 @@ namespace lsp
                  * @return pointer to current state
                  */
                 inline T *get()                         { return tcast(v.get());                }
+
+                /**
+                 * Get current state without refresh.
+                 *
+                 * @param new_state new state to set
+                 * @return pointer to current state
+                 */
+                inline T *current() const               { return tcast(v.current());            }
 
         };
     } /* namespace lltl */
