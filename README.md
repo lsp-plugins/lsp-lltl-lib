@@ -69,6 +69,9 @@ Available collections:
 Collection access:
   - `lltl::iterator` - iterator class for sequential data access.
 
+Available inter-process and inter-thread primitive communications:
+  - `lltl::state` - object for safe state transfer between Real-time and non-realtime thread.
+
 Data manipulation interfaces:
   - `lltl::hash_iface` - inferface for defining hash function for the object.
   - `lltl::compare_iface` - interface for defining comparison routine for the object.
