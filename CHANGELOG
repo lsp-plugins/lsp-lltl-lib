@@ -3,7 +3,7 @@
 *******************************************************************************
 
 === 1.0.21 ===
-
+* Updated lltl::state: added pending() method.
 
 === 1.0.20 ===
 * Implemented lltl::state for safe state transfer between threads.

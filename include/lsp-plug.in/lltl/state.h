@@ -67,6 +67,7 @@ namespace lsp
                 bool            set(void *new_state);
                 void           *pull();
                 void           *get();
+                bool            pending() const;
                 void           *current() const;
                 void            gc();
         };
@@ -157,6 +158,13 @@ namespace lsp
                  * @return pointer to current state
                  */
                 inline T *current() const               { return tcast(v.current());            }
+
+                /**
+                 * Check that there is a pending state that should be applied
+                 *
+                 * @return true if there is a pending state that should be applied
+                 */
+                inline bool pending() const             { return v.pending();                   }
 
         };
     } /* namespace lltl */
