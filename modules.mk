@@ -38,3 +38,8 @@ LIBSHLWAPI_VERSION         := system
 LIBSHLWAPI_NAME            := libshlwapi
 LIBSHLWAPI_TYPE            := opt
 LIBSHLWAPI_LDFLAGS         := -lshlwapi
+
+LIBGNU_VERSION             := system
+LIBGNU_NAME                := libgnu
+LIBGNU_TYPE                := opt
+LIBGNU_LDFLAGS             := -lgnu
