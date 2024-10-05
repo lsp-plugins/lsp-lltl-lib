@@ -153,5 +153,10 @@ namespace lsp
             return atomic_load(&bins[B_STATE]);
         }
 
+        bool raw_state::pending() const
+        {
+            return atomic_load(&bins[B_PENDING]) != NULL;
+        }
+
     } /* namespace lltl */
 } /* namespace lsp */

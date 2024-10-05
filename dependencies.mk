@@ -61,13 +61,28 @@ ifeq ($(PLATFORM),Windows)
 endif
 
 #------------------------------------------------------------------------------
+# Haiku dependencies
+HAIKU_DEPENDENCIES = \
+  LIBGNU
+
+HAIKU_TEST_DEPENDENCIES = \
+  LIBGNU
+
+ifeq ($(PLATFORM),Haiku)
+  DEPENDENCIES             += $(HAIKU_DEPENDENCIES)
+  TEST_DEPENDENCIES        += $(HAIKU_TEST_DEPENDENCIES)
+endif
+
+#------------------------------------------------------------------------------
 # Overall system dependencies
 ALL_DEPENDENCIES = \
   $(DEPENDENCIES) \
   $(LINUX_DEPENDENCIES) \
   $(BSD_DEPENDENCIES) \
   $(WINDOWS_DEPENDENCIES) \
+  $(HAIKU_DEPENDENCIES) \
   $(TEST_DEPENDENCIES) \
   $(LINUX_TEST_DEPENDENCIES) \
   $(BSD_TEST_DEPENDENCIES) \
-  $(WINDOWS_TEST_DEPENDENCIES)
+  $(WINDOWS_TEST_DEPENDENCIES) \
+  $(HAIKU_TEST_DEPENDENCIES)
