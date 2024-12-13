@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2020 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2020 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2024 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2024 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-lltl-lib
  * Created on: 31 июл. 2020 г.
@@ -194,7 +194,7 @@ UTEST_BEGIN("lltl", phashset)
         lltl::phashset<char> h;
         for (size_t i=0; i<count; ++i)
         {
-            sprintf(value, "%04d", int(i));
+            snprintf(value, sizeof(value), "%04d", int(i));
             UTEST_ASSERT(h.create(strdup(value)));
         }
 

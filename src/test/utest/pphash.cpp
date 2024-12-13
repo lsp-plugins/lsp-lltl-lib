@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2020 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2020 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2024 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2024 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-lltl-lib
  * Created on: 11 мая 2020 г.
@@ -203,8 +203,8 @@ UTEST_BEGIN("lltl", pphash)
         lltl::pphash<char, char> h;
         for (size_t i=0; i<count; ++i)
         {
-            sprintf(key, "%04d", int(i));
-            sprintf(value, "0x%04x", int(i));
+            snprintf(key, sizeof(key), "%04d", int(i));
+            snprintf(value, sizeof(value), "0x%04x", int(i));
             UTEST_ASSERT(h.create(key, strdup(value)));
         }
 
