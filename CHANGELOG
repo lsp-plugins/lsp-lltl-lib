@@ -3,7 +3,7 @@
 *******************************************************************************
 
 === 1.0.24 ===
-
+* Added definition of MacOS dependencies in build scripts.
 
 === 1.0.23 ===
 * Updated build scripts.
