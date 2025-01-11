@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2024 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2024 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2025 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2025 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-lltl-lib
  * Created on: 19 июн. 2024 г.
@@ -127,7 +127,6 @@ namespace lsp
                 /**
                  * Refresh and get current state. Call deleter for garbage and previous pending state.
                  * This is RT-unsafe method.
-                 * @param new_state new state to set
                  * @return pointer to current state
                  */
                 inline T *pull()                        { return tcast(v.pull());               }
@@ -146,7 +145,6 @@ namespace lsp
                  * This is RT-safe method that should be called only in conjunction with push().
                  * Otherwise it won't update until garbage is properly cleaned up.
                  *
-                 * @param new_state new state to set
                  * @return pointer to current state
                  */
                 inline T *get()                         { return tcast(v.get());                }
@@ -154,7 +152,6 @@ namespace lsp
                 /**
                  * Get current state without refresh.
                  *
-                 * @param new_state new state to set
                  * @return pointer to current state
                  */
                 inline T *current() const               { return tcast(v.current());            }

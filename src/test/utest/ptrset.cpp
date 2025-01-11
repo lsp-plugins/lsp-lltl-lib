@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2023 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2023 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2025 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2025 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-lltl-lib
  * Created on: 12 нояб. 2023 г.
@@ -34,9 +34,9 @@ UTEST_BEGIN("lltl", ptrset)
         int *xv[N], *yv[N];
         for (size_t i=0; i<N; ++i)
         {
-            xv[i]   = new int(i);
+            xv[i]   = new int(int(i));
             UTEST_ASSERT(xv[i] != NULL);
-            yv[i]   = new int(i);
+            yv[i]   = new int(int(i));
             UTEST_ASSERT(yv[i] != NULL);
         }
         lsp_finally {
@@ -152,7 +152,7 @@ UTEST_BEGIN("lltl", ptrset)
         printf("Generating large data...\n");
         for (size_t i=0; i<100000; ++i)
         {
-            UTEST_ASSERT(p = new int(i));
+            UTEST_ASSERT(p = new int(int(i)));
             UTEST_ASSERT(v.add(p));
             UTEST_ASSERT(s.put(p));
             if (!((i+1) % 10000))
@@ -184,7 +184,7 @@ UTEST_BEGIN("lltl", ptrset)
         lltl::ptrset<int> h;
         for (size_t i=0; i<count; ++i)
         {
-            UTEST_ASSERT(h.put(new int(i)));
+            UTEST_ASSERT(h.put(new int(int(i))));
         }
         UTEST_ASSERT(h.size() == count);
 

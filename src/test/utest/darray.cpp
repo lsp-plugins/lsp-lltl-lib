@@ -46,7 +46,7 @@ UTEST_BEGIN("lltl", darray)
 
     void dump(lltl::darray<int> &x)
     {
-        for (int i=0, n=x.size(); i<n; ++i)
+        for (size_t i=0, n=x.size(); i<n; ++i)
             printf("%d ", *x.get(i));
         printf("\n");
     }
@@ -729,7 +729,7 @@ UTEST_BEGIN("lltl", darray)
         dump(x);
 
         // Reverse order
-        for (int i=0, j=x.size()-1; i<j; ++i, --j)
+        for (ssize_t i=0, j=x.size()-1; i<j; ++i, --j)
         {
             UTEST_ASSERT(x.xswap(i, j));
         }
@@ -759,8 +759,8 @@ UTEST_BEGIN("lltl", darray)
         // Initialize
         for (size_t i=0; i<sizeof(large_struct_t::data)/sizeof(int); ++i)
         {
-            a->data[i] = 0x55aa0000 | i;
-            b->data[i] = (i << 16) | 0xcc33;
+            a->data[i] = int(0x55aa0000 | i);
+            b->data[i] = int((i << 16) | 0xcc33);
         }
 
         UTEST_ASSERT(x.add(a));
@@ -784,7 +784,7 @@ UTEST_BEGIN("lltl", darray)
 
         int v[N];
         for (ssize_t i=0; i<N; ++i)
-            v[i]    = N - i;
+            v[i]    = int(N - i);
 
         lltl::darray<int> a;
         for (ssize_t i=0; i<N; ++i)
@@ -816,7 +816,7 @@ UTEST_BEGIN("lltl", darray)
         printf("Testing iterator...\n");
         int v[N];
         for (ssize_t i=0; i<N; ++i)
-            v[i]    = i;
+            v[i]    = int(i);
 
         lltl::darray<int> a;
         for (ssize_t i=0; i<N; ++i)

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2020 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2020 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2025 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2025 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-lltl-lib
  * Created on: 31 июл. 2020 г.
@@ -207,9 +207,9 @@ namespace lsp
                      * Get value by key or return default value if the value was not found
                      * @param value the desired value
                      * @param dfl default value to return if there is no such value in the set
-                     * @return the associated value
+                     * @return the associated value or default value if not exists
                      */
-                    inline V *dget(const V *key, V *dfl) const              { return vcast(v.get(key, dfl));                                }
+                    inline V *dget(const V *value, V *dfl) const            { return vcast(v.get(value, dfl));                                }
 
                     /**
                      * Remove the item from set if it is present in the set, add the item if not

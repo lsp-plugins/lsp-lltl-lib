@@ -45,16 +45,41 @@ namespace lsp
          *
          * @param i pointer to the iterator
          * @param n number of steps to advance (can be negative)
-         * @return pointer to modified raw iterator
          */
         typedef void (*iter_move_t)(raw_iterator *i, ssize_t n);
 
+        /**
+         * Get pointer to a value at which the iterator is currently pointing
+         *
+         * @param i pointer to the iterator
+         * @return the actual value iterator is pointing to
+         */
         typedef void *(*iter_get_t)(raw_iterator *i);
 
+        /**
+         * Compare positions of two iterators.
+         *
+         * @param a first iterator to compare
+         * @param b second iterator to compare
+         * @return comparison result
+         */
         typedef ssize_t (*iter_compare_t)(const raw_iterator *a, const raw_iterator *b);
 
+        /**
+         * Compute difference in position between two iterators
+         *
+         * @param a first iterator to compare
+         * @param b second iterator to compare
+         * @return difference in position between two iterators
+         */
         typedef ssize_t (*iter_diff_t)(const raw_iterator *a, const raw_iterator *b);
 
+        /**
+         * Obtain the overall number of elements in a collection the iterator is operating with
+         *
+         * @param i pointer to the iterator
+         * @return number of elements in collection the iterator is operating with
+         */
         typedef size_t (*iter_count_t)(const raw_iterator *i);
 
         /**

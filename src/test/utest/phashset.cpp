@@ -34,6 +34,7 @@ namespace lsp
             int v;
 
             explicit item_t(int x): v(x) {}
+            explicit item_t(size_t x): v(int(x)) {}
         } item_t;
     }
 
