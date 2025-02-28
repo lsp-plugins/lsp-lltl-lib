@@ -2,6 +2,9 @@
 * RECENT CHANGES
 *******************************************************************************
 
+=== 1.0.25 ===
+
+
 === 1.0.24 ===
 * Added definition of MacOS dependencies in build scripts.
 * Updated module versions in dependencies.
