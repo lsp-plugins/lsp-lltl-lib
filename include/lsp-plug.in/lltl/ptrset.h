@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2023 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2023 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2025 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2025 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-lltl-lib
  * Created on: 12 нояб. 2023 г.
@@ -202,9 +202,9 @@ namespace lsp
                      * Get value by key or return default value if the value was not found
                      * @param value the desired value
                      * @param dfl default value to return if there is no such value in the set
-                     * @return the associated value
+                     * @return the associated value or default value if not exists
                      */
-                    inline V *dget(const V *key, V *dfl) const              { return vcast(v.get(key, dfl));                                }
+                    inline V *dget(const V *value, V *dfl) const            { return vcast(v.get(value, dfl));                              }
 
                     /**
                      * Remove the item from set if it is present in the set, add the item if not
@@ -223,7 +223,6 @@ namespace lsp
                     /**
                      * Put the value to the set
                      * @param value value to put
-                     * @param ov value removed from hash
                      * @return true if value was not present in the set previously
                      */
                     inline bool put(V *value)                               { return v.put(value);                                          }
@@ -231,8 +230,6 @@ namespace lsp
                     /**
                      * Remove the pointer from set
                      * @param value the value to remove
-                     * @param ok key removed from hash
-                     * @param ov value removed from hash
                      * @return true if the pointer has been removed
                      */
                     inline bool remove(const V *value)                      { return v.remove(value);                                       }

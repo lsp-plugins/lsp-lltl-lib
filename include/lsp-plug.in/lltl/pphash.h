@@ -275,7 +275,6 @@ namespace lsp
                      * Replace the entry ONLY if it exists
                      * @param key key to use
                      * @param value value to use
-                     * @param ok key removed from hash
                      * @param ov value removed from hash
                      * @return pointer to write data or NULL if no allocation possible
                      */
@@ -284,7 +283,6 @@ namespace lsp
                     /**
                      * Replace the entry ONLY if it exists
                      * @param key key to use
-                     * @param ok old key removed from hash
                      * @param ov old value removed from hash
                      * @return pointer to write data or NULL if no allocation possible
                      */
@@ -293,7 +291,6 @@ namespace lsp
                     /**
                      * Remove the associated key
                      * @param key the key to use for seacrh
-                     * @param ok key removed from hash
                      * @param ov value removed from hash
                      * @return true if the data has been removed
                      */

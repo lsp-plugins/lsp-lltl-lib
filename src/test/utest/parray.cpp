@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2020 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2020 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2025 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2025 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-lltl-lib
  * Created on: 8 апр. 2020 г.
@@ -41,7 +41,7 @@ UTEST_BEGIN("lltl", parray)
 
     void dump(lltl::parray<int> &x)
     {
-        for (int i=0, n=x.size(); i<n; ++i)
+        for (size_t i=0, n=x.size(); i<n; ++i)
             printf("%d ", *x.get(i));
         printf("\n");
     }
@@ -66,8 +66,8 @@ UTEST_BEGIN("lltl", parray)
     {
         printf("Testing single operations on parray...\n");
         int array[0x20];
-        for (int i=0, n=sizeof(array)/sizeof(int); i<n; ++i)
-            array[i] = i;
+        for (size_t i=0, n=sizeof(array)/sizeof(int); i<n; ++i)
+            array[i] = int(i);
         int *s = array;
 
         lltl::parray<int> x;
@@ -165,8 +165,8 @@ UTEST_BEGIN("lltl", parray)
     {
         printf("Testing single operations on parray with copying...\n");
         int array[0x20];
-        for (int i=0, n=sizeof(array)/sizeof(int); i<n; ++i)
-            array[i] = i;
+        for (size_t i=0, n=sizeof(array)/sizeof(int); i<n; ++i)
+            array[i] = int(i);
         int *s = array;
 
         lltl::parray<int> x;
@@ -317,8 +317,8 @@ UTEST_BEGIN("lltl", parray)
     {
         printf("Testing multiple operations on darray...\n");
         int array[0x20];
-        for (int i=0, n=sizeof(array)/sizeof(int); i<n; ++i)
-            array[i] = i;
+        for (size_t i=0, n=sizeof(array)/sizeof(int); i<n; ++i)
+            array[i] = int(i);
         int *s = array;
 
         lltl::parray<int> x;
@@ -405,8 +405,8 @@ UTEST_BEGIN("lltl", parray)
     {
         printf("Testing multiple operations on darray with copying...\n");
         int array[0x20];
-        for (int i=0, n=sizeof(array)/sizeof(int); i<n; ++i)
-            array[i] = i;
+        for (size_t i=0, n=sizeof(array)/sizeof(int); i<n; ++i)
+            array[i] = int(i);
         int *s = array;
 
         lltl::parray<int> x;
@@ -733,7 +733,7 @@ UTEST_BEGIN("lltl", parray)
         dump(x);
 
         // Reverse order
-        for (int i=0, j=x.size()-1; i<j; ++i, --j)
+        for (ssize_t i=0, j=x.size()-1; i<j; ++i, --j)
         {
             UTEST_ASSERT(x.xswap(i, j));
         }
@@ -754,7 +754,7 @@ UTEST_BEGIN("lltl", parray)
 
         int v[N];
         for (ssize_t i=0; i<N; ++i)
-            v[i]    = N - i;
+            v[i]    = int(N - i);
 
         lltl::parray<int> a;
         for (ssize_t i=0; i<N; ++i)
@@ -786,7 +786,7 @@ UTEST_BEGIN("lltl", parray)
         printf("Testing iterator...\n");
         int v[N];
         for (ssize_t i=0; i<N; ++i)
-            v[i]    = i;
+            v[i]    = int(i);
 
         lltl::parray<int> a;
         for (ssize_t i=0; i<N; ++i)
