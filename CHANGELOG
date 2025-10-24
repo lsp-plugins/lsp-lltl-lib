@@ -3,7 +3,7 @@
 *******************************************************************************
 
 === 1.0.27 ===
-
+* Updated container interfaces: added const iterators.
 
 === 1.0.26 ===
 * Added MacOS CI builds.
