@@ -73,6 +73,8 @@ namespace lsp
             protected:
                 void            destroy_bin(bin_t *bin);
                 bool            grow();
+                static bool     add_to_bin(bin_t *bin, node_t **free_list, size_t hash, const raw_pair_t *data);
+                static void     free_nodes(bin_t *bin, node_t **free_list, node_t *node);
 
                 lookup_t        find_node(const void *key, size_t hash);
                 raw_pair_t     *create_item(const void *key, size_t hash);

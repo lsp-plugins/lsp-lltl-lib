@@ -52,39 +52,174 @@ namespace lsp
             iter_count
         };
 
+        bool raw_hash_index::add_to_bin(bin_t *bin, node_t **free_list, size_t hash, const raw_pair_t *data)
+        {
+            // Add item to the bin
+            size_t index    = bin->size % raw_hash_node_size;
+            node_t *curr    = bin->tail;
+
+            if ((curr == NULL) || (index == 0))
+            {
+                // Create new node
+                node_t *node    = *free_list;
+                if (node == NULL)
+                {
+                    node        = static_cast<node_t *>(malloc(sizeof(node_t)));
+                    if (node == NULL)
+                        return NULL;
+                }
+                else
+                    *free_list      = (*free_list)->next;
+
+                // Initialize node
+                node->next      = NULL;
+                node->prev      = curr;
+
+                // Link to the list
+                if (curr == NULL)
+                    bin->head       = node;
+                else
+                    curr->next      = node;
+                bin->tail       = node;
+                curr            = node;
+            }
+
+            // Store values
+            curr->hash[index]   = hash;
+            curr->v[index]      = *data;
+            ++bin->size;
+
+            return &curr->v[index];
+        }
+
+        void raw_hash_index::free_nodes(bin_t *bin, node_t **free_list, node_t *node)
+        {
+            bin->tail->next     = *free_list;
+            *free_list          = node;
+
+            if (bin->head == node)
+            {
+                bin->head           = NULL;
+                bin->tail           = NULL;
+            }
+            else
+            {
+                node->prev->next    = NULL;
+                bin->tail           = node->prev;
+            }
+        }
+
         bool raw_hash_index::grow()
         {
             bin_t *xbin, *ybin;
-            size_t ncap, mask;
 
             // No previous allocations?
             if (cap == 0)
             {
-                xbin            = reinterpret_cast<bin_t *>(::malloc(0x10 * sizeof(bin_t)));
+                xbin                = static_cast<bin_t *>(::malloc(0x10 * sizeof(bin_t)));
                 if (xbin == NULL)
                     return false; // Very bad things?
 
-                cap             = 0x10;
-                bins            = xbin;
+                cap                 = 0x10;
+                bins                = xbin;
                 for (size_t i=0; i<cap; ++i, ++xbin)
                 {
-                    xbin->size      = 0;
-                    xbin->head      = NULL;
-                    xbin->tail      = NULL;
+                    xbin->size          = 0;
+                    xbin->head          = NULL;
+                    xbin->tail          = NULL;
                 }
 
                 return true;
             }
 
-            // Twice increase the capacity of hash
-            ncap            = cap << 1;
-            xbin            = reinterpret_cast<bin_t *>(::realloc(bins, ncap * sizeof(bin_t)));
+            // Twice increase the capacity of container
+            const size_t ncap       = cap << 1;
+            xbin                    = static_cast<bin_t *>(::realloc(bins, ncap * sizeof(bin_t)));
             if (xbin == NULL)
                 return false; // Very bad things?
 
             // Now we need to split data
+            node_t *free_list       = NULL; // List of free nodes
+            lsp_finally {
+                while (free_list != NULL)
+                {
+                    node_t *next        = free_list->next;
+                    free(free_list);
+                    free_list           = next;
+                }
+            };
 
-            // TODO
+            // Now we need to split data
+            const size_t mask   = (ncap - 1) ^ (cap - 1); // mask indicates the bit which has been set
+            bins                = xbin;
+
+            // Step 1: initialize new bins as empty
+            ybin                = &xbin[cap];
+            for (size_t i=0; i<cap; ++i, ++ybin)
+            {
+                ybin->size          = 0;
+                ybin->head          = NULL;
+                ybin->tail          = NULL;
+            }
+            ybin                = &xbin[cap];
+
+            // Step 2: split data for each bin
+            for (size_t i=0; i<cap; ++i, ++xbin, ++ybin)
+            {
+                const size_t count  = xbin->size;
+                if (count <= 0)
+                    continue;
+
+                node_t *src         = xbin->head;
+                node_t *dst         = src;
+                size_t src_index    = 0;
+                size_t dst_index    = 0;
+
+                for (size_t j=0; j<count; ++j)
+                {
+                    if (src->hash[src_index] & mask)
+                    {
+                        if (!add_to_bin(ybin, &free_list, src->hash[src_index], &src->v[src_index]))
+                            return false;
+                    }
+                    else
+                    {
+                        // Move data if it's location has changed
+                        if ((src_index != dst_index) || (src != dst))
+                        {
+                            dst->hash[dst_index] = src->hash[src_index];
+                            dst->v[dst_index]    = src->v[src_index];
+                        }
+
+                        // Advance destination pointer
+                        if ((++dst_index) >= raw_hash_node_size)
+                        {
+                            dst             = dst->next;
+                            dst_index       = 0;
+                        }
+                    }
+
+                    // Advance source pointer
+                    if ((++src_index) >= raw_hash_node_size)
+                    {
+                        src             = src->next;
+                        src_index       = 0;
+                    }
+                }
+
+                // Put unused items to free list
+                if (dst_index > 0)
+                {
+                    dst             = dst->next;
+                    if (dst != NULL)
+                        free_nodes(xbin, &free_list, dst);
+                }
+                else
+                    free_nodes(xbin, &free_list, dst);
+
+                // Decrease the size of bin
+                xbin->size             -= ybin->size;
+            }
 
             // Split success
             cap         = ncap;
@@ -142,34 +277,25 @@ namespace lsp
             // Add item to the bin
             bin_t *bin      = &bins[hash & (cap - 1)];
 
-            size_t index    = (bin->size + 1) % raw_hash_node_size;
+            size_t index    = bin->size % raw_hash_node_size;
             node_t *curr    = bin->tail;
-            if (curr == NULL)
+
+            if ((curr == NULL) || (index == 0))
             {
                 // Create new node
                 node_t *node    = static_cast<node_t *>(malloc(sizeof(node_t)));
                 if (node == NULL)
                     return NULL;
 
-                // Link node to exising list
-                node->next      = NULL;
-                node->prev      = NULL;
-                bin->head       = node;
-                bin->tail       = node;
-                curr            = node;
-            }
-            else if (index == 0)
-            {
-
-                // Create new node
-                node_t *node    = static_cast<node_t *>(malloc(sizeof(node_t)));
-                if (node == NULL)
-                    return NULL;
-
-                // Link node to exising list
+                // Initialize node
                 node->next      = NULL;
                 node->prev      = curr;
-                curr->next      = node;
+
+                // Link to the list
+                if (curr == NULL)
+                    bin->head       = node;
+                else
+                    curr->next      = node;
                 bin->tail       = node;
                 curr            = node;
             }
@@ -178,7 +304,6 @@ namespace lsp
             curr->hash[index]   = hash;
             curr->v[index].key  = const_cast<void *>(key);
             ++bin->size;
-            ++size;
 
             return &curr->v[index];
         }
@@ -198,6 +323,7 @@ namespace lsp
                 return NULL;
 
             dst->value      = value;
+            ++size;
 
             return &dst->value;
         }
@@ -267,7 +393,7 @@ namespace lsp
 
             // Find node
             lookup_t pos    = find_node(key, h);
-            if (pos.node != NULL)
+            if (pos.node == NULL)
                 return NULL;
 
             // Replace value if it exists
@@ -303,6 +429,7 @@ namespace lsp
             dst->value      = value;
             if (ov != NULL)
                 *ov         = NULL;
+            ++size;
 
             return &dst->value;
         }
