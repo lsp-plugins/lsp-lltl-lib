@@ -209,12 +209,9 @@ namespace lsp
 
                 // Put unused items to free list
                 if (dst_index > 0)
-                {
                     dst             = dst->next;
-                    if (dst != NULL)
-                        free_nodes(xbin, &free_list, dst);
-                }
-                else if (dst != NULL)
+
+                if (dst != NULL)
                     free_nodes(xbin, &free_list, dst);
 
                 // Decrease the size of bin
