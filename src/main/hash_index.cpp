@@ -214,7 +214,7 @@ namespace lsp
                     if (dst != NULL)
                         free_nodes(xbin, &free_list, dst);
                 }
-                else
+                else if (dst != NULL)
                     free_nodes(xbin, &free_list, dst);
 
                 // Decrease the size of bin
