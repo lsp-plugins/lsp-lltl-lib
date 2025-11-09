@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2020 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2020 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2025 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2025 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-lltl-lib
  * Created on: 31 июл. 2020 г.
@@ -396,6 +396,7 @@ namespace lsp
                         bin->data,
                         0,
                         i,
+                        0,
                         false
                     };
             }
@@ -426,6 +427,7 @@ namespace lsp
                     tuple,
                     size - 1,
                     i,
+                    0,
                     true
                 };
             }

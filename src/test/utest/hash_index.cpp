@@ -229,10 +229,135 @@ UTEST_BEGIN("lltl", hash_index)
         UTEST_ASSERT(index.is_empty());
     }
 
+    void test_iterator_partial()
+    {
+        lltl::hash_index<payload_t, payload_t> index;
+        UTEST_ASSERT(index.capacity() == 0);
+
+        for (size_t i=0; i<0x10; ++i)
+        {
+            payload_t *payload = make_payload(0x1000 + i * 0x10);
+            UTEST_ASSERT(index.create(payload, payload));
+        }
+        for (size_t i=0; i<0x10; ++i)
+        {
+            payload_t *payload = make_payload(0x1008 + i * 0x10);
+            UTEST_ASSERT(index.create(payload, payload));
+        }
+
+        UTEST_ASSERT(index.size() == 0x20);
+
+        // Form the list of keys using iterator
+        lltl::parray<payload_t> keys;
+        size_t idx = 0;
+        for (lltl::iterator<payload_t> it = index.keys(); it.valid(); ++it)
+        {
+            payload_t *payload = it.get();
+            UTEST_ASSERT(payload != NULL);
+            UTEST_ASSERT(keys.add(payload));
+            UTEST_ASSERT(it.index() == idx);
+            ++idx;
+        }
+        UTEST_ASSERT(keys.size() == index.size());
+
+        // Form the list of reverse keys using iterator
+        lltl::parray<payload_t> rkeys;
+        idx = index.size();
+        for (lltl::iterator<payload_t> it = index.rkeys(); it.valid(); ++it)
+        {
+            payload_t *payload = it.get();
+            UTEST_ASSERT(payload != NULL);
+            UTEST_ASSERT(rkeys.unshift(payload));
+
+            --idx;
+            UTEST_ASSERT(it.index() == idx);
+        }
+        UTEST_ASSERT(rkeys.size() == index.size());
+
+        // Check that order of elements matchers
+        for (size_t i=0, n=keys.size(); i<n; ++i)
+        {
+            payload_t *a = keys.uget(i);
+            payload_t *b = rkeys.uget(i);
+            UTEST_ASSERT(a == b);
+        }
+
+        // Check the validity of contents
+        keys.qsort(payload_cmp_func);
+
+        for (size_t i=0; i<0x20; ++i)
+        {
+            payload_t *exp = make_payload(0x1000 + i * 0x08);
+            payload_t *act = keys.uget(i);
+            UTEST_ASSERT(exp == act);
+        }
+    }
+
+    void test_iterator_full()
+    {
+        lltl::hash_index<payload_t, payload_t> index;
+        UTEST_ASSERT(index.capacity() == 0);
+
+        for (size_t i=0; i<0x1000; ++i)
+        {
+            payload_t *payload = make_payload(0x10000 + i);
+            UTEST_ASSERT(index.create(payload, payload));
+        }
+
+        UTEST_ASSERT(index.size() == 0x1000);
+
+        // Form the list of keys using iterator
+        lltl::parray<payload_t> keys;
+        size_t idx = 0;
+        for (lltl::iterator<payload_t> it = index.keys(); it.valid(); ++it)
+        {
+            payload_t *payload = it.get();
+            UTEST_ASSERT(payload != NULL);
+            UTEST_ASSERT(keys.add(payload));
+            UTEST_ASSERT(it.index() == idx);
+            ++idx;
+        }
+        UTEST_ASSERT(keys.size() == index.size());
+
+        // Form the list of reverse keys using iterator
+        lltl::parray<payload_t> rkeys;
+        idx = index.size();
+        for (lltl::iterator<payload_t> it = index.rkeys(); it.valid(); ++it)
+        {
+            payload_t *payload = it.get();
+            UTEST_ASSERT(payload != NULL);
+            UTEST_ASSERT(rkeys.unshift(payload));
+
+            --idx;
+            UTEST_ASSERT(it.index() == idx);
+        }
+        UTEST_ASSERT(rkeys.size() == index.size());
+
+        // Check that order of elements matchers
+        for (size_t i=0, n=keys.size(); i<n; ++i)
+        {
+            payload_t *a = keys.uget(i);
+            payload_t *b = rkeys.uget(i);
+            UTEST_ASSERT(a == b);
+        }
+
+        // Check the validity of contents
+        keys.qsort(payload_cmp_func);
+
+        for (size_t i=0; i<0x1000; ++i)
+        {
+            payload_t *exp = make_payload(0x10000 + i);
+            payload_t *act = keys.uget(i);
+            UTEST_ASSERT(exp == act);
+        }
+    }
+
     UTEST_MAIN
     {
         test_reallocation();
         test_large();
+        test_iterator_partial();
+        test_iterator_full();
     }
 
 UTEST_END

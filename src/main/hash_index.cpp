@@ -611,27 +611,190 @@ namespace lsp
             *src                = tmp;
         }
 
+        raw_iterator raw_hash_index::iter(const iter_vtbl_t *vtbl)
+        {
+            if (size <= 0)
+                return raw_iterator::INVALID;
+
+            // Find first item and return iterator record
+            for (size_t i=0; i<cap; ++i)
+            {
+                bin_t *bin  = &bins[i];
+                if (bin->head != NULL)
+                    return raw_iterator {
+                        vtbl,
+                        this,
+                        bin->head,
+                        0,
+                        i,
+                        0,
+                        false
+                    };
+            }
+
+            return raw_iterator::INVALID;
+        }
+
+        raw_iterator raw_hash_index::riter(const iter_vtbl_t *vtbl)
+        {
+            if (size <= 0)
+                return raw_iterator::INVALID;
+
+            // Find last item and return iterator record
+            for (size_t i=cap; (i--) > 0;)
+            {
+                bin_t *bin  = &bins[i];
+                if (bin->tail != NULL)
+                    return raw_iterator {
+                        vtbl,
+                        this,
+                        bin->tail,
+                        size - 1,
+                        i,
+                        (bin->size - 1) % raw_hash_node_size,
+                        true
+                    };
+            }
+
+            return raw_iterator::INVALID;
+        }
+
         void raw_hash_index::iter_move(raw_iterator *i, ssize_t n)
         {
-            // TODO
+            // Ensure that we don't get out of bounds
+            raw_hash_index *self    = static_cast<raw_hash_index *>(i->container);
+            const ssize_t new_idx   = i->index + n;
+            if ((new_idx < 0) || (size_t(new_idx) >= self->size))
+            {
+                *i = raw_iterator::INVALID;
+                return;
+            }
+
+            // Iterate forward
+            bin_t *bin;
+            node_t *node;
+
+            // item   = pointer to current node
+            // index  = item position in container
+            // offset = bin index
+            // part   = offset inside of node
+            while (n > 0)
+            {
+                bin                     = &self->bins[i->offset];
+                node                    = static_cast<node_t *>(i->item);
+
+                // Try to advance inside of the bin
+                const size_t last       = (node->next != NULL) ? raw_hash_node_size-1 : (bin->size - 1) % raw_hash_node_size;
+                const ssize_t avail     = last - i->part + 1;
+                if (n < avail)
+                {
+                    i->index               += n;
+                    i->part                += n;
+                    return;
+                }
+
+                // We reached end of node, try to advance to the next node.
+                i->index               += avail;
+                n                      -= avail;
+                node                    = node->next;
+                if (node != NULL)
+                {
+                    i->item                 = node;
+                    i->part                 = 0;
+                    continue;
+                }
+
+                // We reached end of bin, try to advance to the new bin
+                while (true)
+                {
+                    // Reached end of bin list?
+                    if ((++i->offset) >= self->cap)
+                    {
+                        *i = raw_iterator::INVALID;
+                        return;
+                    }
+
+                    // Check that bin should be skipped
+                    bin                     = &self->bins[i->offset];
+                    if (size_t(n) < bin->size)
+                    {
+                        i->item                 = bin->head;
+                        i->part                 = 0;
+                        break;
+                    }
+
+                    i->index               += n;
+                    n                      -= bin->size;
+                }
+            }
+
+            // Iterate backward
+            while (n < 0)
+            {
+                bin                     = &self->bins[i->offset];
+                node                    = static_cast<node_t *>(i->item);
+
+                // Try to advance inside of the bin
+                const size_t avail      = i->part + 1;
+                if (size_t(-n) < avail)
+                {
+                    i->index               += n;
+                    i->part                += n;
+                    return;
+                }
+
+                // We reached end of node, try to advance to the next node.
+                i->index               -= avail;
+                n                      += avail;
+                node                    = node->prev;
+                if (node != NULL)
+                {
+                    i->item                 = node;
+                    i->part                 = raw_hash_node_size - 1;
+                    continue;
+                }
+
+                // We reached end of bin, try to advance to the new bin
+                while (true)
+                {
+                    // Reached end of bin list?
+                    if ((i->offset--) <= 0)
+                    {
+                        *i = raw_iterator::INVALID;
+                        return;
+                    }
+
+                    // Check that bin should be skipped
+                    bin                     = &self->bins[i->offset];
+                    if (size_t(-n) < bin->size)
+                    {
+                        i->item                 = bin->tail;
+                        i->part                 = (bin->size - 1) % raw_hash_node_size;
+                        break;
+                    }
+
+                    i->index               += n;
+                    n                      += bin->size;
+                }
+            }
         }
 
         void *raw_hash_index::iter_get_key(raw_iterator *i)
         {
             node_t *node = static_cast<node_t *>(i->item);
-            return node->v[i->offset].key;
+            return node->v[i->part].key;
         }
 
         void *raw_hash_index::iter_get_value(raw_iterator *i)
         {
             node_t *node = static_cast<node_t *>(i->item);
-            return node->v[i->offset].value;
+            return node->v[i->part].value;
         }
 
         void *raw_hash_index::iter_get_pair(raw_iterator *i)
         {
             node_t *node = static_cast<node_t *>(i->item);
-            return &node->v[i->offset];
+            return &node->v[i->part];
         }
 
         ssize_t raw_hash_index::iter_compare(const raw_iterator *a, const raw_iterator *b)
