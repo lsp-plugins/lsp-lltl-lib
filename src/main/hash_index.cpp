@@ -66,7 +66,7 @@ namespace lsp
                 {
                     node        = static_cast<node_t *>(malloc(sizeof(node_t)));
                     if (node == NULL)
-                        return NULL;
+                        return false;
                 }
                 else
                     *free_list      = (*free_list)->next;
@@ -89,7 +89,7 @@ namespace lsp
             curr->v[index]      = *data;
             ++bin->size;
 
-            return &curr->v[index];
+            return true;
         }
 
         void raw_hash_index::free_nodes(bin_t *bin, node_t **free_list, node_t *node)
