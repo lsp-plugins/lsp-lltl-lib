@@ -109,6 +109,7 @@ namespace lsp
                 void                   *item;       // Pointer to current item
                 size_t                  index;      // The overall index in the collection
                 size_t                  offset;     // Some offset inside of data structure (may be not used)
+                size_t                  part;       // Partition (may be not used)
                 bool                    reversive;  // Reversive flag
 
             public:

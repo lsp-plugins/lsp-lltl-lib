@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2023 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2023 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2025 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2025 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-lltl-lib
  * Created on: 12 нояб. 2023 г.
@@ -461,6 +461,7 @@ namespace lsp
                         bin,
                         0,
                         0,
+                        0,
                         false
                     };
             }
@@ -484,6 +485,7 @@ namespace lsp
                         bin,
                         size - 1,
                         bin->size - 1,
+                        0,
                         true
                     };
             }

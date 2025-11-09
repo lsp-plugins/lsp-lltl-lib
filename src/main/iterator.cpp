@@ -65,6 +65,7 @@ namespace lsp
             NULL,
             0,
             0,
+            0,
             false
         };
 
