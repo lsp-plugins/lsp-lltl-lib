@@ -62,6 +62,9 @@ namespace lsp
                 void            init();
                 void            init(deleter1_t deleter);
                 void            init(deleter2_t deleter, void *arg);
+                void            set_deleter(deleter1_t deleter);
+                void            set_deleter(deleter2_t deleter, void *arg);
+                void            clear();
                 void            destroy();
                 void            push(void *new_state);
                 bool            set(void *new_state);
@@ -111,29 +114,55 @@ namespace lsp
                 state & operator = (const state &) = delete;
                 state & operator = (state &&) = delete;
 
+                inline void set_deleter(deleter1_t deleter)
+                {
+                    v.set_deleter(reinterpret_cast<raw_state::deleter1_t>(deleter));
+                }
+
+                template <class V>
+                inline void set_deleter(deleter2_t<V> deleter, V *arg)
+                {
+                    v.set_deleter(reinterpret_cast<raw_state::deleter2_t>(deleter), arg);
+                }
+
             public:
                 /**
+                 * Cleanup all data.
+                 * RT-unsafe method, thread-unsafe method. Should be called when there is no
+                 * concurrent access from another threads.
+                 */
+                inline void clear()                     { v.clear();                            }
+
+                /**
+                 * Cleanup all data and forget about deleter function.
+                 * RT-unsafe method, thread-unsafe method. Should be called when there is no
+                 * concurrent access from another threads.
+                 */
+                inline void flush()                     { v.destroy();                          }
+
+                /**
                  * Cleanup all garbage that can be stored in the state
+                 * Thread-safe method but RT-unsafe method
                  */
                 inline void gc()                        { v.gc();                               }
 
                 /**
                  * Update state. Call deleter for garbage and previous pending state.
-                 * This is RT-unsafe method.
+                 * This is thread-safe but RT-unsafe method.
                  * @param new_state new state to set
                  */
                 inline void push(T *new_state)          { v.push(new_state);                    }
 
                 /**
                  * Refresh and get current state. Call deleter for garbage and previous pending state.
-                 * This is RT-unsafe method.
+                 * This is thread safe but RT-unsafe method.
                  * @return pointer to current state
                  */
                 inline T *pull()                        { return tcast(v.pull());               }
 
                 /**
                  * Update state. Do not call deleter for garbage and previous pending state.
-                 * This is RT-safe method that should be called only in conjunction with pull().
+                 * This is thread-safe and RT-safe method that should be called only in conjunction with pull().
                  * Otherwise it won't update until garbage is properly cleaned up.
                  *
                  * @param new_state new state to set
@@ -142,7 +171,7 @@ namespace lsp
 
                 /**
                  * Refresh and get current state. Do not call deleter for garbage and previous pending state.
-                 * This is RT-safe method that should be called only in conjunction with push().
+                 * This is thread-safe and RT-safe method that should be called only in conjunction with push().
                  * Otherwise it won't update until garbage is properly cleaned up.
                  *
                  * @return pointer to current state
@@ -151,6 +180,7 @@ namespace lsp
 
                 /**
                  * Get current state without refresh.
+                 * Thread-safe and RT-safe method
                  *
                  * @return pointer to current state
                  */
@@ -158,6 +188,7 @@ namespace lsp
 
                 /**
                  * Check that there is a pending state that should be applied
+                 * Thread-safe and RT-safe method
                  *
                  * @return true if there is a pending state that should be applied
                  */

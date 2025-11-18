@@ -36,13 +36,23 @@ namespace lsp
         void raw_state::init(deleter1_t deleter)
         {
             init_bins();
-            deleter2    = NULL;
-            deleter1    = deleter;
+            set_deleter(deleter);
         }
 
         void raw_state::init(deleter2_t deleter, void *arg)
         {
             init_bins();
+            set_deleter(deleter, arg);
+        }
+
+        void raw_state::set_deleter(deleter1_t deleter)
+        {
+            deleter2    = NULL;
+            deleter1    = deleter;
+        }
+
+        void raw_state::set_deleter(deleter2_t deleter, void *arg)
+        {
             deleter2    = deleter;
             params      = arg;
         }
@@ -64,13 +74,19 @@ namespace lsp
                 deleter1(garbage);
         }
 
-        void raw_state::destroy()
+        void raw_state::clear()
         {
             for (size_t i=0; i<B_TOTAL; ++i)
             {
                 void *ptr = atomic_swap(&bins[i], NULL);
                 cleanup(ptr);
             }
+        }
+
+        void raw_state::destroy()
+        {
+            clear();
+
             deleter2    = NULL;
             deleter1    = NULL;
         }
