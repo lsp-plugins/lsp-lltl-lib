@@ -153,6 +153,36 @@ namespace lsp
                 free        = ::free;
             }
         };
+
+        //---------------------------------------------------------------------
+        // Specialization for C-strings: const char *
+        template <>
+        struct hash_spec<const char>: public hash_iface
+        {
+            inline hash_spec()
+            {
+                hash        = char_hash_func;
+            }
+        };
+
+        template <>
+        struct compare_spec<const char>: public compare_iface
+        {
+            inline compare_spec()
+            {
+                compare     = char_cmp_func;
+            }
+        };
+
+        template <>
+        struct allocator_spec<const char>: public allocator_iface
+        {
+            inline allocator_spec()
+            {
+                clone       = char_clone_func;
+                free        = ::free;
+            }
+        };
     } /* namespace lltl */
 } /* namespace lsp */
 
