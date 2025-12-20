@@ -2,6 +2,9 @@
 * RECENT CHANGES
 *******************************************************************************
 
+=== 1.0.29 ===
+
+
 === 1.0.28 ===
 * Added lltl::hash_index container.
 * Some improvements around lltl::state container primitive.
