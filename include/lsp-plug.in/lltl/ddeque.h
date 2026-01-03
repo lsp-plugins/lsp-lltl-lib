@@ -100,6 +100,8 @@ namespace lsp
                 bool            pop_front(void *data);
                 bool            pop_front();
                 size_t          chunks_count(size_t count);
+                void           *get(size_t index);
+                ssize_t         index_of(const void *ptr);
 
                 raw_iterator    iter();
                 raw_iterator    riter();
@@ -164,6 +166,11 @@ namespace lsp
                 T *prepend()                                                    { return cast(v.push_front());      }
                 bool pop_back()                                                 { return v.pop_back();              }
                 bool pop_front()                                                { return v.pop_front();             }
+
+                T *get(size_t index)                                            { return cast(v.get(index));        }
+                const T *get(size_t index) const                                { return ccast(v.get(index));       }
+                ssize_t index_of(const T * item) const                          { return v.index_of(item);          }
+                inline bool contains(const T *p) const                          { return v.index_of(p) >= 0;        }
 
             public:
                 // Single element manipulations (pointer argument)
@@ -252,6 +259,11 @@ namespace lsp
                  * @return true if elements have been placed
                  */
                 bool prepend(const T * data, size_t count)                      { return v.prepend(data, count);    }
+
+            public:
+                // Operators
+                inline T *operator[](size_t idx)                                { return get(idx);                  }
+                inline const T *operator[](size_t idx) const                    { return get(idx);                  }
         };
     } /* namespace lltl */
 } /* namespace lsp */

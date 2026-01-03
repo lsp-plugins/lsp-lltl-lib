@@ -683,6 +683,67 @@ namespace lsp
             return true;
         }
 
+        void *raw_ddeque::get(size_t index)
+        {
+            const size_t half = nItems >> 1;
+            if (index < half)
+            {
+                // Search from the head
+                for (chunk_t * curr = pHead; curr != NULL; curr = curr->pNext)
+                {
+                    const size_t used   = curr->nTail - curr->nHead;
+                    if (index < used)
+                        return &curr->vData[(curr->nHead + index) * nSizeOf];
+
+                    index          -= used;
+                }
+            }
+            else if (index < nItems)
+            {
+                index = nItems - index - 1;
+
+                // Search from the tail
+                for (chunk_t * curr = pTail; curr != NULL; curr = curr->pPrev)
+                {
+                    const size_t used   = curr->nTail - curr->nHead;
+                    if (index < used)
+                        return &curr->vData[(curr->nTail - index - 1) * nSizeOf];
+
+                    index          -= used;
+                }
+            }
+
+            return NULL;
+        }
+
+        ssize_t raw_ddeque::index_of(const void *ptr)
+        {
+            size_t index = 0;
+            const uint8_t *xptr = static_cast<const uint8_t *>(ptr);
+            const size_t end = nChunkSize * nSizeOf;
+
+            // Search from the head
+            for (const chunk_t * curr = pHead; curr != NULL; curr = curr->pNext)
+            {
+                // Check that pointer belongs to this chunk
+                const size_t used   = curr->nTail - curr->nHead;
+                if ((xptr >= curr->vData) && (xptr < &curr->vData[end]))
+                {
+                    size_t offset = (xptr - curr->vData) / nSizeOf;
+                    if (offset < curr->nHead)
+                        return -2;
+                    if (offset >= curr->nTail)
+                        return -3;
+
+                    return (xptr == &curr->vData[offset * nSizeOf]) ? index + offset - curr->nHead : -4;
+                }
+
+                index          += used;
+            }
+
+            return -1;
+        }
+
     } /* namespace lltl */
 } /* namespace lsp */
 

@@ -27,7 +27,7 @@ UTEST_BEGIN("lltl", ddeque)
     void test_simple_single_operations()
     {
         lltl::ddeque<int> v(8);
-        int *ptr;
+        const int *ptr;
         int x = 1;
         int value = 0;
 
@@ -260,10 +260,137 @@ UTEST_BEGIN("lltl", ddeque)
         UTEST_ASSERT(v.extra_chunks() == 0);
     }
 
+    void test_simple_multiple_operations()
+    {
+        printf("Testing ddeque multiple simple operations...\n");
+
+        lltl::ddeque<int> v(8);
+        int value;
+        const int * ptr;
+
+        // Test push_back + pop_front
+        printf("  push_back + pop_front...\n");
+        for (int x=0; x < 128; ++x)
+            UTEST_ASSERT(v.push_back(x));
+        for (int x=0; x < 128; ++x)
+        {
+            const int exp = x;
+            UTEST_ASSERT(ptr = v.front());
+            UTEST_ASSERT(*ptr == exp);
+            UTEST_ASSERT(v.pop_front(value));
+            UTEST_ASSERT(value == exp);
+        }
+        UTEST_ASSERT(v.is_empty());
+
+        // Test push_back + pop_back
+        printf("  push_back + pop_back...\n");
+        for (int x=0; x < 128; ++x)
+            UTEST_ASSERT(v.push_back(x));
+        for (int x=0; x < 128; ++x)
+        {
+            const int exp = 127 - x;
+            UTEST_ASSERT(ptr = v.back());
+            UTEST_ASSERT(*ptr == exp);
+            UTEST_ASSERT(v.pop_back(value));
+            UTEST_ASSERT(value == exp);
+        }
+        UTEST_ASSERT(v.is_empty());
+
+        // Test push_front + pop_back
+        printf("  push_front + pop_back...\n");
+        for (int x=0; x < 128; ++x)
+            UTEST_ASSERT(v.push_front(x));
+        for (int x=0; x < 128; ++x)
+        {
+            const int exp = x;
+            UTEST_ASSERT(ptr = v.back());
+            UTEST_ASSERT(*ptr == exp);
+            UTEST_ASSERT(v.pop_back(value));
+            UTEST_ASSERT(value == exp);
+        }
+        UTEST_ASSERT(v.is_empty());
+
+        // Test push_front + pop_front
+        printf("  push_front + pop_front...\n");
+        for (int x=0; x < 128; ++x)
+            UTEST_ASSERT(v.push_front(x));
+        for (int x=0; x < 128; ++x)
+        {
+            const int exp = 127 - x;
+            UTEST_ASSERT(ptr = v.front());
+            UTEST_ASSERT(*ptr == exp);
+            UTEST_ASSERT(v.pop_front(value));
+            UTEST_ASSERT(value == exp);
+        }
+        UTEST_ASSERT(v.is_empty());
+
+        for (int space=0; space <= 16; space += 4)
+        {
+            // Test moving window using push_back + pop_front
+            printf("  push_back + pop_front space=%d...\n", space);
+            for (int x=0; x<128 + space; ++x)
+            {
+                if (x < 128)
+                    UTEST_ASSERT(v.push_back(x));
+
+                if (x >= space)
+                {
+                    const int exp = x - space;
+                    UTEST_ASSERT(ptr = v.front());
+                    UTEST_ASSERT(*ptr == exp);
+                    UTEST_ASSERT(v.pop_front(value));
+                    UTEST_ASSERT(value == exp);
+                }
+            }
+
+            UTEST_ASSERT(v.is_empty());
+
+            // Test moving window using push_front + pop_back
+            printf("  push_front + pop_back space=%d...\n", space);
+            for (int x=0; x<128 + space; ++x)
+            {
+                if (x < 128)
+                    UTEST_ASSERT(v.push_front(x));
+
+                if (x >= space)
+                {
+                    const int exp = x - space;
+                    UTEST_ASSERT(ptr = v.back());
+                    UTEST_ASSERT(*ptr == exp);
+                    UTEST_ASSERT(v.pop_back(value));
+                    UTEST_ASSERT(value == exp);
+                }
+            }
+
+            UTEST_ASSERT(v.is_empty());
+        }
+    }
+
+    void test_indexing()
+    {
+        printf("Testing ddeque indexing...\n");
+
+        const int *ptr;
+
+        lltl::ddeque<int> v(8);
+        for (int x=0; x < 0x100; ++x)
+            UTEST_ASSERT(v.push_back(x + 0x100));
+
+        for (int x=0; x < 0x100; ++x)
+        {
+            const int exp = x + 0x100;
+            UTEST_ASSERT(ptr = v.get(x));
+            UTEST_ASSERT(*ptr == exp);
+            UTEST_ASSERT(v.index_of(ptr) == x);
+        }
+    }
+
     UTEST_MAIN
     {
         test_simple_single_operations();
         test_cleanup_operations();
+        test_simple_multiple_operations();
+        test_indexing();
     }
 
 UTEST_END
