@@ -260,7 +260,7 @@ namespace lsp
             const size_t n_chunks       = chunks_count(to_alloc);
             chunk_t * const allocated   = alloc_chunk_list(n_chunks);
             if (allocated == NULL)
-                return NULL;
+                return false;
 
             if (pUnused != NULL)
                 pUnused->pPrev              = allocated->pPrev;
