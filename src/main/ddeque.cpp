@@ -765,6 +765,118 @@ namespace lsp
             return -1;
         }
 
+        size_t raw_ddeque::pop_front(void *data, size_t count)
+        {
+            count = lsp_min(count, nItems);
+            if (count <= 0)
+                return count;
+
+            uint8_t *dst            = static_cast<uint8_t *>(data);
+
+            for (size_t offset=0; offset<count; )
+            {
+                const size_t to_copy    = lsp_min(count - offset, pHead->nTail - pHead->nHead);
+
+                // Copy data
+                forward_copy(dst, &pHead->vData[pHead->nHead * nSizeOf], to_copy);
+                dst                    += to_copy * nSizeOf;
+                pHead->nHead           += to_copy;
+                offset                 += to_copy;
+
+                // Advance head if needed
+                if (pHead->nHead >= pHead->nTail)
+                {
+                    chunk_t * const chunk       = pHead;
+                    pHead                       = pHead->pNext;
+                    if (pHead == NULL)
+                        pTail                       = NULL;
+                    else
+                        pHead->pPrev                = NULL;
+                    release_chunk(chunk);
+                }
+            }
+
+            nItems                 -= count;
+
+            return count;
+        }
+
+        size_t raw_ddeque::take_back(void *data, size_t count)
+        {
+            count = lsp_min(count, nItems);
+            if (count <= 0)
+                return count;
+
+            uint8_t *dst            = static_cast<uint8_t *>(data) + count * nSizeOf;
+
+            for (size_t offset=0; offset<count; )
+            {
+                const size_t to_copy    = lsp_min(count - offset, pTail->nTail - pTail->nHead);
+
+                // Copy data
+                dst                    -= to_copy * nSizeOf;
+                pTail->nTail           -= to_copy;
+                forward_copy(dst, &pTail->vData[pTail->nTail * nSizeOf], to_copy);
+                offset                 += to_copy;
+
+                // Advance tail if needed
+                if (pTail->nTail <= pTail->nHead)
+                {
+                    chunk_t * const chunk       = pTail;
+                    pTail                       = pTail->pPrev;
+                    if (pTail == NULL)
+                        pHead                       = NULL;
+                    else
+                        pTail->pNext                = NULL;
+                    release_chunk(chunk);
+                }
+            }
+
+            nItems                 -= count;
+
+            return count;
+        }
+
+        size_t raw_ddeque::pop_back(void *data, size_t count)
+        {
+            count = lsp_min(count, nItems);
+            if (count <= 0)
+                return count;
+
+            uint8_t *dst            = static_cast<uint8_t *>(data);
+
+            for (size_t offset=0; offset<count; )
+            {
+                const size_t to_copy    = lsp_min(count - offset, pTail->nTail - pTail->nHead);
+
+                // Copy data
+                pTail->nTail           -= to_copy;
+                reverse_copy(dst, &pTail->vData[pTail->nTail * nSizeOf], to_copy);
+                dst                    += to_copy * nSizeOf;
+                offset                 += to_copy;
+
+                // Advance tail if needed
+                if (pTail->nTail <= pTail->nHead)
+                {
+                    chunk_t * const chunk       = pTail;
+                    pTail                       = pTail->pPrev;
+                    if (pTail == NULL)
+                        pHead                       = NULL;
+                    else
+                        pTail->pNext                = NULL;
+                    release_chunk(chunk);
+                }
+            }
+
+            nItems                 -= count;
+
+            return count;
+        }
+
+
+
+
+
     } /* namespace lltl */
 } /* namespace lsp */
 

@@ -99,6 +99,9 @@ namespace lsp
                 bool            pop_back();
                 bool            pop_front(void *data);
                 bool            pop_front();
+                size_t          pop_back(void *data, size_t count);
+                size_t          pop_front(void *data, size_t count);
+                size_t          take_back(void *data, size_t count);
                 size_t          chunks_count(size_t count);
                 void           *get(size_t index);
                 ssize_t         index_of(const void *ptr);
@@ -242,7 +245,7 @@ namespace lsp
                  * @param count number of elements
                  * @return true if elements have been placed
                  */
-                bool append(const T * data, size_t count)                       { return v.push_back(data, count);  }
+                bool put_back(const T * data, size_t count)                     { return v.push_back(data, count);  }
 
                 /**
                  * Put the elements to the end of the queue. Keep the same order of elements for sequential pop_back() calls.
@@ -258,7 +261,40 @@ namespace lsp
                  * @param count number of elements
                  * @return true if elements have been placed
                  */
-                bool prepend(const T * data, size_t count)                      { return v.prepend(data, count);    }
+                bool put_front(const T * data, size_t count)                    { return v.prepend(data, count);    }
+
+                /**
+                 * Extract elements from the end of the queue. Keep the same order of elements for sequential push_front() calls.
+                 * @param data pointer to store elements
+                 * @param count number of elements to extract
+                 * @return actual number of elements extracted
+                 */
+                size_t pop_back(T * data, size_t count)                         { return v.pop_back(data, count);   }
+
+                /**
+                 * Extract elements from the end of the queue. Make the reverse order of elements for sequential push_front() calls.
+                 * @param data pointer to store elements
+                 * @param count number of elements to extract
+                 * @return actual number of elements extracted
+                 */
+                size_t take_back(T * data, size_t count)                        { return v.take_back(data, count);  }
+
+                /**
+                 * Extract elements from beginning of the queue. Keep the same order of elements for sequential push_back() calls.
+                 * @param data pointer to store elements
+                 * @param count number of elements to extract
+                 * @return actual number of elements extracted
+                 */
+                size_t pop_front(T * data, size_t count)                        { return v.pop_front(data, count);  }
+
+                /**
+                 * Extract elements from beginning of the queue. Keep the same order of elements for sequential push_back() calls.
+                 * @param data pointer to store elements
+                 * @param count number of elements to extract
+                 * @return actual number of elements extracted
+                 */
+                size_t take_front(T * data, size_t count)                       { return v.pop_front(data, count);  }
+
 
             public:
                 // Operators

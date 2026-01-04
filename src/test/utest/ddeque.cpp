@@ -448,12 +448,12 @@ UTEST_BEGIN("lltl", ddeque)
         v.flush();
 
         // Test bulk append (pass 1)
-        printf("  bulk append(1)...\n");
+        printf("  bulk put_back(1)...\n");
         for (int i=0, n=1; i < 0x80; n += 3)
         {
             const int to_do = lsp_min(0x80 - i, n);
             printf("    size=%d\n", to_do);
-            UTEST_ASSERT(v.append(&buf[i], to_do));
+            UTEST_ASSERT(v.put_back(&buf[i], to_do));
             UTEST_ASSERT(v.size() == size_t(i + to_do));
 
             i              += to_do;
@@ -473,12 +473,12 @@ UTEST_BEGIN("lltl", ddeque)
         }
 
         // Test bulk append (pass 2)
-        printf("  bulk append(2)...\n");
+        printf("  bulk put_back(2)...\n");
         for (int i=0, n=1; i < 0x100; n += 3)
         {
             const int to_do = lsp_min(0x100 - i, n);
             printf("    size=%d\n", to_do);
-            UTEST_ASSERT(v.append(&buf[i], to_do));
+            UTEST_ASSERT(v.put_back(&buf[i], to_do));
             UTEST_ASSERT(v.size() == size_t(i + to_do));
 
             i              += to_do;
@@ -552,12 +552,12 @@ UTEST_BEGIN("lltl", ddeque)
         v.flush();
 
         // Test bulk prepend (pass 1)
-        printf("  bulk prepend(1)...\n");
+        printf("  bulk put_front(1)...\n");
         for (int i=0, n=1; i < 0x80; n += 3)
         {
             const int to_do = lsp_min(0x80 - i, n);
             printf("    size=%d\n", to_do);
-            UTEST_ASSERT(v.prepend(&buf[i], to_do));
+            UTEST_ASSERT(v.put_front(&buf[i], to_do));
             UTEST_ASSERT(v.size() == size_t(i + to_do));
 
             i              += to_do;
@@ -582,12 +582,12 @@ UTEST_BEGIN("lltl", ddeque)
         }
 
         // Test bulk prepend
-        printf("  bulk prepend(2)...\n");
+        printf("  bulk put_front(2)...\n");
         for (int i=0, n=1; i < 0x100; n += 3)
         {
             const int to_do = lsp_min(0x100 - i, n);
             printf("    size=%d\n", to_do);
-            UTEST_ASSERT(v.prepend(&buf[i], to_do));
+            UTEST_ASSERT(v.put_front(&buf[i], to_do));
             UTEST_ASSERT(v.size() == size_t(i + to_do));
 
             i              += to_do;
@@ -614,6 +614,158 @@ UTEST_BEGIN("lltl", ddeque)
         v.flush();
     }
 
+    void test_bulk_extract_operations()
+    {
+        printf("Testing ddeque bulk extract operations...\n");
+
+        lltl::ddeque<int> v(8);
+        int buf[0x100];
+
+        // Test bulk pop_front
+        printf("  bulk pop_front...\n");
+        for (int i=0; i<0x100; ++i)
+        {
+            UTEST_ASSERT(v.push_back(i));
+        }
+
+        UTEST_ASSERT(v.size() == 0x100);
+        UTEST_ASSERT(v.capacity() == 0x100);
+        UTEST_ASSERT(v.chunks() == 0x20);
+        UTEST_ASSERT(v.used_chunks() == 0x20);
+        UTEST_ASSERT(v.extra_chunks() == 0);
+
+        for (int i=0, n=1; i < 0x100; n += 3)
+        {
+            const int to_do = lsp_min(0x100 - i, n);
+            printf("    size=%d\n", to_do);
+            UTEST_ASSERT(v.pop_front(buf, to_do) == size_t(to_do));
+
+            for (int j=0; j<to_do; ++j)
+            {
+                const int exp       = i + j;
+                UTEST_ASSERT(buf[j] == exp);
+            }
+
+            i              += to_do;
+        }
+
+        UTEST_ASSERT(v.size() == 0x0);
+        UTEST_ASSERT(v.capacity() == 0x100);
+        UTEST_ASSERT(v.chunks() == 0x20);
+        UTEST_ASSERT(v.used_chunks() == 0x0);
+        UTEST_ASSERT(v.extra_chunks() == 0x20);
+
+        v.flush();
+
+        // Test bulk take_front
+        printf("  bulk take_front...\n");
+        for (int i=0; i<0x100; ++i)
+        {
+            UTEST_ASSERT(v.push_back(i));
+        }
+
+        UTEST_ASSERT(v.size() == 0x100);
+        UTEST_ASSERT(v.capacity() == 0x100);
+        UTEST_ASSERT(v.chunks() == 0x20);
+        UTEST_ASSERT(v.used_chunks() == 0x20);
+        UTEST_ASSERT(v.extra_chunks() == 0);
+
+        for (int i=0, n=1; i < 0x100; n += 3)
+        {
+            const int to_do = lsp_min(0x100 - i, n);
+            printf("    size=%d\n", to_do);
+            UTEST_ASSERT(v.take_front(buf, to_do) == size_t(to_do));
+
+            for (int j=0; j<to_do; ++j)
+            {
+                const int exp       = i + j;
+                UTEST_ASSERT(buf[j] == exp);
+            }
+
+            i              += to_do;
+        }
+
+        UTEST_ASSERT(v.size() == 0x0);
+        UTEST_ASSERT(v.capacity() == 0x100);
+        UTEST_ASSERT(v.chunks() == 0x20);
+        UTEST_ASSERT(v.used_chunks() == 0x0);
+        UTEST_ASSERT(v.extra_chunks() == 0x20);
+
+        v.flush();
+
+        // Test bulk pop_back
+        printf("  bulk pop_back...\n");
+        for (int i=0; i<0x100; ++i)
+        {
+            UTEST_ASSERT(v.push_front(i));
+        }
+
+        UTEST_ASSERT(v.size() == 0x100);
+        UTEST_ASSERT(v.capacity() == 0x100);
+        UTEST_ASSERT(v.chunks() == 0x20);
+        UTEST_ASSERT(v.used_chunks() == 0x20);
+        UTEST_ASSERT(v.extra_chunks() == 0);
+
+        for (int i=0, n=1; i < 0x100; n += 3)
+        {
+            const int to_do = lsp_min(0x100 - i, n);
+            printf("    size=%d\n", to_do);
+            UTEST_ASSERT(v.pop_back(buf, to_do) == size_t(to_do));
+
+            for (int j=0; j<to_do; ++j)
+            {
+                const int exp       = i + j;
+                UTEST_ASSERT(buf[j] == exp);
+            }
+
+            i              += to_do;
+        }
+
+        UTEST_ASSERT(v.size() == 0x0);
+        UTEST_ASSERT(v.capacity() == 0x100);
+        UTEST_ASSERT(v.chunks() == 0x20);
+        UTEST_ASSERT(v.used_chunks() == 0x0);
+        UTEST_ASSERT(v.extra_chunks() == 0x20);
+
+        v.flush();
+
+        // Test bulk take_back
+        printf("  bulk take_back...\n");
+        for (int i=0; i<0x100; ++i)
+        {
+            UTEST_ASSERT(v.push_front(i));
+        }
+
+        UTEST_ASSERT(v.size() == 0x100);
+        UTEST_ASSERT(v.capacity() == 0x100);
+        UTEST_ASSERT(v.chunks() == 0x20);
+        UTEST_ASSERT(v.used_chunks() == 0x20);
+        UTEST_ASSERT(v.extra_chunks() == 0);
+
+        for (int i=0, n=1; i < 0x100; n += 3)
+        {
+            const int to_do = lsp_min(0x100 - i, n);
+            printf("    size=%d\n", to_do);
+            UTEST_ASSERT(v.take_back(buf, to_do) == size_t(to_do));
+
+            for (int j=0; j<to_do; ++j)
+            {
+                const int exp       = i + to_do - j - 1;
+                UTEST_ASSERT(buf[j] == exp);
+            }
+
+            i              += to_do;
+        }
+
+        UTEST_ASSERT(v.size() == 0x0);
+        UTEST_ASSERT(v.capacity() == 0x100);
+        UTEST_ASSERT(v.chunks() == 0x20);
+        UTEST_ASSERT(v.used_chunks() == 0x0);
+        UTEST_ASSERT(v.extra_chunks() == 0x20);
+
+        v.flush();
+    }
+
     UTEST_MAIN
     {
         test_simple_single_operations();
@@ -621,6 +773,7 @@ UTEST_BEGIN("lltl", ddeque)
         test_simple_multiple_operations();
         test_indexing();
         test_bulk_add_operations();
+        test_bulk_extract_operations();
     }
 
 UTEST_END
