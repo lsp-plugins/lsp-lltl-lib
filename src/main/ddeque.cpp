@@ -25,6 +25,15 @@ namespace lsp
 {
     namespace lltl
     {
+        const iter_vtbl_t raw_ddeque::iterator_vtbl =
+        {
+            iter_move,
+            iter_get,
+            iter_compare,
+            iter_compare,
+            iter_count
+        };
+
         void raw_ddeque::forward_copy(void *dst, const void *src, size_t count)
         {
             memcpy(dst, src, count * nSizeOf);
@@ -873,9 +882,104 @@ namespace lsp
             return count;
         }
 
+        raw_iterator raw_ddeque::iter()
+        {
+            if (nItems <= 0)
+                return raw_iterator::INVALID;
 
+            return raw_iterator {
+                &iterator_vtbl,
+                this,
+                pHead,
+                0,
+                pHead->nHead,
+                0,
+                false
+            };
+        }
 
+        raw_iterator raw_ddeque::riter()
+        {
+            if (nItems <= 0)
+                return raw_iterator::INVALID;
 
+            return raw_iterator {
+                &iterator_vtbl,
+                this,
+                pTail,
+                nItems - 1,
+                pTail->nTail - 1,
+                0,
+                true
+            };
+        }
+
+        void raw_ddeque::iter_move(raw_iterator *i, ssize_t n)
+        {
+            chunk_t *chunk      = static_cast<chunk_t *>(i->item);
+            size_t offset       = i->offset;
+            size_t index        = i->index;
+
+            while (n > 0)
+            {
+                const size_t to_do  = lsp_min(chunk->nTail - offset, size_t(n));
+                offset             += to_do;
+                index              += to_do;
+                if (offset >= chunk->nTail)
+                {
+                    chunk               = chunk->pNext;
+                    if (chunk == NULL)
+                    {
+                        *i                  = raw_iterator::INVALID;
+                        return;
+                    }
+                    offset              = chunk->nHead;
+                }
+
+                n                  -= to_do;
+            }
+
+            while (n < 0)
+            {
+                if (offset <= chunk->nHead)
+                {
+                    chunk               = chunk->pPrev;
+                    if (chunk == NULL)
+                    {
+                        *i                  = raw_iterator::INVALID;
+                        return;
+                    }
+                    offset              = chunk->nTail;
+                }
+
+                const size_t to_do  = lsp_min(offset - chunk->nHead, size_t(-n));
+                offset             -= to_do;
+                index              -= to_do;
+                n                  += to_do;
+            }
+
+            i->item             = chunk;
+            i->offset           = offset;
+            i->index            = index;
+        }
+
+        void *raw_ddeque::iter_get(raw_iterator *i)
+        {
+            raw_ddeque *self    = static_cast<raw_ddeque *>(i->container);
+            chunk_t *chunk      = static_cast<chunk_t *>(i->item);
+            return &chunk->vData[i->offset * self->nSizeOf];
+        }
+
+        ssize_t raw_ddeque::iter_compare(const raw_iterator *a, const raw_iterator *b)
+        {
+            return a->index - b->index;
+        }
+
+        size_t raw_ddeque::iter_count(const raw_iterator *i)
+        {
+            raw_ddeque *self    = static_cast<raw_ddeque *>(i->container);
+            return self->nItems;
+        }
 
     } /* namespace lltl */
 } /* namespace lsp */

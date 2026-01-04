@@ -300,6 +300,13 @@ namespace lsp
                 // Operators
                 inline T *operator[](size_t idx)                                { return get(idx);                  }
                 inline const T *operator[](size_t idx) const                    { return get(idx);                  }
+
+            public:
+                // Iterators
+                inline iterator<T> values()                                     { return iterator<T>(v.iter());         }
+                inline iterator<T> rvalues()                                    { return iterator<T>(v.riter());        }
+                inline iterator<const T> values() const                         { return iterator<const T>(v.iter());   }
+                inline iterator<const T> rvalues() const                        { return iterator<const T>(v.riter());  }
         };
     } /* namespace lltl */
 } /* namespace lsp */

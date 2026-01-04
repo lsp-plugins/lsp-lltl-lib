@@ -766,6 +766,85 @@ UTEST_BEGIN("lltl", ddeque)
         v.flush();
     }
 
+    void test_iterators()
+    {
+        printf("Testing ddeque iterators...\n");
+
+        const int *ptr;
+        lltl::ddeque<int> v(8);
+        lltl::iterator<int> it;
+        for (int i=0; i<0x100; ++i)
+            UTEST_ASSERT(v.push_back(i + 0x100));
+
+        // Check forward sequential iterator
+        printf("  forward sequential iterator...\n");
+        it = v.values();
+        for (size_t i=0; i<0x100; ++i)
+        {
+            const size_t exp_i      = i;
+            const int exp           = i + 0x100;
+
+            UTEST_ASSERT(it.valid());
+            UTEST_ASSERT(it.index() == exp_i);
+            UTEST_ASSERT(ptr = it.get());
+            UTEST_ASSERT(*ptr == exp);
+            ++it;
+        }
+        UTEST_ASSERT(!it.valid());
+
+        // Check forward skipping iterator
+        printf("  forward skipping iterator...\n");
+        it = v.values();
+        for (size_t i=0, n=1; i<0x100; n += 3)
+        {
+            const size_t advance    = lsp_min(0x100 - i, n);
+            const size_t exp_i      = i;
+            const int exp           = i + 0x100;
+
+            UTEST_ASSERT(it.valid());
+            UTEST_ASSERT(it.index() == exp_i);
+            UTEST_ASSERT(ptr = it.get());
+            UTEST_ASSERT(*ptr == exp);
+
+            i      += advance;
+            it     += advance;
+        }
+
+        // Check reverse sequential iterator
+        printf("  reverse sequential iterator...\n");
+        it = v.rvalues();
+        for (size_t i=0; i<0x100; ++i)
+        {
+            const size_t exp_i      = 0x100 - i - 1;
+            const int exp           = 0x200 - i - 1;
+
+            UTEST_ASSERT(it.valid());
+            UTEST_ASSERT(it.index() == exp_i);
+            UTEST_ASSERT(ptr = it.get());
+            UTEST_ASSERT(*ptr == exp);
+            ++it;
+        }
+        UTEST_ASSERT(!it.valid());
+
+        // Check reverse skipping iterator
+        printf("  reverse skipping iterator...\n");
+        it = v.rvalues();
+        for (size_t i=0, n=1; i<0x100; n += 3)
+        {
+            const size_t advance    = lsp_min(0x100 - i, n);
+            const size_t exp_i      = 0x100 - i - 1;
+            const int exp           = 0x200 - i - 1;
+
+            UTEST_ASSERT(it.valid());
+            UTEST_ASSERT(it.index() == exp_i);
+            UTEST_ASSERT(ptr = it.get());
+            UTEST_ASSERT(*ptr == exp);
+
+            i      += advance;
+            it     += advance;
+        }
+    }
+
     UTEST_MAIN
     {
         test_simple_single_operations();
@@ -774,6 +853,7 @@ UTEST_BEGIN("lltl", ddeque)
         test_indexing();
         test_bulk_add_operations();
         test_bulk_extract_operations();
+        test_iterators();
     }
 
 UTEST_END
