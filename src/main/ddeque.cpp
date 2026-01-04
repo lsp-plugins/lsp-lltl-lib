@@ -114,13 +114,25 @@ namespace lsp
             if (count <= nUnused)
                 return acquire_unused_chunk_list(count);
 
+            // Allocate chunk list
             const size_t to_alloc   = count - nUnused;
-            chunk_t * const allocated = alloc_chunk_list(count);
+            chunk_t * const allocated = alloc_chunk_list(to_alloc);
             if (allocated == NULL)
                 return NULL;
+            if (nUnused <= 0)
+            {
+                nChunks                += to_alloc;
+                return allocated;
+            }
 
-            chunk_t * const unused  = acquire_unused_chunk_list(nUnused);
-            chunk_t * const tail    = unused->pPrev;
+            // Add unused chunks
+            chunk_t * const unused  = pUnused;
+            pUnused                 = NULL;
+            nUnused                 = 0;
+
+            chunk_t * tail          = unused;
+            while (tail->pNext != NULL)
+                tail                    = tail->pNext;
 
             tail->pNext             = allocated;
             unused->pPrev           = allocated->pPrev;     // Store pointer to the tail in the first element
@@ -424,11 +436,14 @@ namespace lsp
 
         raw_ddeque::chunk_t *raw_ddeque::preallocate_back(size_t count)
         {
+            size_t n_chunks;
+            chunk_t *chunks;
+
             // Check if deque is empty
             if (pTail == NULL)
             {
-                const size_t n_chunks   = chunks_count(count);
-                chunk_t * chunks        = acquire_chunk_list(n_chunks);
+                n_chunks                = chunks_count(count);
+                chunks                  = acquire_chunk_list(n_chunks);
                 if (chunks == NULL)
                     return NULL;
 
@@ -444,8 +459,8 @@ namespace lsp
                 return pTail;
 
             // Allocate extra chunks and place them after tail
-            const size_t n_chunks   = chunks_count(count + nChunkSize - pTail->nTail);
-            chunk_t * chunks        = acquire_chunk_list(n_chunks);
+            n_chunks                = chunks_count(count + pTail->nTail - nChunkSize);
+            chunks                  = acquire_chunk_list(n_chunks);
             if (chunks == NULL)
                 return NULL;
 
@@ -459,11 +474,14 @@ namespace lsp
 
         raw_ddeque::chunk_t *raw_ddeque::preallocate_front(size_t count)
         {
+            size_t n_chunks;
+            chunk_t *chunks;
+
             // Check if deque is empty
             if (pHead == NULL)
             {
-                const size_t n_chunks   = chunks_count(count);
-                chunk_t * chunks        = acquire_chunk_list(n_chunks);
+                n_chunks                = chunks_count(count);
+                chunks                  = acquire_chunk_list(n_chunks);
                 if (chunks == NULL)
                     return NULL;
 
@@ -482,8 +500,8 @@ namespace lsp
                 return pHead;
 
             // Allocate extra chunks and place them before head
-            const size_t n_chunks   = chunks_count(count - pHead->nHead);
-            chunk_t * chunks        = acquire_chunk_list(n_chunks);
+            n_chunks                = chunks_count(count - pHead->nHead);
+            chunks                  = acquire_chunk_list(n_chunks);
             if (chunks == NULL)
                 return NULL;
 
@@ -503,6 +521,9 @@ namespace lsp
             chunk_t *tail           = preallocate_back(count);
             if (tail == NULL)
                 return false;
+
+            // Update size
+            nItems                 += count;
 
             // Copy first block
             const uint8_t *src      = static_cast<const uint8_t *>(data);
@@ -525,8 +546,6 @@ namespace lsp
                 count                  -= to_copy;
             }
 
-            nItems                 += count;
-
             return true;
         }
 
@@ -535,6 +554,9 @@ namespace lsp
             chunk_t *head           = preallocate_front(count);
             if (head == NULL)
                 return false;
+
+            // Update size
+            nItems                 += count;
 
             // Copy first block
             const uint8_t *src      = static_cast<const uint8_t *>(data) + count * nSizeOf;
@@ -558,8 +580,6 @@ namespace lsp
                 count                  -= to_copy;
             }
 
-            nItems                 += count;
-
             return true;
         }
 
@@ -568,6 +588,9 @@ namespace lsp
             chunk_t *head           = preallocate_front(count);
             if (head == NULL)
                 return false;
+
+            // Update size
+            nItems                 += count;
 
             // Copy first block
             const uint8_t *src      = static_cast<const uint8_t *>(data);
@@ -590,8 +613,6 @@ namespace lsp
                 src                    += to_copy * nSizeOf;
                 count                  -= to_copy;
             }
-
-            nItems                 += count;
 
             return true;
         }
