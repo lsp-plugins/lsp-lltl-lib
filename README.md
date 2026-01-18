@@ -57,6 +57,8 @@ Also, for automatic managment of objects and lookup, additional interfaces like 
 ## Library Contents
 
 Available collections:
+  - `lltl::bitset` - set of bits stored in the optimal for the CPU form for quick data processing 
+                       and memory economy. 
   - `lltl::darray` - dynamic array of plain data structures of the same type.
   - `lltl::ddeque` - double-end queue of plain data structures of the same type.
   - `lltl::hash_index` - the hash container for associating two pointers one to another.
@@ -65,8 +67,8 @@ Available collections:
   - `lltl::pphash` - pointer to pointer hash map, where keys are managed automatically and values
                        are managed by caller.
   - `lltl::ptrset` - set for organize quick storage of raw pointers.
-  - `lltl::bitset` - set of bits stored in the optimal for the CPU form for quick data processing 
-                       and memory economy. 
+  - `lltl::shbuffer` - shared buffer for operating on memory.
+
 
 Collection access:
   - `lltl::iterator` - iterator class for sequential data access.

@@ -3,6 +3,7 @@
 *******************************************************************************
 
 === 1.0.29 ===
+* Implemented lltl::shbuffer container.
 * Implemented lltl::ddeque container.
 
 === 1.0.28 ===
