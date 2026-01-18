@@ -75,8 +75,8 @@ namespace lsp
                 mutable raw_shbuffer        v;
 
             private:
-                const shbuffer     *nvl(const shbuffer * src)       { return (src != NULL) ? src->v.ptr : NULL; }
-                inline static T    *cast(void *ptr)                 { return static_cast<T *>(ptr);                 }
+                inline static T    *cast(void *ptr) noexcept        { return static_cast<T *>(ptr);                 }
+                inline static void *mkp(long v) noexcept            { return reinterpret_cast<void *>(v);           }
 
             public:
                 typedef void        (* deleter_t)(T * data);
@@ -181,6 +181,9 @@ namespace lsp
                 }
 
             public: // Comparison
+                inline ptrdiff_t compare(const void *ptr) const noexcept            { return v.compare(ptr);                }
+                inline ptrdiff_t compare(long ptr) const noexcept                   { return v.compare(mkp(ptr));           }
+
                 inline bool operator == (const shbuffer<T> & src) const noexcept    { return v.compare(src.v) == 0;         }
                 inline bool operator != (const shbuffer<T> & src) const noexcept    { return v.compare(src.v) != 0;         }
                 inline bool operator <  (const shbuffer<T> & src) const noexcept    { return v.compare(src.v) < 0;          }
@@ -190,23 +193,8 @@ namespace lsp
                 inline bool operator !  () const noexcept                           { return v.compare(NULL) == 0;          }
                 inline operator bool() const noexcept                               { return v.compare(NULL) != 0;          }
 
-                template <typename V>
-                inline bool operator == (const V * ptr) const noexcept              { return v.compare(ptr) == 0;           }
-                template <typename V>
-                inline bool operator != (const V * ptr) const noexcept              { return v.compare(ptr) != 0;           }
-                template <typename V>
-                inline bool operator <  (const V * ptr) const noexcept              { return v.compare(ptr) < 0;            }
-                template <typename V>
-                inline bool operator >  (const V * ptr) const noexcept              { return v.compare(ptr) > 0;            }
-                template <typename V>
-                inline bool operator <= (const V * ptr) const noexcept              { return v.compare(ptr) <= 0;           }
-                template <typename V>
-                inline bool operator >= (const V * ptr) const noexcept              { return v.compare(ptr) >= 0;           }
-
-                inline bool operator == (const nullptr_t) const noexcept            { return v.ptr == NULL;                 }
-                inline bool operator != (const nullptr_t) const noexcept            { return v.ptr != NULL;                 }
-
-                inline ptrdiff_t compare(const void *ptr) const noexcept            { return v.compare(ptr);                }
+                inline bool operator == (const nullptr_t) const noexcept            { return v.compare(NULL) == 0;          }
+                inline bool operator != (const nullptr_t) const noexcept            { return v.compare(NULL) != 0;          }
 
             public:
                 /**
@@ -311,8 +299,20 @@ namespace lsp
             return ptr.compare(xptr) op_def 0; \
         } \
         \
+        template<typename V> \
+        inline bool operator op_def (const shbuffer<V> & ptr, long xptr) noexcept \
+        { \
+            return ptr.compare(xptr) op_def 0; \
+        } \
+        \
         template<typename P, typename V> \
         inline bool operator op_def (const P *xptr, const shbuffer<V> & ptr) noexcept \
+        { \
+            return 0 op_def ptr.compare(xptr); \
+        } \
+        \
+        template<typename V> \
+        inline bool operator op_def (long xptr, const shbuffer<V> & ptr) noexcept \
         { \
             return 0 op_def ptr.compare(xptr); \
         }
