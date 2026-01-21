@@ -266,6 +266,10 @@ namespace lsp
                  * @return number of references
                  */
                 inline size_t references() const                        { return (v.ptr != NULL) ? atomic_load(&v.ptr->references) : 0;     }
+
+            public:
+                inline void swap(shbuffer<T> * src)                     { lsp::swap(v.ptr, src->v.ptr);                         }
+                inline void swap(shbuffer<T> & src)                     { lsp::swap(v.ptr, src.v.ptr);                          }
         };
 
         template<typename V>
