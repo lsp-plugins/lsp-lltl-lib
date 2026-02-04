@@ -99,9 +99,13 @@ namespace lsp
             private:
                 mutable raw_ptrset  v;
 
+//                using PV = typename lsp::remove_const<V>::type;
+
                 inline static V *vcast(void *ptr)       { return static_cast<V *>(ptr);             }
                 inline static V **pvcast(void *ptr)     { return reinterpret_cast<V **>(ptr);       }
                 inline static void **pvcast(V **ptr)    { return reinterpret_cast<void **>(ptr);    }
+//                inline static PV *ccast(PV *ptr)        { return ptr;                               }
+//                inline static PV *ccast(const PV *ptr)  { return const_cast<PV *>(ptr);             }
 
             public:
                 explicit inline ptrset()
@@ -225,7 +229,7 @@ namespace lsp
                  * @param value value to put
                  * @return true if value was not present in the set previously
                  */
-                inline bool put(V *value)                               { return v.put(value);                                          }
+                inline bool put(V *value)                               { return v.put(lsp::unconst_ptr(value));                        }
 
                 /**
                  * Remove the pointer from set
