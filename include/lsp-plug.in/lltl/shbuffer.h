@@ -182,7 +182,7 @@ namespace lsp
 
             public: // Comparison
                 inline ptrdiff_t compare(const void *ptr) const noexcept            { return v.compare(ptr);                }
-                inline ptrdiff_t compare(long ptr) const noexcept                   { return v.compare(mkp(ptr));           }
+                inline ptrdiff_t compare(ptrdiff_t ptr) const noexcept              { return v.compare(mkp(ptr));           }
 
                 inline bool operator == (const shbuffer<T> & src) const noexcept    { return v.compare(src.v) == 0;         }
                 inline bool operator != (const shbuffer<T> & src) const noexcept    { return v.compare(src.v) != 0;         }
@@ -293,42 +293,39 @@ namespace lsp
             return !ptr;
         }
 
-    #define LLTL_SHBUFFER_DEF_OP(op_def) \
+    #define LLTL_SHBUFFER_DEF_INT_OP(op_def, type) \
+        template<typename V> \
+        inline bool operator op_def (const shbuffer<V> & ptr, type xptr) noexcept \
+        { \
+            return ptr.compare(ptrdiff_t(xptr)) op_def 0; \
+        } \
+        \
+        template<typename V> \
+        inline bool operator op_def (type xptr, const shbuffer<V> & ptr) noexcept \
+        { \
+            return 0 op_def ptr.compare(ptrdiff_t(xptr)); \
+        } \
+
+    #define LLTL_SHBUFFER_DEF_PTR_OP(op_def) \
         template<typename V, typename P> \
         inline bool operator op_def (const shbuffer<V> & ptr, const P *xptr) noexcept \
         { \
             return ptr.compare(xptr) op_def 0; \
         } \
         \
-        template<typename V> \
-        inline bool operator op_def (const shbuffer<V> & ptr, long xptr) noexcept \
-        { \
-            return ptr.compare(xptr) op_def 0; \
-        } \
-        \
-        template<typename V> \
-        inline bool operator op_def (const shbuffer<V> & ptr, int xptr) noexcept \
-        { \
-            return ptr.compare(long(xptr)) op_def 0; \
-        } \
-        \
         template<typename P, typename V> \
         inline bool operator op_def (const P *xptr, const shbuffer<V> & ptr) noexcept \
         { \
             return 0 op_def ptr.compare(xptr); \
-        } \
-        \
-        template<typename V> \
-        inline bool operator op_def (long xptr, const shbuffer<V> & ptr) noexcept \
-        { \
-            return 0 op_def ptr.compare(xptr); \
-        } \
-        \
-        template<typename V> \
-        inline bool operator op_def (int xptr, const shbuffer<V> & ptr) noexcept \
-        { \
-            return 0 op_def ptr.compare(long(xptr)); \
         }
+
+    #define LLTL_SHBUFFER_DEF_OP(op_def) \
+        /* Definitions for integer constants */ \
+        LLTL_SHBUFFER_DEF_INT_OP(op_def, int) \
+        LLTL_SHBUFFER_DEF_INT_OP(op_def, long) \
+        LLTL_SHBUFFER_DEF_INT_OP(op_def, long long) \
+        /* Definitions for any pointer type */ \
+        LLTL_SHBUFFER_DEF_PTR_OP(op_def)
 
         LLTL_SHBUFFER_DEF_OP(==)
         LLTL_SHBUFFER_DEF_OP(!=)
@@ -338,6 +335,8 @@ namespace lsp
         LLTL_SHBUFFER_DEF_OP(>)
 
     #undef LLTL_SHBUFFER_DEF_OP
+    #undef LLTL_SHBUFFER_DEF_INT_OP
+    #undef LLTL_SHBUFFER_DEF_PTR_OP
     } /* namespace lltl */
 } /* namespace lsp */
 
