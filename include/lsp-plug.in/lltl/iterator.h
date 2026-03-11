@@ -138,6 +138,11 @@ namespace lsp
                 inline static const T *ccast(void *ptr)                         { return const_cast<const T *>(cast(ptr));  }
 
             public: // Construction/destruction
+                explicit iterator()
+                {
+                    v   = raw_iterator::INVALID;
+                }
+
                 inline explicit iterator(const raw_iterator & begin)
                 {
                     v   = begin;

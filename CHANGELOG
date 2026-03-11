@@ -2,6 +2,11 @@
 * RECENT CHANGES
 *******************************************************************************
 
+=== 1.0.29 ===
+* Implemented lltl::shbuffer container.
+* Implemented lltl::ddeque container.
+* Updated module versions in dependencies.
+
 === 1.0.28 ===
 * Added lltl::hash_index container.
 * Some improvements around lltl::state container primitive.
