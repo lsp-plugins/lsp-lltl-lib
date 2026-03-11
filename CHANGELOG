@@ -2,6 +2,9 @@
 * RECENT CHANGES
 *******************************************************************************
 
+=== 1.0.30 ===
+
+
 === 1.0.29 ===
 * Implemented lltl::shbuffer container.
 * Implemented lltl::ddeque container.
