@@ -193,9 +193,6 @@ namespace lsp
                 inline bool operator !  () const noexcept                           { return v.compare(NULL) == 0;          }
                 inline operator bool() const noexcept                               { return v.compare(NULL) != 0;          }
 
-                inline bool operator == (const nullptr_t) const noexcept            { return v.compare(NULL) == 0;          }
-                inline bool operator != (const nullptr_t) const noexcept            { return v.compare(NULL) != 0;          }
-
             public:
                 /**
                  * Obtain the value from the buffer
@@ -309,6 +306,12 @@ namespace lsp
             return ptr.compare(xptr) op_def 0; \
         } \
         \
+        template<typename V> \
+        inline bool operator op_def (const shbuffer<V> & ptr, int xptr) noexcept \
+        { \
+            return ptr.compare(long(xptr)) op_def 0; \
+        } \
+        \
         template<typename P, typename V> \
         inline bool operator op_def (const P *xptr, const shbuffer<V> & ptr) noexcept \
         { \
@@ -319,6 +322,12 @@ namespace lsp
         inline bool operator op_def (long xptr, const shbuffer<V> & ptr) noexcept \
         { \
             return 0 op_def ptr.compare(xptr); \
+        } \
+        \
+        template<typename V> \
+        inline bool operator op_def (int xptr, const shbuffer<V> & ptr) noexcept \
+        { \
+            return 0 op_def ptr.compare(long(xptr)); \
         }
 
         LLTL_SHBUFFER_DEF_OP(==)
