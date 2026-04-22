@@ -1,6 +1,6 @@
 # lsp-lltl-lib
 
-Low-level Template Library (LLTL) for basic data collections used in LSP Project
+Low-level Template Library (LLTL) for basic data collections used in LSP Project.
 
 This library does not aim to repeat STL. It aims to replace some important
 parts of STL with generalized templates (generics). Since STL template 
@@ -109,6 +109,16 @@ Required specifications:
   - `lltl::allocator_spec` - specification for allocation (creating copy) and deallocation
                                 of the object, required by:
     - `lltl::pphash` for key object
+
+## Supported platforms
+
+The build and correct unit test execution has been confirmed for following platforms:
+* FreeBSD
+* GNU/Linux
+* MacOS (ARM-based)
+* OpenBSD
+* Windows 32-bit
+* Windows 64-bit
 
 ## Requirements
 
