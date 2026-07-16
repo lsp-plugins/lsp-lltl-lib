@@ -3,7 +3,7 @@
 *******************************************************************************
 
 === 1.0.32 ===
-
+* Added ssort() methods for lltl::parray and lltl::darray containers.
 
 === 1.0.31 ===
 * Updated build system: ASAN, CROSS_COMPILE, DEBUG, DEVEL, PROFILE, STRICT,

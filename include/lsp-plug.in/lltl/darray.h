@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2025 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2025 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2026 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2026 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-lltl-lib
  * Created on: 7 апр. 2020 г.
@@ -92,6 +92,9 @@ namespace lsp
 
                 void        qsort(cmp_func_t f);
                 void        qsort(sort_closure_t *c);
+
+                void        ssort(cmp_func_t f);
+                void        ssort(sort_closure_t *c);
 
                 raw_iterator    iter();
                 raw_iterator    riter();
