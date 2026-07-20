@@ -330,6 +330,33 @@ namespace lsp
                     v.qsort(&c);
                 }
 
+                inline void ssort(cmp_func_t cmp)                               { v.ssort(reinterpret_cast<raw_parray::cmp_func_t>(cmp));   }
+                inline void ssort(compare_func_t cmp)
+                {
+                    sort_closure_t c;
+                    c.compare       = cmp;
+                    c.size          = sizeof(T);
+                    v.ssort(&c);
+                }
+
+                inline void ssort(const compare_iface &cmp)
+                {
+                    sort_closure_t c;
+                    c.compare       = cmp.compare;
+                    c.size          = sizeof(T);
+                    v.ssort(&c);
+                }
+
+                inline void ssort()
+                {
+                    compare_spec<T> spec;
+                    sort_closure_t c;
+                    c.compare       = spec.compare;
+                    c.size          = sizeof(T);
+                    v.ssort(&c);
+                }
+
+
             public:
                 // Operators
                 inline T *operator[](size_t idx)                                { return get(idx);                      }
