@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2025 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2025 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2026 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2026 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-lltl-lib
  * Created on: 7 апр. 2020 г.
@@ -477,6 +477,22 @@ namespace lsp
             } xf;
             xf.f = f;
             lsp::qsort_r(vItems, nItems, nSizeOf, raw_cmp, xf.p);
+        }
+
+        void raw_darray::ssort(sort_closure_t *c)
+        {
+            lsp::ssort_r(vItems, nItems, nSizeOf, closure_cmp, c);
+        }
+
+        void raw_darray::ssort(cmp_func_t f)
+        {
+            union
+            {
+                cmp_func_t f;
+                void *p;
+            } xf;
+            xf.f = f;
+            lsp::ssort_r(vItems, nItems, nSizeOf, raw_cmp, xf.p);
         }
 
         raw_iterator raw_darray::iter()
